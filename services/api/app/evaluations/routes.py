@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query, Response
+from openmhs_bridge import Comparison
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
@@ -182,26 +183,47 @@ def _results(session: Session, job: EvaluationJob) -> dict[str, EvaluationResult
     return {r.kind: r for r in session.scalars(select(EvaluationResult).where(EvaluationResult.job_id == job.id))}
 
 
-def _result_doc(r: EvaluationResult | None) -> dict[str, Any] | None:
+class EngineComparison(BaseModel):
+    """One ``ops compare`` output: parsed (``result``) and byte for byte (``raw``), with the digest of ``raw``."""
+
+    result: Comparison
+    raw: str
+    raw_sha256: str
+
+
+class ComparisonOut(BaseModel):
+    evaluation: uuid.UUID
+    reported: EngineComparison
+    verified: EngineComparison | None
+    paired: EngineComparison | None
+    summary: dict[str, Any] | None
+    provenance: dict[str, Any] | None
+    config: dict[str, Any]
+
+
+def _result_doc(r: EvaluationResult | None) -> EngineComparison | None:
     if r is None:
         return None
-    return {"result": r.payload, "raw": r.raw, "raw_sha256": r.raw_sha256}
+    return EngineComparison(result=Comparison.model_validate(r.payload), raw=r.raw, raw_sha256=r.raw_sha256)
 
 
 @router.get("/{job_id}/comparison")
-def comparison(job_id: uuid.UUID, ctx: ProjectViewer, session: SessionDep) -> dict[str, Any]:
+def comparison(job_id: uuid.UUID, ctx: ProjectViewer, session: SessionDep) -> ComparisonOut:
     """The engine's comparisons, unchanged, with the provenance of the run."""
     job = _job(session, ctx.project.id, job_id)
     res = _results(session, job)
-    return {
-        "evaluation": str(job.id),
-        "reported": _result_doc(res.get("compare_reported")),
-        "verified": _result_doc(res.get("compare_verified")),
-        "paired": _result_doc(res.get("compare_paired")),
-        "summary": job.summary,
-        "provenance": job.provenance,
-        "config": job.config,
-    }
+    reported = _result_doc(res.get("compare_reported"))
+    if reported is None:
+        raise error(500, "result.missing", "the evaluation has no reported comparison")
+    return ComparisonOut(
+        evaluation=job.id,
+        reported=reported,
+        verified=_result_doc(res.get("compare_verified")),
+        paired=_result_doc(res.get("compare_paired")),
+        summary=job.summary,
+        provenance=job.provenance,
+        config=job.config,
+    )
 
 
 @router.get("/{job_id}/validation")

@@ -60,3 +60,9 @@ than saying it is not done. The criterion moved unchanged; DATA-004 is blocked o
 Found by the isolation test: an outsider's long URL overflowed `audit_events.action` and turned a 404 into a
 500 without recording the denial. The audit now records `METHOD /route/{template}` (no ids, bounded) and
 clamps every field, so an audit write cannot fail on input length.
+
+## D-012 (2026-11-18) Web app: npm (shared cache), same-origin API proxy, development identity until AUTH-002
+npm instead of pnpm reuses the D:\npm-cache already holding Next 15.5.28 and Playwright 1.63.0 (with its
+cached Chromium). The browser calls `/api/v1/*` on the web origin; Next rewrites it to the API, so no CORS
+and no API URL in client code. Sign-in in the web app is the API's development identity only and is
+labelled so; OIDC login (code + PKCE, HttpOnly session cookie) is AUTH-002.

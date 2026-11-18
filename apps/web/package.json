@@ -1,0 +1,43 @@
+{
+  "name": "@pap/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "gen:api": "openapi-typescript ../../packages/contracts/openapi.json -o src/lib/api/schema.d.ts",
+    "check:api": "openapi-typescript ../../packages/contracts/openapi.json -o .api-check.d.ts && node -e \"const f=require('fs');if(f.readFileSync('.api-check.d.ts','utf8')!==f.readFileSync('src/lib/api/schema.d.ts','utf8')){console.error('src/lib/api/schema.d.ts is stale: npm run gen:api');process.exit(1)}f.unlinkSync('.api-check.d.ts')\""
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.108.0",
+    "clsx": "2.1.1",
+    "echarts": "6.1.0",
+    "lucide-react": "1.75.0",
+    "next": "15.5.28",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.3.7",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.5",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "22.15.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "4.4.1",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.28",
+    "jsdom": "26.1.0",
+    "openapi-typescript": "7.13.0",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
+  }
+}

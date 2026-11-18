@@ -52,10 +52,11 @@ python_gates() {
 
 web_gates() {
   if [ -f apps/web/package.json ]; then
-    step "web typecheck" pnpm --dir apps/web typecheck
-    step "web lint" pnpm --dir apps/web lint
-    step "web unit" pnpm --dir apps/web test
-    if [ "$MODE" != "quick" ]; then step "web build" pnpm --dir apps/web build; fi
+    step "web typecheck" npm --prefix apps/web run -s typecheck
+    step "web lint" npm --prefix apps/web run -s lint -- --max-warnings 0
+    step "web unit" npm --prefix apps/web run -s test
+    step "web api client up to date" npm --prefix apps/web run -s check:api
+    if [ "$MODE" != "quick" ]; then step "web build" env NEXT_TELEMETRY_DISABLED=1 npm --prefix apps/web run -s build; fi
   else
     absent "web"
   fi
