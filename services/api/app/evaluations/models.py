@@ -54,6 +54,9 @@ class EvaluationJob(IdMixin, CreatedMixin, Base):
     provenance: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     created_by: Mapped[str] = mapped_column(String(300))
+    trace_context: Mapped[dict[str, str] | None] = mapped_column(
+        JSONB, doc="W3C trace context of the submitting request, so the worker continues its trace"
+    )
 
 
 class JobArtifact(Base):

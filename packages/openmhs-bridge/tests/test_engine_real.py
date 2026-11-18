@@ -163,3 +163,27 @@ def test_unexpected_manifest_resolution_is_an_error(engine: Engine, fixtures: Pa
         engine.compare(store, task_type="lift", a="no-such-release", b="tol-0.01", verified=True, expect_a={"x"})
     assert info.value.code == "engine.input_rejected"
     assert info.value.detail["resolved"] == []
+
+
+def test_observers_see_every_engine_process(engine: Engine, fixtures: Path, tmp_path: Path) -> None:
+    """Telemetry hook: command, timing and outcome of each process, nothing else; a failing observer is ignored."""
+    from openmhs_bridge import Invocation
+
+    seen: list[Invocation] = []
+
+    def broken(_: Invocation) -> None:
+        raise RuntimeError("observer bug")
+
+    engine.observers[:] = [broken, seen.append]
+    try:
+        store = tmp_path / "ops.sqlite"
+        engine.ingest(store, [fixtures / "gazebo_ab.jsonl"])
+        engine.compare(store, verified=False, task_type="pick_place", a="nonexistent-a", b="nonexistent-b")
+    finally:
+        engine.observers.clear()
+    commands = [i.command for i in seen]
+    assert commands == ["ops ingest", "ops compare"], commands
+    for inv in seen:
+        assert inv.end_ns >= inv.start_ns
+        assert inv.outcome == "ok" and inv.returncode == 0
+        assert str(tmp_path) not in repr(inv)  # no paths or arguments in telemetry

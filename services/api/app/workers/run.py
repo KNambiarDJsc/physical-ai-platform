@@ -20,6 +20,7 @@ import uuid
 from typing import Any
 
 from openmhs_bridge import EngineError
+from opentelemetry.trace import SpanKind, StatusCode
 from sqlalchemy import update
 
 from ..config import get_settings
@@ -29,6 +30,14 @@ from ..evaluations import service
 from ..evaluations.models import EvaluationJob
 from ..evaluations.pipeline import PipelineError, run_pipeline
 from ..evidence.storage import get_storage
+from ..observability import (
+    JOB_SECONDS,
+    configure_logging,
+    configure_tracing,
+    extract_context,
+    job_id_var,
+    tracer,
+)
 
 log = logging.getLogger("pap.worker")
 
@@ -59,6 +68,35 @@ class _Watch(threading.Thread):
 
 
 def execute(job_id: uuid.UUID, worker: str) -> str:
+    """Run one claimed job inside a span that continues the submitting request's trace."""
+    with session_factory()() as s:
+        job = s.get(EvaluationJob, job_id)
+        carrier = job.trace_context if job else None
+        attempt = job.attempts if job else 0
+    token = job_id_var.set(str(job_id))
+    start = time.perf_counter()
+    state = "failed"
+    try:
+        with tracer.start_as_current_span(
+            "evaluation.job",
+            context=extract_context(carrier),
+            kind=SpanKind.CONSUMER,
+            attributes={"pap.job.id": str(job_id), "pap.job.attempt": attempt},
+        ) as span:
+            try:
+                state = _execute(job_id, worker)
+            finally:
+                span.set_attribute("pap.job.outcome", state)
+                if state not in ("succeeded", "cancelled"):
+                    span.set_status(StatusCode.ERROR, state)
+                JOB_SECONDS.labels(state).observe(time.perf_counter() - start)
+                log.info("job finished", extra={"event": "job", "state": state, "attempt": attempt})
+        return state
+    finally:
+        job_id_var.reset(token)
+
+
+def _execute(job_id: uuid.UUID, worker: str) -> str:
     settings = get_settings()
     storage = get_storage()
     with session_factory()() as s:
@@ -132,8 +170,7 @@ def run(once: bool = False, poll_s: float = 1.0) -> None:
             time.sleep(poll_s)
             continue
         log.info("job %s claimed by %s", job_id, worker)
-        state = execute(job_id, worker)
-        log.info("job %s -> %s", job_id, state)
+        execute(job_id, worker)
         if once:
             return
 
@@ -143,7 +180,13 @@ def main() -> None:
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--poll", type=float, default=1.0)
     ns = ap.parse_args()
-    logging.basicConfig(level=logging.INFO, format='{"level":"%(levelname)s","logger":"%(name)s","msg":"%(message)s"}')
+    configure_logging("pap-worker")
+    configure_tracing("pap-worker")
+    port = get_settings().worker_metrics_port
+    if port:
+        from prometheus_client import start_http_server
+
+        start_http_server(port)  # job durations and engine metrics are recorded in this process
     run(once=ns.once, poll_s=ns.poll)
 
 

@@ -790,10 +790,10 @@
     },
     {
       "id": "OBS-001",
-      "title": "Operational observability",
+      "title": "Operational observability (application instrumentation)",
       "priority": 4,
       "depends_on": [
-        "INF-003"
+        "RI-003"
       ],
       "description": "Structured logs, OpenTelemetry traces over OTLP, Prometheus metrics for API and worker.",
       "acceptance": [
@@ -805,8 +805,44 @@
         "uv run pytest services/api/tests/test_observability.py"
       ],
       "paths": [
-        "services/api/app/observability/",
-        "infrastructure/observability/"
+        "services/api/app/observability/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_observability.py (real API, real worker code, real engine): one trace from the submitting request (span 'POST /api/v1/orgs/{org_slug}/projects/{project_slug}/evaluations', request id attribute) to the worker's 'evaluation.job' span (same trace id, parent = the request span, continued from evaluation_jobs.trace_context across processes) to every engine process ('engine outcome verify' x240, 'engine ops ingest', 'engine ops compare', 'engine ops incidents', each a child of the job span; no paths or arguments in span attributes).",
+          "test_observability.py: every log line is one JSON object; the request line carries request_id, route template, status, duration and trace_id; job lines carry job_id and the same trace_id; no 'Bearer', no credential, and no fragment of the uploaded CSV appears in the logs; bearer tokens, JWTs and service tokens in a message are redacted; quotes in messages stay valid JSON (the old worker format string did not).",
+          "test_observability.py: /metrics exports pap_evaluation_jobs by state (read from the database at scrape time, so correct across API and worker), request durations by method/route template/status, job durations by outcome, engine invocations by command/result and engine failures by command/code; no tenant slugs or ids in labels. In production /metrics is 404 without PAP_METRICS_TOKEN and 401 with a wrong token.",
+          "Bridge: Engine.observers hook (test_engine_real.py) reports command, timing and outcome per process; an observer that raises does not change the engine result.",
+          "Real stack (smoke.sh --e2e, 7/7): 163 JSON request lines and JSON 'job finished' lines with job_id and trace_id in the stack log.",
+          "Found: FastAPI 0.163's built-in telemetry made a second server span recording concrete URL paths (tenant slugs, ids); disabled in favour of the template-only span (D-020)."
+        ]
+      },
+      "limitations": [
+        "No collector, Prometheus server or dashboards run yet: that is OBS-002 (needs INF-003). Spans are dropped unless OTEL_EXPORTER_OTLP_ENDPOINT is set; the OTLP export path itself has not been exercised against a collector.",
+        "The web server (Next.js) is not instrumented; the API request span starts at the API."
+      ]
+    },
+    {
+      "id": "OBS-002",
+      "title": "Observability stack in Compose",
+      "priority": 4,
+      "depends_on": [
+        "INF-003",
+        "OBS-001"
+      ],
+      "description": "OpenTelemetry Collector, Prometheus scrape configuration and starter dashboards as optional Compose services, receiving what OBS-001 emits.",
+      "acceptance": [
+        "An optional Compose profile starts an OTel Collector and Prometheus; traces from a real evaluation arrive in the collector and the API and worker metrics are scraped.",
+        "Grafana/Loki/Tempo (AGPL-3.0) are only ever separate, unmodified services, never bundled into product images."
+      ],
+      "tests": [
+        "bash scripts/smoke.sh --compose --observability"
+      ],
+      "paths": [
+        "infrastructure/observability/",
+        "docker-compose.yml"
       ],
       "status": "unstarted",
       "verification": {

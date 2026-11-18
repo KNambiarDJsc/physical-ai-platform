@@ -22,6 +22,7 @@ from ..config import Settings, get_settings
 from ..contracts.episode import EvaluationConfig, OutcomeClass
 from ..db import get_session, utcnow
 from ..engine import get_engine
+from ..observability import inject_context
 from ..releases.models import Release
 from . import reports, service
 from .models import EpisodeRecord, EvaluationJob, EvaluationResult, JobArtifact
@@ -134,6 +135,7 @@ def submit(
         session.rollback()
         raise error(e.status, e.code, e.message) from e
     if created:
+        job.trace_context = inject_context()  # the worker continues this request's trace
         audit_allow(session, ctx, "evaluation.submit", f"evaluation:{job.id}", input_sha256=job.input_sha256)
         session.commit()
     else:

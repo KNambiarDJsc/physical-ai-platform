@@ -12,8 +12,12 @@ from .config import get_settings
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
+    from .observability import engine_observer
+
     s = get_settings()
-    return engine_from_env(s.engine_lock_path, timeout_s=s.engine_timeout_s)
+    engine = engine_from_env(s.engine_lock_path, timeout_s=s.engine_timeout_s)
+    engine.observers.append(engine_observer)
+    return engine
 
 
 def engine_status() -> dict[str, Any]:

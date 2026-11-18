@@ -16,7 +16,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypeVar
@@ -70,6 +70,18 @@ class RawRun:
 
 
 @dataclass(frozen=True)
+class Invocation:
+    """One engine process, as reported to observers (metrics, traces). Holds no arguments or output: those can
+    contain paths and evidence, which do not belong in telemetry."""
+
+    command: str  # e.g. "ops compare", "outcome verify", "--version"
+    start_ns: int  # wall clock, time.time_ns()
+    end_ns: int
+    returncode: int | None  # None when the process was stopped or never started
+    outcome: str  # "ok", "exit_<code>", or an EngineError code such as "engine.timeout"
+
+
+@dataclass(frozen=True)
 class Result[T]:
     """An engine answer: the typed value, the engine's output verbatim, and what produced it."""
 
@@ -87,6 +99,8 @@ class Engine:
         self._checked: tuple[int, int] | None = None
         self._version: str | None = None
         self._lock = threading.Lock()
+        # Called after every engine process; an observer that raises is ignored (telemetry must not fail a run).
+        self.observers: list[Callable[[Invocation], None]] = []
 
     # -------------------------------------------------------------------------------------------- integrity
 
@@ -132,6 +146,33 @@ class Engine:
         timeout_s: float | None = None,
         cancel: threading.Event | None = None,
         cwd: str | None = None,
+        ok: tuple[int, ...] = (0,),
+    ) -> RawRun:
+        command = " ".join(a for a in args[:3] if not a.startswith("--") or a == "--version") or "?"
+        start_ns = time.time_ns()
+        try:
+            run = self._run_process(args, timeout_s=timeout_s, cancel=cancel, cwd=cwd)
+        except EngineError as e:
+            self._notify(Invocation(command, start_ns, time.time_ns(), None, e.code))
+            raise
+        outcome = "ok" if run.returncode in ok else f"exit_{run.returncode}"
+        self._notify(Invocation(command, start_ns, time.time_ns(), run.returncode, outcome))
+        return run
+
+    def _notify(self, inv: Invocation) -> None:
+        for observer in list(self.observers):
+            try:
+                observer(inv)
+            except Exception:  # noqa: BLE001, S112  telemetry must never change an engine result
+                continue
+
+    def _run_process(
+        self,
+        args: Sequence[str],
+        *,
+        timeout_s: float | None,
+        cancel: threading.Event | None,
+        cwd: str | None,
     ) -> RawRun:
         self.check_binary()
         for a in args:
@@ -230,7 +271,9 @@ class Engine:
         epath = workdir / f"{name}.evidence.jsonl"
         cpath.write_text(json.dumps(contract, sort_keys=True), encoding="utf-8")
         epath.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in evidence), encoding="utf-8")
-        run = self._run(["--json", "outcome", "verify", f"--contract={cpath}", f"--evidence={epath}"], cancel=cancel)
+        run = self._run(
+            ["--json", "outcome", "verify", f"--contract={cpath}", f"--evidence={epath}"], cancel=cancel, ok=(0, 3, 4)
+        )
         if run.returncode not in VERDICT_EXIT:
             raise EngineError(
                 "engine.input_rejected" if run.returncode == 1 else "engine.exit",
@@ -255,7 +298,7 @@ class Engine:
         allow_rejections: bool = False,
     ) -> Result[IngestResult]:
         paths = [str(Path(f).resolve()) for f in files]
-        run = self._run(["--json", "ops", "ingest", f"--store={store}", "--", *paths], cancel=cancel)
+        run = self._run(["--json", "ops", "ingest", f"--store={store}", "--", *paths], cancel=cancel, ok=(0, 3))
         if run.returncode not in (0, 3):
             raise EngineError(
                 "engine.exit", f"ops ingest exited {run.returncode}", {"stderr": run.stderr.strip()[-2000:]}

@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     worker_lease_s: int = Field(default=60, ge=5)
     job_max_attempts: int = Field(default=3, ge=1, le=10)
 
+    # /metrics on the API: open outside production; in production only with this bearer token (else 404).
+    metrics_token: str | None = None
+    # The worker serves its own /metrics on this port when set (job durations and engine metrics live there).
+    worker_metrics_port: int | None = Field(default=None, ge=1, le=65535)
+
     @model_validator(mode="after")
     def _refuse_unsafe_combinations(self) -> Settings:
         if self.env == "production" and self.auth_mode == "dev":

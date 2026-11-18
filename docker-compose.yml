@@ -30,6 +30,10 @@ x-api-env: &api-env
   PAP_AUTH_MODE: ${PAP_AUTH_MODE:-dev}
   PAP_DATABASE_URL: postgresql+psycopg://pap:${PAP_DB_PASSWORD:?set PAP_DB_PASSWORD}@postgres:5432/pap
   PAP_MAX_UPLOAD_BYTES: ${PAP_MAX_UPLOAD_BYTES:-104857600}
+  # Traces are exported over OTLP/HTTP only when this is set (e.g. http://otel-collector:4318); see OBS-002.
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  # /metrics on the API needs this bearer token when PAP_ENV=production (otherwise it is not served there).
+  PAP_METRICS_TOKEN: ${PAP_METRICS_TOKEN:-}
 
 services:
   postgres:
@@ -86,6 +90,9 @@ services:
       PAP_ENGINE_TIMEOUT_S: ${PAP_ENGINE_TIMEOUT_S:-300}
       PAP_WORKER_LEASE_S: ${PAP_WORKER_LEASE_S:-60}
       PAP_JOB_MAX_ATTEMPTS: ${PAP_JOB_MAX_ATTEMPTS:-3}
+      # Job durations and engine metrics are recorded in the worker and served here (inside the network only).
+      PAP_WORKER_METRICS_PORT: "9100"
+    expose: ["9100"]
     volumes: ["artifacts:/data/artifacts", "work:/data/work"]
     depends_on:
       migrate: { condition: service_completed_successfully }

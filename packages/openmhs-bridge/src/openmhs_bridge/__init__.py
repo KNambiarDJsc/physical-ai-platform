@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .canonical import canonical_json, digest, sha256_bytes, sha256_file, sha256_text
 from .conditions import conditions_of
-from .engine import VERDICT_EXIT, Engine, EngineConfig, RawRun, Result
+from .engine import VERDICT_EXIT, Engine, EngineConfig, Invocation, RawRun, Result
 from .errors import EngineError
 from .models import (
     Arm,
@@ -33,6 +33,7 @@ __all__ = [
     "IncidentDetail",
     "IncidentSummary",
     "IngestResult",
+    "Invocation",
     "Paired",
     "RawRun",
     "Result",

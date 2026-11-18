@@ -116,3 +116,15 @@ the API audience with a resource indicator (RFC 8707). No refresh tokens yet: th
 token (capped at 8 h). Tests use oidc-provider (certified OP implementation) because Keycloak needs Docker.
 Rejected: tokens in sessionStorage/localStorage (readable by any script on the page), NextAuth/Auth.js (another
 session layer and adapter for one provider type we already handle in ~150 lines with a certified library).
+
+## D-020 (2026-11-18) Split OBS-001: application instrumentation now, the collector stack later (OBS-002)
+All three OBS-001 criteria are about what the API and worker emit (JSON logs, metrics, one trace from request
+to engine), which can be built and tested without Docker; only the collector, Prometheus server and dashboards
+need Compose. OBS-001 now depends on RI-003 instead of INF-003, with its criteria unchanged; the infrastructure
+part is the new OBS-002 (depends on INF-003). Nothing was weakened, as with D-009.
+Telemetry records operational facts only: ids, route templates, status codes, durations, states, engine outcome
+codes. FastAPI 0.163 ships built-in OpenTelemetry whose server span records the concrete URL (tenant slugs and
+ids); it is switched off (`telemetry={...False}`) and the `observe` middleware makes the single request span.
+Engine telemetry comes from a bridge observer hook (command, timing, outcome; never arguments or output), so the
+bridge stays free of OTel/Prometheus. Job-state gauges are read from the database at scrape time so they are
+right across processes; job and engine metrics are served by the worker on PAP_WORKER_METRICS_PORT.

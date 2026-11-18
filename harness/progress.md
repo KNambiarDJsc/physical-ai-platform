@@ -38,11 +38,17 @@ Semgrep project rules clean and self-tested; Trivy found postcss 8.4.31 inside n
 no token readable by the page, forged header ignored, sign-out, forged cookie refused, no dev sign-in in OIDC
 mode). Found and fixed: the API's issuer check was a string-prefix match (`http://localhost.evil.example`).
 
-**State now:** 19 of 23 verified. In progress: INF-003, SEC-001 (both wait only for containers to run). Blocked:
-DATA-004 (S3 server needs Docker). Unstarted: OBS-001 (depends on INF-003).
+**Then OBS-001 (verified, split per D-020):** JSON logs with request/job/trace ids and redaction, Prometheus
+metrics (job states from the DB, request/job/engine durations, engine failures), one OTel trace from the API
+request through the worker's job span to every engine process (context stored with the job). Bridge observer
+hook for engine telemetry. FastAPI's own telemetry switched off (it recorded concrete URLs). The isolation
+guard caught /metrics hidden from the schema; it is in the schema now.
+
+**State now:** 20 of 24 verified. In progress: INF-003, SEC-001 (both wait only for containers to run).
+Blocked: DATA-004 (S3 server needs Docker). Unstarted: OBS-002 (needs INF-003).
 
 **Next:** run `bash scripts/smoke.sh --compose --e2e` when Docker can be started (or CI after an approved
-push) to verify INF-003 and finish SEC-001 -> OBS-001 -> DATA-004.
+push) to verify INF-003 and finish SEC-001 -> OBS-002 -> DATA-004.
 
 **Gotchas:** (1) Next 15.5 on this machine left the evaluation page out of its own client reference manifest
 ("Could not find the module ... in the React Client Manifest", 500) whenever the page imported a NEW

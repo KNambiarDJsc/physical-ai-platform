@@ -63,8 +63,8 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | Keycloak (keycloak/keycloak) | Reference OIDC provider for self-hosted installs | AUTH-001 live test | Apache-2.0 (stated) | Not embedded; any OIDC IdP works |
 | SeaweedFS (seaweedfs/seaweedfs) | S3-compatible object store for self-hosting | DATA-002 S3 adapter | Apache-2.0 (stated) | Preferred over MinIO (AGPL-3.0, community edition in maintenance) and Garage (AGPL-3.0) for redistribution in a commercial self-hosted bundle; the adapter speaks plain S3, so customers may bring any S3 |
 | boto3 / botocore | S3 client | DATA-002 | Apache-2.0 (stated) | Only when the S3 adapter is built |
-| OpenTelemetry Python / Collector | Traces, metrics over OTLP | OBS-001 | Apache-2.0 (stated) | |
-| Prometheus | Metrics | OBS-001 | Apache-2.0 (stated) | |
+| OpenTelemetry Python (api, sdk, exporter-otlp-proto-http) / Collector | Traces over OTLP | OBS-001: Python 1.45.2 in use; Collector in OBS-002 | Apache-2.0 (PyPI metadata) | Exporter pulls protobuf (BSD-3) and requests (Apache-2.0). FastAPI's built-in telemetry is switched off (D-020) |
+| Prometheus / prometheus-client | Metrics | OBS-001: prometheus-client 0.26.0 in use; server in OBS-002 | Apache-2.0 AND BSD-2-Clause (PyPI metadata) | |
 | Grafana / Loki / Tempo | Dashboards, logs, traces | OBS-001 | **AGPL-3.0** (stated) | Run as separate, unmodified services; never embed or link; customers may already run their own |
 | Trivy | Image and dependency scan in CI | SEC-001: 0.76.1, image `aquasec/trivy` by digest | Apache-2.0 (stated) | Run as the container image, never `aquasecurity/trivy-action` (its tags were hijacked in 2026). Local run: found and fixed postcss in next |
 | Semgrep (CE engine) | Static analysis in CI | SEC-001: 1.183.0, image `semgrep/semgrep` by digest | LGPL-2.1 engine (stated); registry rules under the Semgrep Rules License | Only our own rules (`.semgrep/rules.yml`, self-tested by `scripts/check_semgrep_rules.py`); no registry packs. Run as a separate tool, not linked |

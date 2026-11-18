@@ -4407,6 +4407,24 @@
           "health"
         ]
       }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Prometheus metrics. Open outside production; in production only with PAP_METRICS_TOKEN, else 404.",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {}
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "health"
+        ]
+      }
     }
   }
 }
