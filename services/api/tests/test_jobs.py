@@ -9,43 +9,12 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from helpers import as_user, make_org, ok
+from helpers import as_user, ok
 from sqlalchemy import select
 
 P = "/api/v1/orgs/acme/projects/picking"
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
 pytestmark = pytest.mark.engine
-
-
-@pytest.fixture
-def demo(client: TestClient, omhs: Any, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
-    from app.config import get_settings
-
-    monkeypatch.setenv("PAP_WORKER_LEASE_S", "5")
-    get_settings.cache_clear()
-    make_org(client, "alice", "acme", "picking")
-    h = as_user("alice")
-    ids: dict[str, Any] = {}
-    for key, label, version in (("baseline", "pick-stack-2.14.0", "2.14.0"), ("candidate", "pick-stack-2.15.0-rc1",
-                                                                             "2.15.0-rc1")):  # fmt: skip
-        comp = [{"kind": "software", "name": "pick-stack", "version": version}]
-        ids[key] = ok(client.post(f"{P}/releases", json={"label": label, "kind": "software", "components": comp},
-                                  headers=h), 201)["id"]  # fmt: skip
-        data = (DEMO / "data" / f"{key}.csv").read_bytes()
-        ids[f"{key}_art"] = ok(client.post(f"{P}/artifacts", files={"file": (f"{key}.csv", data)}, headers=h), 201)[
-            "id"
-        ]
-    spec = json.loads((DEMO / "mapping.json").read_text(encoding="utf-8"))
-    ids["mapping"] = ok(client.post(f"{P}/mappings", json=spec, headers=h), 201)["id"]
-    ids["body"] = {
-        "baseline_release_id": ids["baseline"],
-        "candidate_release_id": ids["candidate"],
-        "mapping_id": ids["mapping"],
-        "baseline_artifact_ids": [ids["baseline_art"]],
-        "candidate_artifact_ids": [ids["candidate_art"]],
-        "config": {"task_type": "pick_place", "paired": True},
-    }
-    return ids
 
 
 def submit(c: TestClient, body: dict[str, Any], status: int = 201) -> Any:

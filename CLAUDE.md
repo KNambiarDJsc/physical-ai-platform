@@ -52,6 +52,8 @@ conversation, holds the state of the work.
 | Full gate | `bash scripts/verify.sh` |
 | Build pinned engine | `OPENMHS_SRC_REPO=C:/Users/HP/Open-MHS bash scripts/build-openmhs.sh` |
 | Python tests | `uv run pytest` (from repo root) |
+| Local stack (no Docker) | `uv run python scripts/dev_stack.py` (web must be built first) |
+| Smoke + browser e2e | `bash scripts/smoke.sh --e2e` (needs a built engine; starts and stops its own stack) |
 | Bounded autonomous loop (opt-in) | `bash scripts/loop.sh --iterations 1` |
 
 Engine for tests: `OPENMHS_BIN` and `OPENMHS_BIN_SHA256` (written to `.engine/build.json` by the build

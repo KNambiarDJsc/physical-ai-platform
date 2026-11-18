@@ -17,7 +17,7 @@ comparisons, drill-down and reports. It observes recorded evidence; it never con
 |---|---|
 | `packages/openmhs-bridge` | Runs the pinned OpenMHS binary; typed results with provenance |
 | `services/api` | FastAPI service and evaluation worker |
-| `apps/web` | Next.js application (not started) |
+| `apps/web` | Next.js application (Release Intelligence workspace, comparison, episodes, report export) |
 | `harness/` | Feature registry, progress, decisions, blockers, evaluation results |
 | `docs/` | Capability audit, engine interface gaps, integration registry, decisions |
 | `scripts/` | Build, verify, audit, loop, hooks |
@@ -36,6 +36,16 @@ bash scripts/verify.sh                                            # every gate
 Tests need PostgreSQL: set `PAP_TEST_DATABASE_URL`, or leave it unset to start a throwaway server with
 `pgserver` (development dependency). Engine-backed tests skip when the engine is not built, and fail instead of
 skipping with `PAP_REQUIRE_ENGINE=1` (the full gate sets it).
+
+Run the whole platform locally without Docker (PostgreSQL via pgserver, API, worker, web; development
+identity only):
+
+```bash
+npm --prefix apps/web ci && npm --prefix apps/web run build
+uv run python scripts/dev_stack.py            # http://127.0.0.1:3000, API on :8000
+bash scripts/smoke.sh                          # fresh stack in var/smoke, one real evaluation over HTTP
+bash scripts/smoke.sh --e2e                    # plus the Playwright suites (happy path and failure paths)
+```
 
 Docker Compose for the whole stack is planned (INF-003) and not available yet.
 

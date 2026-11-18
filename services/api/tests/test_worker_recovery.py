@@ -12,7 +12,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 from helpers import as_user, ok
-from test_jobs import P, demo  # noqa: F401  (fixture)
+from test_jobs import P
 
 API = Path(__file__).resolve().parents[1]
 pytestmark = pytest.mark.engine
@@ -28,7 +28,7 @@ def state(job_id: str) -> tuple[str, str | None, int]:
         return j.state, j.lease_owner, j.attempts
 
 
-def test_killed_worker_is_recovered(client: TestClient, demo: dict[str, Any]) -> None:  # noqa: F811
+def test_killed_worker_is_recovered(client: TestClient, demo: dict[str, Any]) -> None:
     from app.config import get_settings
     from app.workers.run import run
 
@@ -63,7 +63,7 @@ def test_killed_worker_is_recovered(client: TestClient, demo: dict[str, Any]) ->
     assert cmp_["verified"]["result"]["b"]["attempt_outcomes"] == [77, 34, 9]  # same answer as an uninterrupted run
 
 
-def test_lost_worker_cannot_write_after_recovery(client: TestClient, demo: dict[str, Any]) -> None:  # noqa: F811
+def test_lost_worker_cannot_write_after_recovery(client: TestClient, demo: dict[str, Any]) -> None:
     """A worker whose lease was taken over must not persist anything (results are lease-guarded)."""
     from app.db import session_factory
     from app.engine import get_engine

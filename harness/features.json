@@ -649,12 +649,20 @@
       "paths": [
         "services/api/app/evaluations/reports.py"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_reports.py (real engine run of the synthetic demo): GET report.json twice and a rebuild from the database in a fresh session give identical bytes; X-Report-SHA256 is the sha256 of those bytes; the report holds the input checksums (equal to provenance.inputs), engine provenance (commit e9ef873b), mapping name/version/spec_sha256, and every stored engine output byte for byte (raw equals the comparison endpoint's raw; raw_sha256 re-checked); 240 episodes sorted deterministically; no generation timestamp.",
+          "test_reports.py: report.html equals render_html(json.loads(report.json)) exactly; render_html takes only the parsed JSON (no session/settings/engine); the page names the JSON digest it was rendered from; states SYNTHETIC/SIMULATED/PRODUCTION EVIDENCE from evidence_class; escapes hostile labels; no script and no external resource; served with CSP default-src 'none'.",
+          "Outsider access to both report URLs returns 404 (test_reports.py and the OpenAPI-enumerated isolation sweep, which picked the two new routes up automatically).",
+          "Visual review of the HTML report at 1280 px light and 390 px dark: fixed narrow comparison cards (stacked full width) and a mobile overflow (grid items min-width 0).",
+          "Browser: release-flow.spec.ts downloads both reports from the comparison page (blob download with the caller's identity) and checks the HTML states SYNTHETIC EVIDENCE and contains the JSON's input checksum."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "The report is regenerated on request rather than stored; byte identity relies on the stored rows being immutable (they are: results, episodes, mapping revisions and artifacts are write-once)."
+      ]
     },
     {
       "id": "SEC-001",
@@ -740,12 +748,20 @@
         "examples/manipulation-demo/",
         "tests/e2e/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "bash scripts/smoke.sh --e2e (exit 0, 2026-11-18): starts pgserver PostgreSQL, API, supervised worker and the built web app in var/smoke; scripts/smoke_api.py runs one real evaluation over HTTP (reported improvement, verified insufficient_evidence, synthetic, byte-identical JSON report, HTML names its JSON digest, outsider 404); then 7/7 Playwright tests pass.",
+          "release-flow.spec.ts: sign in -> create organization -> create project -> two releases -> upload two CSVs -> mapping -> paired evaluation on the real engine -> comparison (Improvement reported vs Insufficient evidence verified, SYNTHETIC EVIDENCE, engine commit) -> HTML+JSON export -> contradiction filter (32) -> episode conditions and reasons. All through the web app.",
+          "failure-paths.spec.ts through the UI: non-text upload refused with the reason; an artifact the mapping rejects (duplicate header) fails the evaluation with input.artifact_rejected and offers no report; same release on both sides cannot be submitted; an absent task type fails with input.task_type; min_known 1000 gives Insufficient evidence for both comparisons; the worker process is hard-killed (taskkill /T /F) while the job runs, the stack starts a new worker, the job finishes as attempt 2 of 3 with the same verdicts; resubmitting the same inputs returns the same evaluation (still attempt 2); a user of another organization sees 'organization not found', no episodes, and 404 on both report URLs.",
+          "Dataset: examples/manipulation-demo/generate.py (seeded) produces success, missed_grasp, drop, assist (operator intervention), scale_missing, scale_bad, late_reading and timeout cases for baseline and candidate across 5 SKUs x shelves (40 scenarios per release), every row data_origin=synthetic, plus 3 malformed rows per file."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Runs on the pgserver/uvicorn/next start stack (scripts/dev_stack.py), not Docker Compose (INF-003 needs a Docker engine).",
+        "Clean-machine install not yet checked (INF-003 / CI)."
+      ]
     },
     {
       "id": "OBS-001",

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from alembic import command
@@ -12,6 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import as_user, make_org, ok
 from pg import admin_url, fresh_database
 
 API = Path(__file__).resolve().parents[1]
@@ -86,3 +89,38 @@ def omhs():  # type: ignore[no-untyped-def]
             pytest.fail(f"PAP_REQUIRE_ENGINE=1 but the engine is unavailable: {err}")
         pytest.skip(f"engine unavailable: {err}")
     return e
+
+
+DEMO_PROJECT = "/api/v1/orgs/acme/projects/picking"
+DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
+
+
+@pytest.fixture
+def demo(client: TestClient, omhs: Any, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    from app.config import get_settings
+
+    monkeypatch.setenv("PAP_WORKER_LEASE_S", "5")
+    get_settings.cache_clear()
+    make_org(client, "alice", "acme", "picking")
+    h = as_user("alice")
+    ids: dict[str, Any] = {}
+    releases = (("baseline", "pick-stack-2.14.0", "2.14.0"), ("candidate", "pick-stack-2.15.0-rc1", "2.15.0-rc1"))
+    for key, label, version in releases:
+        comp = [{"kind": "software", "name": "pick-stack", "version": version}]
+        body = {"label": label, "kind": "software", "components": comp}
+        ids[key] = ok(client.post(f"{DEMO_PROJECT}/releases", json=body, headers=h), 201)["id"]
+        data = (DEMO / "data" / f"{key}.csv").read_bytes()
+        ids[f"{key}_art"] = ok(
+            client.post(f"{DEMO_PROJECT}/artifacts", files={"file": (f"{key}.csv", data)}, headers=h), 201
+        )["id"]
+    spec = json.loads((DEMO / "mapping.json").read_text(encoding="utf-8"))
+    ids["mapping"] = ok(client.post(f"{DEMO_PROJECT}/mappings", json=spec, headers=h), 201)["id"]
+    ids["body"] = {
+        "baseline_release_id": ids["baseline"],
+        "candidate_release_id": ids["candidate"],
+        "mapping_id": ids["mapping"],
+        "baseline_artifact_ids": [ids["baseline_art"]],
+        "candidate_artifact_ids": [ids["candidate_art"]],
+        "config": {"task_type": "pick_place", "paired": True},
+    }
+    return ids

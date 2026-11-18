@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { use } from "react";
+import { use, useState } from "react";
 import { Notice, PageHeader, Panel } from "@/components/AppShell";
 import { ComparisonView } from "@/components/ComparisonView";
 import { RequireIdentity } from "@/components/Identity";
 import { StateBadge } from "@/components/ui";
-import { api, projectPath, type ComparisonOut, type Evaluation } from "@/lib/api/client";
+import { api, download, projectPath, type ComparisonOut, type Evaluation } from "@/lib/api/client";
 
 type Params = { org: string; project: string; id: string };
 
@@ -43,6 +43,7 @@ function Evaluation({ org, project, id }: Params) {
             {j && <span className="num text-xs text-faint">attempt {j.attempts} of {j.max_attempts}</span>}
           </span>
         }
+        actions={done ? <ReportActions base={base} id={id} /> : undefined}
       />
       {job.isLoading && <p className="text-[13px] text-muted">Loading…</p>}
       {job.error && <Notice tone="bad">{job.error.message}</Notice>}
@@ -63,5 +64,38 @@ function Evaluation({ org, project, id }: Params) {
       {cmp.error && <Notice tone="bad">{cmp.error.message}</Notice>}
       {cmp.data && <ComparisonView data={cmp.data} episodesHref={`/o/${org}/p/${project}/e/${id}/episodes`} />}
     </>
+  );
+}
+
+/** Downloads the reproducible JSON report and the HTML report rendered from it. */
+function ReportActions({ base, id }: { base: string; id: string }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const get = async (fmt: "html" | "json") => {
+    setBusy(fmt);
+    setErr(null);
+    try {
+      await download(`${base}/report.${fmt}`, `evaluation-${id}.${fmt}`);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+  const btn = "rounded-md border border-line bg-panel px-2.5 py-1.5 text-[13px] hover:bg-sunken disabled:opacity-50";
+  return (
+    <div className="flex items-center gap-2">
+      <button className={btn} disabled={!!busy} onClick={() => get("html")}>
+        {busy === "html" ? "Preparing…" : "Download HTML report"}
+      </button>
+      <button className={btn} disabled={!!busy} onClick={() => get("json")}>
+        {busy === "json" ? "Preparing…" : "Download JSON report"}
+      </button>
+      {err && (
+        <span role="alert" className="text-xs text-bad">
+          {err}
+        </span>
+      )}
+    </div>
   );
 }

@@ -6,6 +6,7 @@ computes a statistic. Every response about results carries the job's provenance.
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime
 from typing import Annotated, Any, Literal
@@ -22,7 +23,7 @@ from ..contracts.episode import EvaluationConfig, OutcomeClass
 from ..db import get_session, utcnow
 from ..engine import get_engine
 from ..releases.models import Release
-from . import service
+from . import reports, service
 from .models import EpisodeRecord, EvaluationJob, EvaluationResult, JobArtifact
 
 router = APIRouter(prefix="/api/v1/orgs/{org_slug}/projects/{project_slug}/evaluations", tags=["evaluations"])
@@ -328,3 +329,55 @@ def episode(job_id: uuid.UUID, episode_id: uuid.UUID, ctx: ProjectViewer, sessio
     if e is None:
         raise error(404, "not_found", "episode not found")
     return EpisodeDetail(**_ep(e), document=e.document, verifier_report=e.verifier_report)
+
+
+REPORT_RESPONSES: dict[int | str, dict[str, Any]] = {409: {"description": "the evaluation has not succeeded"}}
+
+
+def _report(session: Session, ctx: ProjectViewer, job_id: uuid.UUID, fmt: str) -> tuple[EvaluationJob, bytes]:
+    job = _job(session, ctx.project.id, job_id)
+    _results(session, job)  # 409 unless succeeded
+    data = reports.serialize(reports.build_report(session, job))
+    audit_allow(
+        session, ctx, "evaluation.report", f"evaluation:{job.id}", format=fmt, sha256=reports.sha256_bytes(data)
+    )
+    session.commit()
+    return job, data
+
+
+@router.get(
+    "/{job_id}/report.json",
+    response_class=Response,
+    responses={200: {"content": {"application/json": {}}, "description": "pap.report/1"}, **REPORT_RESPONSES},
+)
+def report_json(job_id: uuid.UUID, ctx: ProjectViewer, session: SessionDep) -> Response:
+    """The reproducible JSON report: identical bytes every time for the same evaluation."""
+    job, data = _report(session, ctx, job_id, "json")
+    return Response(
+        data,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f'attachment; filename="evaluation-{job.id}.json"',
+            "X-Report-SHA256": reports.sha256_bytes(data),
+        },
+    )
+
+
+@router.get(
+    "/{job_id}/report.html",
+    response_class=Response,
+    responses={200: {"content": {"text/html": {}}, "description": "rendered from pap.report/1"}, **REPORT_RESPONSES},
+)
+def report_html(job_id: uuid.UUID, ctx: ProjectViewer, session: SessionDep) -> Response:
+    """The HTML report, rendered from the JSON report only. Self-contained: no scripts, no external resources."""
+    job, data = _report(session, ctx, job_id, "html")
+    page = reports.render_html(json.loads(data)).encode("utf-8")
+    return Response(
+        page,
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="evaluation-{job.id}.html"',
+            "X-Report-SHA256": reports.sha256_bytes(data),
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+        },
+    )

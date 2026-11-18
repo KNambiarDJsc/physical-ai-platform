@@ -51,3 +51,23 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const projectPath = (org: string, project: string) => `/api/v1/orgs/${org}/projects/${project}`;
+
+/** Fetches a file from the API with the caller's identity and hands it to the browser as a download. */
+export async function download(path: string, filename: string): Promise<void> {
+  const headers = new Headers();
+  const identity = getIdentity();
+  if (identity) headers.set("Authorization", `Bearer ${identity}`);
+  const res = await fetch(path, { headers, cache: "no-store" });
+  if (!res.ok) throw new ApiError(res.status, "http_error", `${res.status} ${res.statusText}`);
+  const url = URL.createObjectURL(await res.blob());
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}

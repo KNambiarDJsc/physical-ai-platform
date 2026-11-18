@@ -2,6 +2,39 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-18 — Session 2: reports, failure-path e2e and the smoke script
+
+**State now:** 18 of 23 features verified (adds RI-008, E2E-001). Open: SEC-001 (containers, worker limits, CI
+scanners), INF-003 (Compose; needs a Docker engine, B-001), AUTH-002 (browser OIDC), OBS-001 (after INF-003);
+DATA-004 blocked on Docker.
+
+**Evidence:** `bash scripts/verify.sh` full gate green (136 Python tests with the engine required, audit
+11/11, 8 web unit tests, web build). `bash scripts/smoke.sh --e2e` exit 0: API smoke on a fresh stack plus 7/7
+Playwright tests (happy path entirely in the UI incl. creating the organization and project and exporting
+both reports; failure paths: non-text upload, rejected artifact, same release, absent task type, too few
+known outcomes, worker hard-killed mid-job -> attempt 2 of 3, duplicate submission, outsider).
+
+**Changes:** `services/api/app/evaluations/reports.py` (pap.report/1 JSON + HTML from it), `report.json` /
+`report.html` routes (audited, CSP on the HTML), download buttons on the comparison page, organization and
+project creation in the overview, minimum-known-units input, runtime API proxy route (D-013), supervised
+worker + stop file + state dir in dev_stack (D-015), `scripts/smoke.sh`, `scripts/smoke_api.py`,
+`apps/web/e2e/failure-paths.spec.ts`. The `demo` fixture moved to conftest.py.
+
+**Findings:** the next.config rewrite pinned the API address at build time (D-013). The outsider sees
+"organization not found" (the API does not even confirm the organization exists); my test had expected
+"evaluation not found".
+
+**Next:** SEC-001 container + CI files (can be written and `docker compose config`-checked here, not run) ->
+INF-003 when a Docker engine is available -> AUTH-002 -> OBS-001.
+
+**Gotchas:** (1) Next 15.5 on this machine left the evaluation page out of its own client reference manifest
+("Could not find the module ... in the React Client Manifest", 500) whenever the page imported a NEW
+component file (`ReportActions.tsx`, with or without "use client"); defining the component in the page file
+fixed it. Check `page_client-reference-manifest.js` for the page's own `page.tsx` if a page 500s after build.
+(2) C: filled to 0 bytes mid-run (Remote Desktop traces again, 16 GB, deleted under the standing rule); the
+smoke script now keeps TMP/TEMP under var/smoke/tmp. (3) `taskkill /T` exits non-zero when part of the tree is
+already gone; check the process instead of the exit code.
+
 ## 2026-11-18 — Session 1 (later): web application and the first browser-verified end-to-end flow
 
 **State now:** 16 of 23 features verified (adds WEB-001, RI-005, RI-006, RI-007). Open: SEC-001 (containers,

@@ -66,3 +66,22 @@ npm instead of pnpm reuses the D:\npm-cache already holding Next 15.5.28 and Pla
 cached Chromium). The browser calls `/api/v1/*` on the web origin; Next rewrites it to the API, so no CORS
 and no API URL in client code. Sign-in in the web app is the API's development identity only and is
 labelled so; OIDC login (code + PKCE, HttpOnly session cookie) is AUTH-002.
+
+## D-013 (2026-11-18) Proxy /api/v1 with a route handler, not a next.config rewrite (amends D-012)
+Found by the smoke run: a rewrite's destination is resolved at `next build` and written into
+routes-manifest.json, so the web build only worked against the API address it was built with (port 8000).
+`src/app/api/v1/[...path]/route.ts` now forwards at request time to `PAP_API_URL`, streaming bodies both ways
+and dropping hop-by-hop headers. One build runs against any API address, which Compose and any deployment need.
+
+## D-014 (2026-11-18) Reports are regenerated on request, not stored
+`report.json` is built from rows that never change after the job succeeds (results, episodes, mapping
+revision, artifacts, job provenance) and serialized deterministically (sorted keys and lists, no generation
+time), so regenerating gives the same bytes; the sha256 of those bytes identifies the report (X-Report-SHA256,
+and named inside the HTML). `report.html` is a pure function of the parsed JSON. Storing a copy would add a
+second source of truth without making the report more reproducible. Each download is audited with its digest.
+
+## D-015 (2026-11-18) dev_stack supervises the worker
+If the worker exits, dev_stack starts a new one (as a Compose restart policy would) and writes its PID to
+`<state>/dev-stack/worker.pid`; the e2e recovery test kills that PID mid-job. A `--stop-file` lets scripts stop
+the stack cleanly, PostgreSQL included (a forced kill on Windows leaves pgserver's postgres running), and
+`--state-dir` keeps smoke runs apart from a developer's stack.

@@ -180,6 +180,7 @@ function NewEvaluation(props: { base: string; org: string; project: string; rele
   const [candArt, setCandArt] = useState<string[]>([]);
   const [taskType, setTaskType] = useState("");
   const [paired, setPaired] = useState(false);
+  const [minKnown, setMinKnown] = useState("30");
   const m = useMutation({
     mutationFn: () =>
       api<Evaluation>(`${props.base}/evaluations`, {
@@ -190,12 +191,12 @@ function NewEvaluation(props: { base: string; org: string; project: string; rele
           mapping_id: mapping,
           baseline_artifact_ids: baseArt,
           candidate_artifact_ids: candArt,
-          config: { task_type: taskType, paired },
+          config: { task_type: taskType, paired, min_known: Number(minKnown) },
         }),
       }),
     onSuccess: (e) => router.push(`/o/${props.org}/p/${props.project}/e/${e.id}`),
   });
-  const ready = baseline && candidate && baseline !== candidate && mapping && baseArt.length && candArt.length && taskType;
+  const ready = baseline && candidate && baseline !== candidate && mapping && baseArt.length && candArt.length && taskType && Number(minKnown) >= 1;
   const multi = (id: string, value: string[], set: (v: string[]) => void, label: string) => (
     <div>
       <label className="text-xs text-muted" htmlFor={id}>
@@ -235,6 +236,10 @@ function NewEvaluation(props: { base: string; org: string; project: string; rele
           <label className="block text-xs text-muted" htmlFor="task-type">
             Task type
             <input id="task-type" className={`${input} mt-1 block w-full`} value={taskType} onChange={(e) => setTaskType(e.target.value)} placeholder="e.g. pick_place" />
+          </label>
+          <label className="block text-xs text-muted" htmlFor="min-known">
+            Minimum known units per release
+            <input id="min-known" type="number" min={1} step={1} className={`${input} num mt-1 block w-full`} value={minKnown} onChange={(e) => setMinKnown(e.target.value)} />
           </label>
           <label className="flex items-center gap-2 text-xs text-muted">
             <input type="checkbox" checked={paired} onChange={(e) => setPaired(e.target.checked)} /> Also pair by scenario

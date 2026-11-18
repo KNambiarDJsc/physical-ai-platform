@@ -3,8 +3,10 @@
     uv run python scripts/dev_stack.py            # until Ctrl-C
     uv run python scripts/dev_stack.py --ready-file var/stack.json   # write URLs when everything answers
 
-Development only (PAP_AUTH_MODE=dev). Everything lives under var/ (gitignored). The web app must be built first
-(npm --prefix apps/web run build). Docker Compose (INF-003) replaces this once Docker is available.
+The worker is supervised: if it exits (or is killed, as the e2e recovery test does) it is started again, like a
+container restart policy, and its PID is written to var/dev-stack/worker.pid. Development only (PAP_AUTH_MODE=dev).
+Everything lives under var/ (gitignored). The web app must be built first (npm --prefix apps/web run build).
+Docker Compose (INF-003) replaces this once Docker is available.
 """
 
 from __future__ import annotations
@@ -21,7 +23,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 API_DIR = ROOT / "services" / "api"
-VAR = ROOT / "var"
 
 
 def wait(url: str, seconds: float = 90) -> None:
@@ -42,7 +43,13 @@ def main() -> int:
     ap.add_argument("--api-port", type=int, default=8000)
     ap.add_argument("--web-port", type=int, default=3000)
     ap.add_argument("--ready-file")
+    ap.add_argument("--state-dir", default=str(ROOT / "var"), help="database, artifacts and work files go here")
+    ap.add_argument("--stop-file", help="stop cleanly (database included) when this file appears")
     ns = ap.parse_args()
+    VAR = Path(ns.state_dir).resolve()
+    stop = Path(ns.stop_file) if ns.stop_file else None
+    if stop:
+        stop.unlink(missing_ok=True)
 
     import pgserver
     import psycopg
@@ -71,10 +78,19 @@ def main() -> int:
         "PAP_WORKER_LEASE_S": "10",
         "PYTHONPATH": str(API_DIR),
     }
+    run_dir = VAR / "dev-stack"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    pid_file = run_dir / "worker.pid"
+
+    def start_worker() -> subprocess.Popen[bytes]:
+        w = subprocess.Popen([sys.executable, "-m", "app.workers.run", "--poll", "0.5"], cwd=API_DIR, env=env)
+        pid_file.write_text(str(w.pid), encoding="utf-8")
+        return w
+
     api_cmd = [sys.executable, "-m", "uvicorn", "app.main:create_app", "--factory", "--host", "127.0.0.1", "--port"]
     procs = [
         subprocess.Popen([*api_cmd, str(ns.api_port)], cwd=API_DIR, env=env),
-        subprocess.Popen([sys.executable, "-m", "app.workers.run", "--poll", "0.5"], cwd=API_DIR, env=env),
+        start_worker(),
         subprocess.Popen(
             ["npm", "--prefix", str(ROOT / "apps" / "web"), "run", "start", "--", "-p", str(ns.web_port)],
             env={**env, "PAP_API_URL": f"http://127.0.0.1:{ns.api_port}", "NEXT_TELEMETRY_DISABLED": "1"},
@@ -84,12 +100,23 @@ def main() -> int:
     try:
         wait(f"http://127.0.0.1:{ns.api_port}/healthz")
         wait(f"http://127.0.0.1:{ns.web_port}/")
-        info = {"api": f"http://127.0.0.1:{ns.api_port}", "web": f"http://127.0.0.1:{ns.web_port}", "database": db}
+        info = {
+            "api": f"http://127.0.0.1:{ns.api_port}",
+            "web": f"http://127.0.0.1:{ns.web_port}",
+            "database": db,
+            "worker_pid_file": str(pid_file),
+        }
         print(json.dumps(info), flush=True)
         if ns.ready_file:
             Path(ns.ready_file).write_text(json.dumps(info), encoding="utf-8")
-        while all(p.poll() is None for p in procs):
-            time.sleep(1)
+        while procs[0].poll() is None and procs[2].poll() is None:
+            if stop and stop.exists():
+                print("stop file found; stopping", file=sys.stderr, flush=True)
+                return 0
+            if procs[1].poll() is not None:
+                print(f"worker exited ({procs[1].returncode}); starting a new one", file=sys.stderr, flush=True)
+                procs[1] = start_worker()
+            time.sleep(0.5)
         print("a component exited; stopping", file=sys.stderr)
         return 1
     except KeyboardInterrupt:

@@ -4,25 +4,26 @@ import path from "node:path";
 
 /**
  * The Release Intelligence flow in a real browser against the real API, worker and pinned OpenMHS engine
- * (scripts/dev_stack.py). The organization and project are created through the API (there is no UI for that
- * yet); everything after that goes through the web app.
+ * (scripts/dev_stack.py). Every step goes through the web app.
  */
 const DEMO = path.resolve(__dirname, "../../../examples/manipulation-demo");
 const run = Date.now().toString(36);
 const org = `e2e-${run}`;
 const user = `alice-${run}`;
 
-test("register releases, upload evidence, evaluate, compare, drill down", async ({ page, request }) => {
-  const auth = { Authorization: `Bearer dev:${user}` };
-  expect((await request.post("/api/v1/orgs", { headers: auth, data: { slug: org, name: "E2E" } })).status()).toBe(201);
-  expect(
-    (await request.post(`/api/v1/orgs/${org}/projects`, { headers: auth, data: { slug: "picking", name: "Picking cell" } })).status(),
-  ).toBe(201);
-
+test("register releases, upload evidence, evaluate, compare, export, drill down", async ({ page }) => {
+  // Everything through the web app, from signing in to creating the organization and project.
   await page.goto("/settings");
   await page.getByLabel("Subject").fill(user);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Overview" }).click();
+  await expect(page.getByText("You are not a member of any organization yet.")).toBeVisible();
+  await page.getByLabel("Organization name").fill("E2E");
+  await page.getByLabel("Organization slug").fill(org);
+  await page.getByRole("button", { name: "Create organization" }).click();
+  await page.getByLabel("Project name").fill("Picking cell");
+  await page.getByLabel("Project slug").fill("picking");
+  await page.getByRole("button", { name: "Create project" }).click();
   await page.getByRole("link", { name: "Picking cell" }).click();
   await expect(page.getByRole("heading", { name: `${org} / picking` })).toBeVisible();
 
@@ -58,6 +59,18 @@ test("register releases, upload evidence, evaluate, compare, drill down", async 
   await expect(page.getByRole("heading", { name: /Paired by scenario/ })).toBeVisible();
   await expect(page.getByText(/commit e9ef873b42/)).toBeVisible();
   await page.screenshot({ path: "test-results/comparison.png", fullPage: true });
+
+  // Export: the HTML report is rendered from the JSON report, and says what kind of evidence it rests on.
+  const [html] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download HTML report" }).click()]);
+  expect(html.suggestedFilename()).toMatch(/^evaluation-.+\.html$/);
+  const htmlText = readFileSync(await html.path(), "utf-8");
+  expect(htmlText).toContain("SYNTHETIC EVIDENCE");
+  expect(htmlText).not.toContain("<script");
+  const [json] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download JSON report" }).click()]);
+  const report = JSON.parse(readFileSync(await json.path(), "utf-8"));
+  expect(report.schema).toBe("pap.report/1");
+  expect(report.evidence_class).toEqual(["synthetic"]);
+  expect(htmlText).toContain(report.provenance.input_sha256);
 
   await page.getByRole("link", { name: "Contradiction" }).click();
   await expect(page.getByText(/of 32$/)).toBeVisible();

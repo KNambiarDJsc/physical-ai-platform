@@ -1,14 +1,9 @@
 import type { NextConfig } from "next";
 
-const api = process.env.PAP_API_URL ?? "http://127.0.0.1:8000";
-
 const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
-  // The browser talks to the web origin only; the API is proxied server-side.
-  async rewrites() {
-    return [{ source: "/api/v1/:path*", destination: `${api}/api/v1/:path*` }];
-  },
+  // The browser talks to the web origin only; src/app/api/v1/[...path]/route.ts proxies to PAP_API_URL at run time.
   async headers() {
     return [
       {
