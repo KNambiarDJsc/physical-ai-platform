@@ -57,16 +57,16 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | Vitest, Playwright | Web tests | RI-006, E2E-001 | MIT, Apache-2.0 (stated) | Playwright 1.63.0 has a cached Chromium on this machine |
 | Tailwind CSS | Styling | RI-006 | MIT (stated) | |
 | Caddy (caddyserver/caddy) | Reverse proxy in Compose | INF-003 | Apache-2.0 (stated) | |
-| Docker Compose | Local stack | INF-003 | Apache-2.0 (stated) | Blocked locally (B-001) |
+| Docker Compose | Local stack | INF-003: `docker-compose.yml` (v2.39 config-validated) | Apache-2.0 (stated) | Images: postgres 16.10, python 3.12.11-slim, rust 1.89.0-slim, node 22.16.0-slim, uv 0.7.11, all tag+digest pinned. Not run locally (B-001) |
 | Keycloak (keycloak/keycloak) | Reference OIDC provider for self-hosted installs | AUTH-001 live test | Apache-2.0 (stated) | Not embedded; any OIDC IdP works |
 | SeaweedFS (seaweedfs/seaweedfs) | S3-compatible object store for self-hosting | DATA-002 S3 adapter | Apache-2.0 (stated) | Preferred over MinIO (AGPL-3.0, community edition in maintenance) and Garage (AGPL-3.0) for redistribution in a commercial self-hosted bundle; the adapter speaks plain S3, so customers may bring any S3 |
 | boto3 / botocore | S3 client | DATA-002 | Apache-2.0 (stated) | Only when the S3 adapter is built |
 | OpenTelemetry Python / Collector | Traces, metrics over OTLP | OBS-001 | Apache-2.0 (stated) | |
 | Prometheus | Metrics | OBS-001 | Apache-2.0 (stated) | |
 | Grafana / Loki / Tempo | Dashboards, logs, traces | OBS-001 | **AGPL-3.0** (stated) | Run as separate, unmodified services; never embed or link; customers may already run their own |
-| Trivy | Image and dependency scan in CI | SEC-001 | Apache-2.0 (stated) | |
-| Semgrep (CE engine) | Static analysis in CI | SEC-001 | LGPL-2.1 engine (stated); registry rules under the Semgrep Rules License | Use only our own or permissively licensed rules |
-| gitleaks | Secret scan in CI | SEC-001 | MIT (stated) | `scripts/check_secrets.py` is the local guard |
+| Trivy | Image and dependency scan in CI | SEC-001: 0.76.1, image `aquasec/trivy` by digest | Apache-2.0 (stated) | Run as the container image, never `aquasecurity/trivy-action` (its tags were hijacked in 2026). Local run: found and fixed postcss in next |
+| Semgrep (CE engine) | Static analysis in CI | SEC-001: 1.183.0, image `semgrep/semgrep` by digest | LGPL-2.1 engine (stated); registry rules under the Semgrep Rules License | Only our own rules (`.semgrep/rules.yml`, self-tested by `scripts/check_semgrep_rules.py`); no registry packs. Run as a separate tool, not linked |
+| gitleaks | Secret scan in CI | SEC-001: 8.30.1, image `ghcr.io/gitleaks/gitleaks` by digest | MIT (stated) | Binary, not `gitleaks-action` (which needs a licence key for organization accounts). `scripts/check_secrets.py` is the local guard |
 | Hypothesis | Property tests (mapping, canonical JSON) | DATA-003 | MPL-2.0 (stated) | Dev-only |
 | Schemathesis | OpenAPI fuzzing | SEC-001 | MIT (stated) | Dev-only |
 | testcontainers-python | Ephemeral PostgreSQL/S3 in tests | once Docker is available | Apache-2.0 (stated) | Replaces pgserver |

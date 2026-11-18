@@ -1,0 +1,125 @@
+# The whole platform: PostgreSQL, a one-shot migration, API, evaluation worker (with the pinned engine) and web.
+#
+#   PAP_DB_PASSWORD=change-me docker compose up -d --build --wait
+#   bash scripts/smoke.sh --compose          # the same, plus one real evaluation over HTTP, then down
+#
+# Defaults are for a local, single-user environment: development identity (PAP_AUTH_MODE=dev), ports bound to
+# 127.0.0.1 only. For anything shared, set PAP_ENV=production and PAP_AUTH_MODE=oidc, and put PAP_OIDC_ISSUER,
+# PAP_OIDC_AUDIENCE (and PAP_OIDC_JWKS_URL if not discoverable) in .env.pap (read by api, worker and migrate when
+# present). The API refuses to start with the development identity in production.
+# Artifacts use the local content-addressed store on a volume; the S3 adapter is DATA-004.
+
+name: pap
+
+x-hardening: &hardening
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+  tmpfs: ["/tmp:size=256m,mode=1777"]
+
+x-api-build: &api-build
+  context: .
+  dockerfile: infrastructure/docker/api.Dockerfile
+
+x-api-env-file: &api-env-file
+  - path: .env.pap
+    required: false
+
+x-api-env: &api-env
+  PAP_ENV: ${PAP_ENV:-development}
+  PAP_AUTH_MODE: ${PAP_AUTH_MODE:-dev}
+  PAP_DATABASE_URL: postgresql+psycopg://pap:${PAP_DB_PASSWORD:?set PAP_DB_PASSWORD}@postgres:5432/pap
+  PAP_MAX_UPLOAD_BYTES: ${PAP_MAX_UPLOAD_BYTES:-104857600}
+
+services:
+  postgres:
+    image: postgres:16.10-bookworm@sha256:38471f330eb885e04de130b768d6db4e10469e2311879c7e5c699f6d2d8a1c74
+    environment:
+      POSTGRES_DB: pap
+      POSTGRES_USER: pap
+      POSTGRES_PASSWORD: ${PAP_DB_PASSWORD:?set PAP_DB_PASSWORD}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pap -d pap"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+
+  migrate:
+    build: *api-build
+    image: pap-api:local
+    command: ["alembic", "upgrade", "head"]
+    env_file: *api-env-file
+    environment: *api-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+    <<: *hardening
+
+  api:
+    build: *api-build
+    image: pap-api:local
+    env_file: *api-env-file
+    environment: *api-env
+    volumes: ["artifacts:/data/artifacts"]
+    ports: ["127.0.0.1:${PAP_API_PORT:-8000}:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+    <<: *hardening
+
+  worker:
+    build: *api-build
+    image: pap-api:local
+    command: ["python", "-m", "app.workers.run"]
+    env_file: *api-env-file
+    environment:
+      <<: *api-env
+      # Time limits: each engine call, the whole job, and the lease another worker waits out after a crash.
+      PAP_ENGINE_TIMEOUT_S: ${PAP_ENGINE_TIMEOUT_S:-300}
+      PAP_WORKER_LEASE_S: ${PAP_WORKER_LEASE_S:-60}
+      PAP_JOB_MAX_ATTEMPTS: ${PAP_JOB_MAX_ATTEMPTS:-3}
+    volumes: ["artifacts:/data/artifacts", "work:/data/work"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    # CPU, memory and process limits for the process that runs the engine on uploaded evidence.
+    cpus: ${PAP_WORKER_CPUS:-2}
+    mem_limit: ${PAP_WORKER_MEMORY:-2g}
+    memswap_limit: ${PAP_WORKER_MEMORY:-2g}
+    pids_limit: 256
+    stop_grace_period: 30s
+    restart: unless-stopped
+    <<: *hardening
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/web.Dockerfile
+    image: pap-web:local
+    environment:
+      PAP_API_URL: http://api:8000
+    ports: ["127.0.0.1:${PAP_WEB_PORT:-3000}:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    tmpfs: ["/tmp:size=64m,mode=1777", "/web/.next/cache:size=64m,uid=1000,gid=1000"]
+
+volumes:
+  pgdata:
+  artifacts:
+  work:

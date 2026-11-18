@@ -24,8 +24,16 @@ worker + stop file + state dir in dev_stack (D-015), `scripts/smoke.sh`, `script
 "organization not found" (the API does not even confirm the organization exists); my test had expected
 "evaluation not found".
 
-**Next:** SEC-001 container + CI files (can be written and `docker compose config`-checked here, not run) ->
-INF-003 when a Docker engine is available -> AUTH-002 -> OBS-001.
+**Later the same session (SEC-001 / INF-003, both still in progress):** Dockerfiles (non-root, engine built
+from engine.lock.json inside the image), docker-compose.yml (read-only services, worker CPU/memory/pids limits,
+healthchecks; `docker compose config` validates), `scripts/smoke.sh --compose` (non-root, limits, engine,
+proxy, API smoke, e2e), `.github/workflows/ci.yml` (gate + e2e, gitleaks/Semgrep/Trivy as digest-pinned
+images, Compose job with image scans). Ran the scanners locally at the CI versions: gitleaks history clean;
+Semgrep project rules clean and self-tested; Trivy found postcss 8.4.31 inside next (2 HIGH) -> npm override
+(D-017) -> clean. Web standalone server checked locally with a run-time API address.
+
+**Next:** run `bash scripts/smoke.sh --compose --e2e` when Docker can be started (or CI after an approved
+push) to verify INF-003 and finish SEC-001 -> AUTH-002 (browser OIDC) -> OBS-001.
 
 **Gotchas:** (1) Next 15.5 on this machine left the evaluation page out of its own client reference manifest
 ("Could not find the module ... in the React Client Manifest", 500) whenever the page imported a NEW

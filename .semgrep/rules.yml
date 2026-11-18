@@ -1,0 +1,94 @@
+# Project rules for Semgrep CE (SEC-001). Our own rules only: registry rule packs are under the Semgrep Rules
+# License, which the integration registry does not accept for this repository.
+rules:
+  - id: pap-subprocess-shell
+    languages: [python]
+    severity: ERROR
+    message: >-
+      subprocess with shell=True. The engine bridge runs binaries without a shell so that labels and paths can
+      never become commands; keep it that way.
+    patterns:
+      - pattern: subprocess.$F(..., shell=$X, ...)
+      - pattern-not: subprocess.$F(..., shell=False, ...)
+    paths:
+      exclude: ["/scripts/dev_stack.py"]  # npm is a .cmd on Windows; fixed command, no user input
+
+  - id: pap-os-system
+    languages: [python]
+    severity: ERROR
+    message: os.system/os.popen run a shell. Use subprocess with an argument list.
+    pattern-either:
+      - pattern: os.system(...)
+      - pattern: os.popen(...)
+
+  - id: pap-eval-exec
+    languages: [python]
+    severity: ERROR
+    message: eval/exec on anything is not acceptable in this codebase.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: pap-sql-text-interpolation
+    languages: [python]
+    severity: ERROR
+    message: SQL text built by string interpolation. Use bound parameters (text(":name")) or the ORM.
+    pattern-either:
+      - pattern: sqlalchemy.text(f"...")
+      - pattern: text(f"...")
+      - pattern: text("..." % $X)
+      - pattern: text("...".format(...))
+      - pattern: text("..." + $X)
+      - pattern: $CONN.execute(f"...")
+
+  - id: pap-unsafe-deserialization
+    languages: [python]
+    severity: ERROR
+    message: Deserializing untrusted input with pickle/marshal or yaml.load can execute code.
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+      - pattern: marshal.loads(...)
+      - pattern: yaml.load(...)
+
+  - id: pap-jwt-unverified
+    languages: [python]
+    severity: ERROR
+    message: JWT decoded without signature verification.
+    pattern-either:
+      - pattern: 'jwt.decode(..., options={..., "verify_signature": False, ...}, ...)'
+      - pattern: jwt.decode(..., verify=False, ...)
+
+  - id: pap-tls-verify-disabled
+    languages: [python]
+    severity: ERROR
+    message: TLS certificate verification disabled.
+    pattern-either:
+      - pattern: httpx.$F(..., verify=False, ...)
+      - pattern: requests.$F(..., verify=False, ...)
+      - pattern: ssl._create_unverified_context(...)
+
+  - id: pap-react-dangerous-html
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      dangerouslySetInnerHTML renders unescaped HTML. Evidence and engine text must be rendered as text.
+    pattern: <$EL dangerouslySetInnerHTML={...} />
+
+  - id: pap-js-eval
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: eval / new Function execute strings as code.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: pap-token-in-browser-storage
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >-
+      Credentials must not live in browser storage (AUTH-002 keeps the session in an HttpOnly cookie). Only the
+      labelled development identity may use sessionStorage.
+    pattern-either:
+      - pattern: localStorage.setItem(...)
+      - pattern: window.localStorage.setItem(...)

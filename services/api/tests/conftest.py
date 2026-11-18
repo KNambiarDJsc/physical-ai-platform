@@ -69,7 +69,8 @@ def client(settings_env: None, database_url: str) -> Iterator[TestClient]:
         ).scalars()
         names = ", ".join(f'"{t}"' for t in tables)
         if names:
-            conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+            # Identifiers cannot be bound parameters; these are table names read from pg_tables, quoted.
+            conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))  # nosemgrep: pap-sql-text-interpolation
 
 
 def engine_required() -> bool:

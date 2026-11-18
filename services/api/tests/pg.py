@@ -41,9 +41,9 @@ def _libpq(url: str) -> str:
 
 @contextmanager
 def fresh_database(server_url: str) -> Iterator[str]:
-    name = f"pap_test_{uuid.uuid4().hex[:12]}"
+    name = f"pap_test_{uuid.uuid4().hex[:12]}"  # generated here; identifiers cannot be bound parameters
     with psycopg.connect(_libpq(server_url), autocommit=True) as conn:
-        conn.execute(f'CREATE DATABASE "{name}"')
+        conn.execute(f'CREATE DATABASE "{name}"')  # nosemgrep: pap-sql-text-interpolation
     url = make_url(server_url).set(database=name).render_as_string(hide_password=False)
     try:
         yield url
@@ -52,4 +52,4 @@ def fresh_database(server_url: str) -> Iterator[str]:
 
         get_engine.cache_clear()
         with psycopg.connect(_libpq(server_url), autocommit=True) as conn:
-            conn.execute(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')
+            conn.execute(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')  # nosemgrep: pap-sql-text-interpolation

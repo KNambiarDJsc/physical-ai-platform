@@ -1,0 +1,10 @@
+# Paths Semgrep does not scan (replaces its built-in defaults, so they are repeated here).
+node_modules/
+.venv/
+var/
+.engine/
+apps/web/.next/
+apps/web/test-results/
+**/*.d.ts
+# Deliberately bad code that tests the rules themselves (semgrep scan --test .semgrep).
+.semgrep/

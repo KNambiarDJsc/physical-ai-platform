@@ -7,6 +7,8 @@ progress.md.
 Docker Desktop's engine pipe is absent; RAM (~2.6 GB free of 16) is needed by the user. Impact: Compose
 stack (INF-003), Keycloak (live OIDC), MinIO-class S3 server and container image scans cannot be run
 locally. Unblock: user starts Docker Desktop, or these run in GitHub Actions. Owner: user.
+2026-11-18: everything that needs Docker is now written and waiting: `bash scripts/smoke.sh --compose --e2e`
+(local) and the `compose` + `security` jobs in .github/workflows/ci.yml (needs a push, which needs approval).
 
 ## B-002 No external customer data
 All evidence available is open data (CoreSense, CC BY 4.0), simulation (Gazebo, LeRobot PushT) or

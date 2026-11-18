@@ -1,0 +1,21 @@
+# Only what the images need goes into the build context.
+.git
+.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.engine
+var
+harness
+docs
+examples
+**/node_modules
+apps/web/.next
+apps/web/test-results
+apps/web/playwright-report
+**/*.tsbuildinfo
+**/tests
+.env
+.env.*
+!.env.example

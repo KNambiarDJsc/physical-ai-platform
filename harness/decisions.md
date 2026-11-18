@@ -85,3 +85,23 @@ If the worker exits, dev_stack starts a new one (as a Compose restart policy wou
 `<state>/dev-stack/worker.pid`; the e2e recovery test kills that PID mid-job. A `--stop-file` lets scripts stop
 the stack cleanly, PostgreSQL included (a forced kill on Windows leaves pgserver's postgres running), and
 `--state-dir` keeps smoke runs apart from a developer's stack.
+
+## D-016 (2026-11-18) Security scanners run as digest-pinned images, with our own Semgrep rules
+gitleaks 8.30.1, Semgrep 1.183.0 and Trivy 0.76.1 run in CI as container images pinned by digest rather than
+through their GitHub Actions: third-party action tags can be re-pointed (it happened to trivy-action in 2026),
+an image digest cannot, and gitleaks-action needs a licence key for organization accounts. Versions are at
+least two weeks old when chosen. Semgrep runs only `.semgrep/rules.yml` (registry packs are under the Semgrep
+Rules License, which the integration registry does not accept); each rule has an annotated sample that
+`scripts/check_semgrep_rules.py` checks, because `semgrep --test` crashes on Windows paths.
+
+## D-017 (2026-11-18) Override next's bundled postcss
+Trivy found next 15.5.28 pinning postcss 8.4.31 (CVE-2026-45623, CVE-2026-73646, fixed in 8.5.12/8.5.18).
+`overrides.next.postcss = 8.5.33` (the version the rest of the tree already uses); npm ci, unit tests and the
+build pass. Remove the override when next ships a fixed postcss.
+
+## D-018 (2026-11-18) One image for API and worker; engine built inside it
+api.Dockerfile builds OpenMHS from engine.lock.json (fetch by commit, `git rev-parse` check, `cargo build
+--locked`) and records the digest that build produced in /app/.engine/build.json; Rust release builds are not
+bit-identical across machines, so the commit pins behaviour and each platform has its own digest (D-002).
+The worker is the same image with another command, so the API's /healthz engine check covers the worker's
+binary too. Services run as non-root with read-only root filesystems; only /data is writable.

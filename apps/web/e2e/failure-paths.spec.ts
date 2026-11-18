@@ -13,6 +13,8 @@ import path from "node:path";
 const ROOT = path.resolve(__dirname, "../../..");
 const DEMO = path.join(ROOT, "examples/manipulation-demo");
 const PID_FILE = process.env.PAP_WORKER_PID_FILE ?? path.join(ROOT, "var/dev-stack/worker.pid");
+// Under Docker Compose the worker is killed from the host by this command instead (scripts/smoke.sh --compose).
+const KILL_CMD = process.env.PAP_WORKER_KILL_CMD;
 const run = Date.now().toString(36);
 const org = `fail-${run}`;
 const owner = `owner-${run}`;
@@ -157,13 +159,14 @@ test("a worker killed mid-job is replaced and the job finishes; resubmitting ret
     if (state !== "running") await page.waitForTimeout(100);
   }
   expect(state, "the job never started").toBe("running");
-  const pid = readFileSync(PID_FILE, "utf-8").trim();
-  killHard(Number(pid));
+  const pid = KILL_CMD ? null : readFileSync(PID_FILE, "utf-8").trim();
+  if (KILL_CMD) execSync(KILL_CMD, { stdio: "inherit", shell: "/bin/bash" });
+  else killHard(Number(pid));
 
   // The stack starts a new worker; once the lease expires it takes the job over and runs it again from the start.
   await expect(page.getByText("succeeded", { exact: true })).toBeVisible({ timeout: 150_000 });
   await expect(page.getByText("attempt 2 of 3")).toBeVisible();
-  expect(readFileSync(PID_FILE, "utf-8").trim()).not.toBe(pid);
+  if (pid) expect(readFileSync(PID_FILE, "utf-8").trim()).not.toBe(pid);
   const reported = page.getByRole("heading", { name: "Reported by the robot" }).locator("..");
   await expect(reported.getByText("Improvement")).toBeVisible();
   await expect(page.getByRole("link", { name: "Contradiction" })).toBeVisible(); // conflicting evidence stays visible

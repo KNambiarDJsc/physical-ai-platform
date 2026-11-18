@@ -691,11 +691,17 @@
         "verified_at": null,
         "evidence": [
           "test_isolation.py: every organization-scoped (method, path) in the OpenAPI document (25+) called by an outsider user and an outsider service credential, on the victim's path and on the attacker's own path with the victim's ids (IDOR); all 404 where a victim id is involved, no victim data in any response, victim data unchanged. It found and fixed a 500 on long denied URLs (audit field length).",
-          "test_mapping.py: malformed CSV/JSONL, oversized lines, deeply nested JSON, NUL bytes and non-UTF-8 produce row or artifact rejections, not crashes"
+          "test_mapping.py: malformed CSV/JSONL, oversized lines, deeply nested JSON, NUL bytes and non-UTF-8 produce row or artifact rejections, not crashes",
+          "Semgrep 1.183.0 (project rules .semgrep/rules.yml only: shell subprocess, os.system, eval/exec, SQL text interpolation, unsafe deserialization, unverified JWT, TLS verify off, dangerouslySetInnerHTML, JS eval, tokens in localStorage): 0 findings on the repository after marking 3 test-only DDL statements (identifiers cannot be bound) with reasoned nosemgrep comments; scripts/check_semgrep_rules.py confirms all 10 rules fire on the annotated samples (14 expected findings, 5 ok cases) and nowhere else. A first version of the shell rule matched shell=False and was fixed.",
+          "gitleaks 8.30.1 (release checksum verified): `gitleaks git` on the full history (9 commits) found no leaks; `gitleaks dir` findings (434) are all in gitignored build directories (.engine source export, .venv, var, web build), 0 in tracked files.",
+          "Trivy 0.76.1 (release checksum verified) fs scan of a clean export of tracked files, HIGH/CRITICAL, fixed only: found postcss 8.4.31 (CVE-2026-45623, CVE-2026-73646) pinned inside next; fixed with an npm override to the postcss 8.5.33 already in the tree (npm ci, unit tests and build pass); re-scan: 0 vulnerabilities in package-lock.json and uv.lock, 0 misconfigurations in both Dockerfiles.",
+          "Images written: infrastructure/docker/api.Dockerfile (runs as uid 10001, code and engine root-owned and read-only, only /data writable; engine built from engine.lock.json inside the build) and web.Dockerfile (runs as node). docker-compose.yml: every service read_only with tmpfs, cap_drop ALL, no-new-privileges; worker cpus 2, mem 2g (no swap), pids 256; time limits via PAP_ENGINE_TIMEOUT_S, the job timeout and the lease. `docker compose config` validates.",
+          ".github/workflows/ci.yml: gitleaks (history), Semgrep (project rules + rule self-test), Trivy fs and image scans, all as container images pinned by digest; actions pinned to commit SHAs; contents: read."
         ]
       },
       "limitations": [
-        "Containers, worker resource limits and CI scanners (gitleaks, Trivy, Semgrep) not done yet."
+        "Not verified until containers actually run: non-root users and worker limits are written and config-validated, and scripts/smoke.sh --compose checks them (id -u per service, docker inspect of the worker), but no Docker engine ran here (B-001).",
+        "The CI workflow has not run (nothing is pushed). The same scanner versions were run locally instead; Trivy image scans have not run anywhere yet."
       ]
     },
     {
@@ -719,12 +725,19 @@
         "docker-compose.yml",
         "infrastructure/docker/"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "docker-compose.yml: postgres 16.10 (digest-pinned, healthcheck), one-shot migrate (alembic upgrade head), api (healthcheck = /healthz, which is 503 unless the image's engine passes the digest check), worker (restart policy, limits), web (standalone server, healthcheck). One command: PAP_DB_PASSWORD=... docker compose up -d --build --wait. `docker compose config` validates.",
+          "The engine is built inside api.Dockerfile from engine.lock.json (repository + commit fetched by SHA, verified with git rev-parse, cargo build --locked) and its digest written to /app/.engine/build.json; nothing is copied from a developer machine.",
+          "Web image: the standalone server was run locally with PAP_API_URL set only at run time; it serves the app (200) and its proxy answers 502 when that API is down, i.e. the API address is not baked into the build (D-013).",
+          "scripts/smoke.sh --compose (builds, waits for health, checks non-root/limits/engine/proxy, runs the API smoke and optionally both browser suites) and the CI `compose` job exist but have not run."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Needs a Docker engine or a CI runner to verify (B-001); Docker Desktop is installed here but not started (RAM)."
+      ]
     },
     {
       "id": "E2E-001",

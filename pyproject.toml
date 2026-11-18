@@ -46,6 +46,7 @@ exclude = ["\\.engine/", "tests/"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
+testpaths = ["packages/openmhs-bridge/tests", "services/api/tests"]
 markers = [
   "engine: runs the real pinned OpenMHS binary (OPENMHS_BIN); fails instead of skipping when PAP_REQUIRE_ENGINE=1",
 ]

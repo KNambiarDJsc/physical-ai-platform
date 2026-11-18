@@ -54,6 +54,8 @@ conversation, holds the state of the work.
 | Python tests | `uv run pytest` (from repo root) |
 | Local stack (no Docker) | `uv run python scripts/dev_stack.py` (web must be built first) |
 | Smoke + browser e2e | `bash scripts/smoke.sh --e2e` (needs a built engine; starts and stops its own stack) |
+| Same on Docker Compose | `bash scripts/smoke.sh --compose --e2e` (needs a running Docker engine) |
+| Semgrep (project rules) | `uvx --from semgrep==1.183.0 semgrep scan --config .semgrep/rules.yml --error --metrics=off` and `uvx --from semgrep==1.183.0 python scripts/check_semgrep_rules.py` |
 | Bounded autonomous loop (opt-in) | `bash scripts/loop.sh --iterations 1` |
 
 Engine for tests: `OPENMHS_BIN` and `OPENMHS_BIN_SHA256` (written to `.engine/build.json` by the build

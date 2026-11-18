@@ -1,0 +1,128 @@
+# CI: the full gate and browser suites on the local stack, security scanners, and the Docker Compose stack.
+# Every action is pinned to a commit SHA and every scanner image to a digest (the version is in the comment).
+# Scanners run as container images, not as their GitHub Actions (third-party action tags have been hijacked
+# before; an image digest cannot be).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.7.11"
+  NODE_VERSION: "22.16.0"
+  RUST_TOOLCHAIN: "1.89.0"
+  GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+  SEMGREP_IMAGE: semgrep/semgrep:1.183.0@sha256:2e45517a85e13a9cca14a2a00df6bb48affd66b8ebfae1b0991cd57578362fb0
+  TRIVY_IMAGE: aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c
+
+jobs:
+  verify:
+    name: gate, smoke and browser suites (local stack)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Rust toolchain
+        run: rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal && rustup default "$RUST_TOOLCHAIN"
+      - name: Install dependencies
+        run: |
+          uv sync --all-packages --frozen
+          npm --prefix apps/web ci --no-audit --no-fund
+          npx --prefix apps/web playwright install --with-deps chromium
+      - name: Build the pinned engine
+        run: |
+          repo="$(jq -r .repository engine.lock.json)"; commit="$(jq -r .commit engine.lock.json)"
+          git init -q "$RUNNER_TEMP/openmhs" && cd "$RUNNER_TEMP/openmhs"
+          git remote add origin "$repo" && git fetch -q --depth 1 origin "$commit"
+          cd "$GITHUB_WORKSPACE" && OPENMHS_SRC_REPO="$RUNNER_TEMP/openmhs" uv run bash scripts/build-openmhs.sh --jobs 4
+      - name: Full gate
+        run: uv run bash scripts/verify.sh
+      - name: Smoke and browser suites
+        run: uv run bash scripts/smoke.sh --e2e
+      - name: Keep logs and traces
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verify-logs
+          path: |
+            var/smoke/dev-stack/*.log
+            apps/web/test-results/
+          retention-days: 7
+
+  security:
+    name: secret, code and dependency scans
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans the whole history
+      - name: gitleaks (history)
+        run: docker run --rm -v "$PWD:/repo" -w /repo "$GITLEAKS_IMAGE" git . --redact --no-banner --exit-code 1
+      - name: Semgrep (project rules; registry packs are not used, see the integration registry)
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src "$SEMGREP_IMAGE" \
+            semgrep scan --config .semgrep/rules.yml --error --metrics=off --disable-version-check
+          docker run --rm -v "$PWD:/src" -w /src "$SEMGREP_IMAGE" python3 scripts/check_semgrep_rules.py
+      - name: Trivy (dependencies in uv.lock, package-lock.json and Cargo.lock files; misconfiguration)
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src "$TRIVY_IMAGE" fs --scanners vuln,misconfig \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --skip-dirs apps/web/node_modules .
+
+  compose:
+    name: Docker Compose stack (images, non-root, limits, smoke, browser suites, image scan)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install test tooling
+        run: |
+          uv sync --all-packages --frozen
+          npm --prefix apps/web ci --no-audit --no-fund
+          npx --prefix apps/web playwright install --with-deps chromium
+      - name: Compose smoke and browser suites
+        run: bash scripts/smoke.sh --compose --e2e
+        env:
+          COMPOSE_BAKE: "false"
+      - name: Trivy (images)
+        if: always()
+        run: |
+          for image in pap-api:local pap-web:local; do
+            docker image inspect "$image" >/dev/null 2>&1 || { echo "$image was not built"; exit 1; }
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" image \
+              --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image"
+          done
+      - name: Keep logs and traces
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: compose-logs
+          path: |
+            var/smoke/dev-stack/compose.log
+            apps/web/test-results/
+          retention-days: 7
