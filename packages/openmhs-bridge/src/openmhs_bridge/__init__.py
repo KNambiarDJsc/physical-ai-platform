@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 
-from .canonical import canonical_json, digest, sha256_bytes, sha256_file
+from .canonical import canonical_json, digest, sha256_bytes, sha256_file, sha256_text
 from .conditions import conditions_of
 from .engine import VERDICT_EXIT, Engine, EngineConfig, RawRun, Result
 from .errors import EngineError
@@ -44,6 +44,7 @@ __all__ = [
     "engine_from_env",
     "sha256_bytes",
     "sha256_file",
+    "sha256_text",
 ]
 
 

@@ -115,6 +115,13 @@ class OrgContext:
     principal: Principal
 
 
+def _action(request: Request) -> str:
+    """The route template (``GET /api/v1/orgs/{org_slug}/...``), not the concrete URL: no ids, bounded length."""
+    route = request.scope.get("route")
+    template = getattr(route, "path", None) or request.url.path
+    return f"{request.method} {template}"
+
+
 def _deny(principal: Principal, org_id: uuid.UUID | None, action: str, resource: str, reason: str) -> None:
     """Record a denial in its own transaction so it survives the failed request."""
     with session_factory()() as s:
@@ -146,7 +153,7 @@ def org_context(
                 select(Membership.role).where(Membership.organization_id == org.id, Membership.user_id == principal.id)
             )
     if org is None or role is None:
-        _deny(principal, None, f"{request.method} {request.url.path}", f"org:{org_slug}", "not a member")
+        _deny(principal, None, _action(request), f"org:{org_slug}", "not a member")
         raise error(404, "not_found", "organization not found")
     return OrgContext(org, role, principal)
 
@@ -156,7 +163,7 @@ OrgDep = Annotated[OrgContext, Depends(org_context)]
 
 def require_role(ctx: OrgContext, minimum: Role, request: Request) -> None:
     if RANK[ctx.role] < RANK[minimum]:
-        _deny(ctx.principal, ctx.org.id, f"{request.method} {request.url.path}", f"org:{ctx.org.slug}", "role")
+        _deny(ctx.principal, ctx.org.id, _action(request), f"org:{ctx.org.slug}", "role")
         raise error(403, "forbidden", f"requires role {minimum}")
 
 

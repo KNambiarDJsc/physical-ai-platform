@@ -45,9 +45,9 @@ def record(
     session.add(
         AuditEvent(
             organization_id=organization_id,
-            actor=actor,
-            action=action,
-            resource=resource,
+            actor=actor[:300],  # clamped: an audit write must never fail on input length
+            action=action[:100],
+            resource=resource[:300],
             decision=decision,
             detail=detail or {},
         )

@@ -2,6 +2,34 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-18 — Session 1 (continued): the first real Release Intelligence workflow runs end to end in the API
+
+**State now:** 12 of 22 features verified: INF-001, INF-002, CORE-001, CORE-002, DATA-001, DATA-002, DATA-003,
+AUTH-001, RI-001, RI-002, RI-003, RI-004. In progress: RI-005 (TS client missing), SEC-001 (containers, CI
+scanners). Blocked: DATA-004 (S3 adapter, needs Docker). Not started: WEB-001, RI-006/007/008, INF-003,
+E2E-001, OBS-001.
+
+**What works (all against PostgreSQL and the pinned engine, 132 tests, `bash scripts/verify.sh` green):**
+- API: orgs, members, service credentials, audit log, projects, releases (engine-identical manifest digests),
+  artifact upload (content-addressed, limited, sniffed), immutable mapping revisions, evaluations (submit,
+  list, get, cancel, comparison, validation, incidents, episodes with filters, episode detail).
+- Worker (`python -m app.workers.run`): SKIP LOCKED claim with lease + heartbeat, cancellation kills the
+  engine, timeout, bounded retry of transient errors, recovery of a hard-killed worker's job, lease-guarded
+  persistence. Results stored verbatim with sha256; events file and engine store kept as artifacts; a re-run
+  of the engine on the stored events reproduces the stored comparison byte for byte.
+- Demo (synthetic, labelled): reported comparison says **improvement**, verified says **insufficient
+  evidence**; contradictions 7 -> 25. `uv run python scripts/run_demo_pipeline.py` prints it without the DB.
+- Isolation test covers every org-scoped route twice (victim path; attacker path with victim ids). It found a
+  real 500 on long denied URLs (fixed, D-011).
+
+**Next (in order):** WEB-001 web scaffold + generated TS client (closes RI-005) -> RI-006 comparison UI ->
+RI-007 episode drill-down -> RI-008 reports -> E2E-001 Playwright flow. INF-003 / SEC-001 containers need
+Docker (B-001) or CI.
+
+**Gotchas:** FastAPI 0.163 includes routers lazily (`app.routes` does not list them; enumerate the OpenAPI
+document). Starlette warns that httpx TestClient support is deprecated (harmless for now). The worker's
+`PAP_WORKER_LEASE_S` minimum is 5 s; tests use 5.
+
 ## 2026-11-18 — Session 1: harness, engine audit, pinned bridge
 
 **State now**

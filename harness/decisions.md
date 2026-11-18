@@ -50,3 +50,13 @@ itself refuses conditions that contradict the verdict. Gap G-2 asks OpenMHS to p
 INF-002 mixed the API and the web scaffold, so authorization (AUTH-001) would wait on frontend tooling it
 does not use. The web criterion moved unchanged to WEB-001; RI-006 now depends on WEB-001. No criterion
 was removed or weakened.
+
+## D-010 (2026-11-18) Move the S3 adapter criterion from DATA-002 to a new DATA-004
+The first workflow runs on the local content-addressed adapter (a mounted volume in Compose). An S3 adapter
+cannot be tested here without an S3 server (B-001), and writing it untested to tick a box would be worse
+than saying it is not done. The criterion moved unchanged; DATA-004 is blocked on B-001.
+
+## D-011 (2026-11-18) Audit the route template, not the concrete URL
+Found by the isolation test: an outsider's long URL overflowed `audit_events.action` and turned a 404 into a
+500 without recording the denial. The audit now records `METHOD /route/{template}` (no ids, bounded) and
+clamps every field, so an audit write cannot fail on input length.

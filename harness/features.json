@@ -283,10 +283,14 @@
       "paths": [
         "services/api/app/releases/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_releases.py: manifest built as openmhs.deployment/0.1 with labels.release; label unique per project (409); policy release refused without an immutable model revision (tag @main -> 422; commit or sha256 accepted); a float written in exponent form refused (digest safety)",
+          "test_release_digest_equals_the_engines (real engine): the API's manifest_digest is the digest the engine resolves for the release label",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
+        ]
       },
       "limitations": []
     },
@@ -303,7 +307,7 @@
         "Stored objects are addressed by SHA-256; re-uploading identical bytes returns the existing artifact; stored bytes are never overwritten.",
         "Filenames are never used as storage paths; path traversal attempts are refused or neutralised and tested.",
         "Only declared media types are accepted (CSV, JSONL, JSON); archives are refused until archive extraction protection exists.",
-        "A local filesystem adapter and an S3-compatible adapter implement one storage interface; the S3 adapter is tested against a real S3-compatible server or marked unverified."
+        "A local filesystem adapter implements the storage interface (Storage protocol) used by uploads and the worker."
       ],
       "tests": [
         "uv run pytest services/api/tests/test_artifacts.py"
@@ -311,12 +315,19 @@
       "paths": [
         "services/api/app/evidence/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_artifacts.py: upload is sha256-addressed and deduplicated (second upload returns the same artifact, one stored file); over-limit upload -> 413 with nothing stored and the partial temp file removed; filenames with ../, backslashes, absolute paths, drive letters and control characters become display names only and never paths; .zip/.exe/no extension -> 415 upload.type, zip and gzip magic disguised as .csv/.jsonl -> 415 upload.archive, NUL bytes -> 415 upload.binary; viewer -> 403",
+          "test_storage_never_overwrites_and_checks_digests: objects written read-only, identical content not rewritten, limit enforced while streaming, keys cannot escape the root, a tampered object is refused on read",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Starlette spools a multipart upload before the handler sees it; the API also rejects a declared Content-Length over the limit, and the reverse proxy must cap request bodies (INF-003).",
+        "S3 adapter moved to DATA-004 (D-010)."
+      ]
     },
     {
       "id": "DATA-003",
@@ -340,16 +351,43 @@
       "paths": [
         "services/api/app/ingestion/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-18",
         "evidence": [
           "test_mapping.py: rows in == episodes + rejections (demo files 123 = 120 + 3); unavailable fields counted, never invented; time without UTC offset rejected; duplicate, wrong cell count, bad number/boolean/quality rejected per row; non-UTF-8, NUL, empty, duplicate header, broken quoting, row limit reject the artifact; JSONL nested paths, unix_ms, invalid/deep/non-object lines rejected per row; invalid mappings refused",
-          "test_pipeline_real.py::test_engine_accepted_every_event: events from the demo dataset ingested by the real engine with 0 rejections and 0 duplicates"
+          "test_pipeline_real.py::test_engine_accepted_every_event: events from the demo dataset ingested by the real engine with 0 rejections and 0 duplicates",
+          "test_mapping_revisions_are_immutable_versions: v1 created; identical spec -> 200 with the same revision; changed spec -> v2 with a new sha256; v1 unchanged; PUT/PATCH/DELETE -> 405",
+          "test_invalid_mapping_is_422_with_reasons",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
         ]
       },
+      "limitations": []
+    },
+    {
+      "id": "DATA-004",
+      "title": "S3-compatible artifact storage adapter",
+      "priority": 3,
+      "depends_on": [
+        "DATA-002"
+      ],
+      "description": "Second implementation of the Storage interface for S3-compatible object stores (SeaweedFS in Compose; any S3 in customer deployments).",
+      "acceptance": [
+        "A local filesystem adapter and an S3-compatible adapter implement one storage interface; the S3 adapter is tested against a real S3-compatible server or marked unverified."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_storage_s3.py"
+      ],
+      "paths": [
+        "services/api/app/evidence/"
+      ],
+      "status": "blocked",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
       "limitations": [
-        "Immutable stored mapping revisions (API + table) not built yet: criterion 1 open."
+        "Blocked on B-001: no Docker engine for an S3-compatible server on this workstation; can run in CI."
       ]
     },
     {
@@ -374,12 +412,21 @@
         "services/api/app/workers/",
         "services/api/app/evaluations/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_jobs.py::test_full_evaluation: second identical submission returns the same job (200); comparison is 409 until a worker runs it (evaluation never runs in the HTTP handler)",
+          "test_concurrent_workers_never_claim_the_same_job: 8 concurrent claims on one queued job -> exactly 1 (FOR UPDATE SKIP LOCKED)",
+          "test_worker_recovery.py::test_killed_worker_is_recovered: worker started as a separate process, hard-killed while running the job; job left running with a stale lease; after lease expiry a new worker re-queues it and finishes it (attempts 2) with the same comparison as an uninterrupted run",
+          "test_lost_worker_cannot_write_after_recovery: a worker whose lease was taken over cannot persist results",
+          "test_cancel_queued / test_cancel_running_kills_the_engine; test_timeout_fails_after_bounded_attempts (job.timeout); test_transient_failure_is_retried_then_fails (queued, queued, failed after 3 attempts, structured error engine.start_failed); test_invalid_submissions (same release 422, foreign mapping 404, unknown task type -> failed input.task_type)",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Worker CPU/memory limits are container settings (INF-003/SEC-001); the engine has a per-call timeout and output cap."
+      ]
     },
     {
       "id": "RI-003",
@@ -403,16 +450,16 @@
       "paths": [
         "services/api/app/evaluations/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-18",
         "evidence": [
-          "test_pipeline_real.py (real engine): pipeline over the demo dataset runs outcome verify per episode, ops ingest, ops compare reported + verified + paired; reported verdict improvement (attempts 96/24 -> 111/9), verified insufficient_evidence (84/31/5 -> 77/34/9); compare raw output byte-identical to a direct CLI run on the same events file; two runs give identical events and outputs; same release, unknown task type and a non-UTF-8 artifact fail with structured errors"
+          "test_pipeline_real.py (real engine): pipeline over the demo dataset runs outcome verify per episode, ops ingest, ops compare reported + verified + paired; reported verdict improvement (attempts 96/24 -> 111/9), verified insufficient_evidence (84/31/5 -> 77/34/9); compare raw output byte-identical to a direct CLI run on the same events file; two runs give identical events and outputs; same release, unknown task type and a non-UTF-8 artifact fail with structured errors",
+          "test_jobs.py::test_full_evaluation: the job runs outcome verify, ops ingest and ops compare (reported, verified, paired) with the real binary through the worker code; ingest rejections and unexpected manifest resolution raise structured errors (bridge tests)",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
         ]
       },
-      "limitations": [
-        "Runs as a function; running it inside a durable job (RI-002) is the remaining criterion."
-      ]
+      "limitations": []
     },
     {
       "id": "RI-004",
@@ -432,10 +479,15 @@
       "paths": [
         "services/api/app/evaluations/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_full_evaluation: job provenance carries engine version, binary sha256, commit, rules version corr-1, mapping name@version sha256, evidence class, input artifact sha256s per release, events and engine-store bundle digests and the input checksum; config stored on the job",
+          "events.jsonl and ops.sqlite stored as immutable artifacts (kind events / engine_store); re-ingesting the stored events file and re-running ops compare reproduces the stored verified output byte for byte, and its sha256 equals raw_sha256",
+          "engine outputs stored verbatim (raw) and parsed (payload) per result kind",
+          "bash scripts/verify.sh: all gates passed (132 tests with PAP_REQUIRE_ENGINE=1, audit 11/11, schema/openapi/demo drift checks)"
+        ]
       },
       "limitations": []
     },
@@ -459,12 +511,17 @@
         "services/api/app/releases/",
         "packages/contracts/"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "packages/contracts/openapi.json generated from the app and drift-checked in verify.sh (25 paths)",
+          "test_full_evaluation: comparison endpoint returns the engine's raw output and json.loads(raw) == result; no statistic computed in the API; episode list filters by release and outcome class with pagination (total + items); episode detail returns the verifier report and the episode document"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "TypeScript client not generated yet (needs openapi-typescript; done with WEB-001)."
+      ]
     },
     {
       "id": "RI-006",
@@ -569,12 +626,17 @@
         "services/api/",
         "infrastructure/docker/"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "test_isolation.py: every organization-scoped (method, path) in the OpenAPI document (25+) called by an outsider user and an outsider service credential, on the victim's path and on the attacker's own path with the victim's ids (IDOR); all 404 where a victim id is involved, no victim data in any response, victim data unchanged. It found and fixed a 500 on long denied URLs (audit field length).",
+          "test_mapping.py: malformed CSV/JSONL, oversized lines, deeply nested JSON, NUL bytes and non-UTF-8 produce row or artifact rejections, not crashes"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Containers, worker resource limits and CI scanners (gitleaks, Trivy, Semgrep) not done yet."
+      ]
     },
     {
       "id": "INF-003",
