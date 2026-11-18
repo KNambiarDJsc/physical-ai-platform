@@ -17,8 +17,15 @@ examples/coresense/README.md. Robots reported every GoTo succeeded; motion captu
 arrivals outside the assumed 0.20 m at the claim (the drones arrive about 0.5 s later). Found and fixed: cancelled
 goals counted as contradictions; added the `physical` evidence class.
 
-**Next:** confirm the CI run for the worker/image fixes; INF-003 and SEC-001 to verified once it is green;
-Milestone C (controlled regression with a known degradation and a negative control).
+**Milestone C (EVAL-001, verified):** MuJoCo reaching arm, pre-registered (0971184) before the held-out run;
+engine: 50 ms latency regression detected (+97 pp), 20 ms regression detected (+21 pp; robot self-reports
+overstated it 4.5-fold, 118 contradictions), no-change control gave no regression verdict. New engine gaps G-7
+(only pass/fail rates compared; the 20 ms shift is a 3.6x loss of accuracy) and G-8 (no change cannot be
+established with a near-perfect baseline). More CI-found defects fixed: OIDC step hit a stale web server (process
+groups + port guard), and the port guard itself counted TIME_WAIT as busy on Linux.
+
+**Next:** INF-003 and SEC-001 to verified once a fully green CI run is recorded; Milestone D (competitive
+baseline: an engineer doing the same analysis with a script) and unfamiliar real-world evidence.
 
 ## 2026-11-18 — Session 2: reports, failure-path e2e and the smoke script
 

@@ -895,6 +895,44 @@
         "Only GoTo goals are evaluated; Takeoff, Land and mission outcomes are not.",
         "Nearest-sample rule (9/107 claimed arrivals inside the box) differs from the OpenMHS verifier's every-sample rule (4/107); both documented."
       ]
+    },
+    {
+      "id": "EVAL-001",
+      "title": "Controlled regression experiment with a no-change control (MuJoCo)",
+      "priority": 2,
+      "depends_on": [
+        "RI-005",
+        "RI-008"
+      ],
+      "description": "Milestone C: a known regression injected into a simulated controller, evaluated through the platform against a pre-registered design, with a negative control.",
+      "acceptance": [
+        "Design, sample size and predictions committed before the held-out run.",
+        "Baseline, degraded and no-change groups from real simulation; nothing fabricated; rollouts regenerate byte for byte.",
+        "All statistics by the pinned engine; the known regression is detected, the no-change control gives no regression verdict, and failed predictions or engine limits are reported.",
+        "Automated test re-checks regeneration and the recorded verdicts."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_mujoco_regression.py"
+      ],
+      "paths": [
+        "examples/mujoco-regression/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-19",
+        "evidence": [
+          "PREREGISTRATION.md committed in 0971184 before any held-out episode; held-out run: 150 episodes per group (A 10 ms, B 50 ms, C 10 ms on independent seeds, D 20 ms), 0 rows rejected.",
+          "Engine verdicts (verified): A vs B regression (+97.3 pp [+92.6, +99.0]); A vs D regression (+21.3 pp [+15.0, +28.6]); A vs C insufficient_evidence (0/150 vs 0/150). All four predictions held; one predicted mechanism (source of A/C contradictions) did not and is reported.",
+          "Robot self-reports overstated the D regression about 4.5-fold (+96.7 pp reported vs +21.3 pp verified): 118 contradictions (robot timeout, fingertip within 2 cm).",
+          "test_mujoco_regression.py: 4 passed (byte-identical regeneration of all four groups; the three comparisons through run_pipeline and the pinned engine give the recorded verdicts and counts).",
+          "Resources: peak RSS 57.8-61.6 MB, 0.9-2.0 s CPU per 150 episodes; verdict 10-12 s per comparison."
+        ]
+      },
+      "limitations": [
+        "Simulation of one idealised task; the self-report rule is written for the experiment.",
+        "D was chosen on the pilot (B was declared beforehand).",
+        "Only failure rates are compared (G-7); 'no change' cannot be established with a near-perfect baseline (G-8)."
+      ]
     }
   ]
 }

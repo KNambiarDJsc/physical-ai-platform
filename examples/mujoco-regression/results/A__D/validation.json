@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "artifact": "sha256:392bd0034aefafd09a127f9a0f300d2e16562d3a6b03b56a73d854e2db422759",
+      "episodes": 150,
+      "name": "A.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "controller-latency-10ms",
+      "rows": 150,
+      "unavailable": {}
+    },
+    {
+      "artifact": "sha256:d7b155c5c3d7b1e65fdd5ff8ff9383c57d0efd5d5444d1e452d8a9633fa945fa",
+      "episodes": 150,
+      "name": "D.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "controller-latency-20ms",
+      "rows": 150,
+      "unavailable": {}
+    }
+  ]
+}

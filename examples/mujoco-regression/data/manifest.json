@@ -1,0 +1,169 @@
+{
+  "environment": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "python": "3.12.11",
+    "machine": "AMD64",
+    "system": "Windows",
+    "cpu_count": 16
+  },
+  "n_per_group": 150,
+  "groups": {
+    "A": {
+      "group": "A",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 10
+      },
+      "config_sha256": "sha256:0b8697de85456f684a4073f62a119dd81166866577d9f1541079cca82096a4ba",
+      "seeds": [
+        1000,
+        1150
+      ],
+      "episodes": 150,
+      "wall_s": 1.092,
+      "peak_rss_mb": 57.8,
+      "csv": "A.csv",
+      "csv_sha256": "sha256:392bd0034aefafd09a127f9a0f300d2e16562d3a6b03b56a73d854e2db422759"
+    },
+    "B": {
+      "group": "B",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 50
+      },
+      "config_sha256": "sha256:e913bdb68f2d45fa28a57c46bf65eda95b04f1d4810e35d8559560af39608354",
+      "seeds": [
+        1000,
+        1150
+      ],
+      "episodes": 150,
+      "wall_s": 1.995,
+      "peak_rss_mb": 59.5,
+      "csv": "B.csv",
+      "csv_sha256": "sha256:c61e77c8efcd3a959a2f7cafaeb6933210fd27cca09b6b8cdcf9111775dd72ef"
+    },
+    "C": {
+      "group": "C",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 10
+      },
+      "config_sha256": "sha256:0b8697de85456f684a4073f62a119dd81166866577d9f1541079cca82096a4ba",
+      "seeds": [
+        5000,
+        5150
+      ],
+      "episodes": 150,
+      "wall_s": 0.924,
+      "peak_rss_mb": 60.4,
+      "csv": "C.csv",
+      "csv_sha256": "sha256:bc2384e401a66d340e1729e2aaaa4f6d1e7b7c76ece859352389ad7588a6d08c"
+    },
+    "D": {
+      "group": "D",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 20
+      },
+      "config_sha256": "sha256:a3be2291b4c217b430dbb47bce0634a4a7b1ad974ca4f8fc778d76982fd2e78c",
+      "seeds": [
+        1000,
+        1150
+      ],
+      "episodes": 150,
+      "wall_s": 1.989,
+      "peak_rss_mb": 61.6,
+      "csv": "D.csv",
+      "csv_sha256": "sha256:d7b155c5c3d7b1e65fdd5ff8ff9383c57d0efd5d5444d1e452d8a9633fa945fa"
+    }
+  }
+}

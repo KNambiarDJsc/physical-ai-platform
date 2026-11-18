@@ -1,0 +1,35 @@
+{
+  "schema": "pap.mapping/1",
+  "name": "mujoco-reach-ground-truth",
+  "description": "SIMULATED controlled experiment (MuJoCo 3.17.0): one row per reaching episode of a planar two-link arm. The claim is the controller's own report from quantized encoders through its nominal model; the evidence is the simulator's ground-truth fingertip error at the report time. Times are a simulated clock starting 2026-01-01T00:00:00Z.",
+  "evidence_class": "simulated",
+  "input": {"format": "csv"},
+  "episode_id": {"column": "episode_id"},
+  "robot": {"const": "sim/planar-arm"},
+  "task_type": {"const": "reach"},
+  "site": {"const": "mujoco"},
+  "scenario": {"column": "scenario"},
+  "started_at": {"column": "start_time", "format": "rfc3339", "clock_domain": "mujoco-sim", "uncertainty_ms": 1},
+  "ended_at": {"column": "end_time", "format": "rfc3339", "clock_domain": "mujoco-sim", "uncertainty_ms": 1},
+  "reported_outcome": {
+    "column": "robot_status",
+    "values": {"succeeded": "succeeded", "timeout": "timeout"},
+    "missing": "reject"
+  },
+  "measurements": [
+    {
+      "name": "tip_error", "column": "tip_error_m", "signal": "fingertip.error_to_target", "unit": "m",
+      "kind": "independent_sensor", "system": "mujoco", "device": "ground-truth-site",
+      "time": {"column": "end_time", "format": "rfc3339", "clock_domain": "mujoco-sim", "uncertainty_ms": 1}
+    }
+  ],
+  "contract": {
+    "name": "fingertip-at-target",
+    "version": "0.1",
+    "window_ms": [0, 50],
+    "max_clock_uncertainty_ms": 10,
+    "conditions": [
+      {"name": "fingertip within 0.02 m of the target", "evidence": "tip_error", "op": "le", "value": {"value": 0.02, "unit": "m"}}
+    ]
+  }
+}

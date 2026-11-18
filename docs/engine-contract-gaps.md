@@ -34,3 +34,20 @@ per-job store. Acceptable because stores are per job and rebuildable.
 The engine treats attempts sharing `scenario_id` as replicates and supports pairing by scenario. Other
 correlation (same robot on the same day, same object instance) is not modelled. The platform must warn
 when one robot or one site dominates an arm; such warnings are descriptive and labelled as ours.
+
+## G-7 Only pass/fail rates are compared, never the measured values themselves
+Found in the MuJoCo experiment (examples/mujoco-regression): a 20 ms latency raised the median fingertip error
+from 4.3 mm to 15.7 mm; the engine saw only that 32 of 150 episodes crossed the 2 cm line (all between 20.0 and
+23.7 mm). A binary contract turns a broad loss of accuracy into a modest failure rate and hides how close the rest
+is to the threshold. **Ask:** a comparison of a continuous measurement between releases (e.g. difference of
+medians or a distribution shift test, with its interval and method named), so a regression in margin is visible
+before it becomes failures. Until then the platform shows the per-episode measured values but does not compare
+their distributions itself.
+
+## G-8 "No change" cannot be established with a near-perfect baseline
+Also from the MuJoCo experiment: with 0 failures in either arm the engine returns insufficient_evidence ("fewer
+than 5 failures in both arms"), and with 150 episodes per arm the interval (+-2.5 pp) is wider than the +-1 pp
+no-change margin anyway. Correct and conservative, but a release manager cannot get a positive "no change"
+answer for a reliable controller without very large samples. **Ask:** state, with the verdict, the smallest
+difference the current samples could exclude, so "insufficient evidence" says how much evidence is missing
+(related to G-4).

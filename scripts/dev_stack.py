@@ -41,7 +41,12 @@ def wait(url: str, seconds: float = 90) -> None:
 
 
 def port_free(port: int) -> bool:
+    """True unless something is listening on the port. On POSIX, SO_REUSEADDR as the servers themselves set it, so
+    connections of a just-stopped stack in TIME_WAIT do not count as busy (found on CI). Windows' SO_REUSEADDR means
+    something else (taking over a live port), so it is not set there."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        if sys.platform != "win32":
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind(("127.0.0.1", port))
             return True
