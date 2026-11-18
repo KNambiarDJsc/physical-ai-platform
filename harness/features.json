@@ -241,12 +241,23 @@
         "services/api/app/organizations/",
         "services/api/app/projects/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "uv run pytest services/api/tests/test_auth.py: OIDC token from a local HTTP IdP (discovery + JWKS fetched over HTTP by PyJWKClient) accepted and user created by (iss, sub); refused with 401 + WWW-Authenticate: wrong audience, wrong issuer, expired, other key, no sub, unknown kid, garbage, alg none, HS256 signed with the public key; dev tokens refused in oidc mode",
+          "test_scaffold.py::test_production_refuses_dev_auth: PAP_ENV=production + PAP_AUTH_MODE=dev refused at start; get_principal refuses again at request time",
+          "test_roles: viewer 403 on project create; engineer 403 on member and credential management; admin succeeds; last admin cannot be demoted or removed (409)",
+          "test_service_credentials_hashed_scoped_revocable: only sha256 + prefix stored; token never listed; works in its org, 404 in another, cannot create orgs, 401 after revocation and for forged tokens",
+          "test_decisions_are_audited: allow rows for project.create and member.put; deny rows for the viewer's write and the outsider's read (outsider row has no organization attached)",
+          "test_isolation.py: every (method, path) with {org_slug} in the generated OpenAPI document (11 cases) called by an outsider user and an outsider service credential with the victim's real slugs and ids -> 404, no victim id/name in the body, victim data unchanged; mutation check: granting outsiders a role made 11/11 cases fail",
+          "PAP_REQUIRE_ENGINE=1 uv run pytest services/api: 37 passed; mypy strict on app: no issues"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Live IdP (Keycloak) round trip not run: Docker unavailable (B-001, B-004). The local IdP serves real discovery and JWKS documents over HTTP.",
+        "Project-level role overrides (per-project grants) are not implemented; the organization role applies to all of its projects."
+      ]
     },
     {
       "id": "RI-001",

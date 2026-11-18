@@ -6,5 +6,8 @@ from fastapi import FastAPI
 
 
 def register(app: FastAPI) -> None:
-    """Routers are added here as features land."""
-    return None
+    from .organizations.routes import router as organizations
+    from .projects.routes import router as projects
+
+    app.include_router(organizations)
+    app.include_router(projects)
