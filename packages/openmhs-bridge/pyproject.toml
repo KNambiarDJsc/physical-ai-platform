@@ -1,0 +1,13 @@
+[project]
+name = "openmhs-bridge"
+version = "0.1.0"
+description = "Runs the pinned OpenMHS engine binary and returns typed, provenance-carrying results."
+requires-python = ">=3.12,<3.13"
+dependencies = ["pydantic>=2.11,<3"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openmhs_bridge"]

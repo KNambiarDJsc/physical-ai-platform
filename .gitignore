@@ -1,0 +1,31 @@
+# engine builds (rebuild with scripts/build-openmhs.sh)
+.engine/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# node
+node_modules/
+.next/
+apps/web/test-results/
+apps/web/playwright-report/
+
+# local state
+.env
+.env.*
+!.env.example
+var/
+harness/logs/
+harness/loop-signal
+harness/STOP
+graphify-out/
+
+# os
+.DS_Store
+Thumbs.db

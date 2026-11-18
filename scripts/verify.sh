@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# The single verification entry point.
+#
+#   scripts/verify.sh            full gate: everything below, engine tests required (no skips)
+#   scripts/verify.sh --quick    registry, lint, types, unit tests (engine tests run if the engine is built)
+#   scripts/verify.sh --python   Python gates only (full)
+#   scripts/verify.sh --web      web gates only
+#
+# A gate whose code does not exist yet is reported as "not present", never as passed.
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+export UV_CACHE_DIR="${UV_CACHE_DIR:-D:/uv-cache}"
+
+MODE="full"
+case "${1:-}" in
+  --quick) MODE="quick" ;;
+  --python) MODE="python" ;;
+  --web) MODE="web" ;;
+  "") ;;
+  *) echo "usage: $0 [--quick|--python|--web]" >&2; exit 2 ;;
+esac
+
+FAILED=()
+step() {
+  local name="$1"; shift
+  printf '\n=== %s\n' "$name"
+  if "$@"; then echo "--- ok: $name"; else echo "--- FAILED: $name"; FAILED+=("$name"); fi
+}
+absent() { printf '\n=== %s\n--- not present yet\n' "$1"; }
+
+python_gates() {
+  step "ruff check" uv run ruff check .
+  step "ruff format" uv run ruff format --check .
+  step "mypy (bridge)" uv run mypy packages/openmhs-bridge/src
+  if [ -d services/api/app ] && [ -n "$(ls services/api/app/*.py 2>/dev/null | grep -v __init__)" ]; then
+    step "mypy (api)" uv run mypy services/api/app
+  else
+    absent "mypy (api)"
+  fi
+  if [ "$MODE" = "quick" ]; then
+    step "pytest" uv run pytest -q
+  else
+    step "pytest (engine required)" env PAP_REQUIRE_ENGINE=1 uv run pytest -q
+    step "openmhs audit" uv run python scripts/audit_openmhs.py
+  fi
+}
+
+web_gates() {
+  if [ -f apps/web/package.json ]; then
+    step "web typecheck" pnpm --dir apps/web typecheck
+    step "web lint" pnpm --dir apps/web lint
+    step "web unit" pnpm --dir apps/web test
+    if [ "$MODE" != "quick" ]; then step "web build" pnpm --dir apps/web build; fi
+  else
+    absent "web"
+  fi
+}
+
+step "feature registry" python scripts/check_features.py
+step "no secrets in tracked files" python scripts/check_secrets.py
+case "$MODE" in
+  quick|full) python_gates; web_gates ;;
+  python) python_gates ;;
+  web) web_gates ;;
+esac
+
+echo
+if [ ${#FAILED[@]} -gt 0 ]; then
+  echo "verify ($MODE): FAILED: ${FAILED[*]}"
+  exit 1
+fi
+echo "verify ($MODE): all gates passed"

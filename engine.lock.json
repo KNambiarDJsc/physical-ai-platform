@@ -1,0 +1,24 @@
+{
+  "schema": "pap.engine-lock/1",
+  "engine": "openmhs",
+  "repository": "https://github.com/KNambiarDJsc/Open-MHS",
+  "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+  "cargo_package": "openmhs-cli",
+  "binary": "openmhs",
+  "profile": "release",
+  "interfaces": {
+    "ops_rules_version": "corr-1",
+    "event_schema": "openmhs.event/0.1",
+    "deployment_schema": "openmhs.deployment/0.1",
+    "artifact_schema": "openmhs.artifact/0.1",
+    "outcome_contract_version": "0.1"
+  },
+  "builds": {
+    "windows-amd64": {
+      "sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+      "version": "openmhs 0.1.0",
+      "built": "2026-11-18",
+      "note": "cargo build --release --locked --offline, rustc 1.89.0; Rust release builds are not bit-reproducible across machines, so each platform records its own digest"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(uv sync*)",
+      "Bash(uv lock*)",
+      "Bash(bash scripts/verify.sh*)",
+      "Bash(bash scripts/smoke.sh*)",
+      "Bash(python scripts/check_features.py*)",
+      "Bash(python scripts/check_secrets.py*)",
+      "Bash(python scripts/audit_openmhs.py*)",
+      "Bash(pnpm --dir apps/web *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/guard.py", "timeout": 60 }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/after_edit.py", "timeout": 60 }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/handoff.py", "timeout": 30 }]
+      }
+    ]
+  }
+}

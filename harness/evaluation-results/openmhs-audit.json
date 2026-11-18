@@ -1,0 +1,279 @@
+{
+  "checks": [
+    {
+      "check": "binary runs",
+      "detail": {
+        "sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+        "version": "openmhs 0.1.0"
+      },
+      "ok": true
+    },
+    {
+      "check": "binary is the pinned build (.engine/build.json)",
+      "detail": {
+        "expected": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41"
+      },
+      "ok": true
+    },
+    {
+      "check": "coresense fixture: 469 records, 124 outcome.verified",
+      "detail": {
+        "outcome.verified": 124,
+        "records": 469
+      },
+      "ok": true
+    },
+    {
+      "check": "ops ingest gazebo_ab: no rejections",
+      "detail": {
+        "ingested": {
+          "accepted": 1117,
+          "duplicate": 4
+        },
+        "rules": "corr-1"
+      },
+      "ok": true
+    },
+    {
+      "check": "ops compare --verified gazebo: 15/30 -> 0/30 failed, newcombe -0.5, insufficient_evidence",
+      "detail": {
+        "a": [
+          15,
+          15,
+          0
+        ],
+        "b": [
+          30,
+          0,
+          0
+        ],
+        "ci95_a": [
+          0.236593090512564,
+          0.7634069094874361
+        ],
+        "difference": [
+          -0.5,
+          -0.7634069094874361,
+          -0.11736746745022214
+        ],
+        "reasons": [
+          "fewer than 30 scenarios with a known outcome in an arm (a 10, b 10)"
+        ],
+        "verdict": "insufficient_evidence"
+      },
+      "ok": true
+    },
+    {
+      "check": "ops compare reported gazebo: 0 reported failures in both arms",
+      "detail": {
+        "a": [
+          30,
+          0,
+          0
+        ],
+        "b": [
+          30,
+          0,
+          0
+        ]
+      },
+      "ok": true
+    },
+    {
+      "check": "ops ingest coresense verified: no rejections",
+      "detail": {
+        "incidents": 9,
+        "ingested": {
+          "accepted": 467,
+          "duplicate": 2
+        }
+      },
+      "ok": true
+    },
+    {
+      "check": "ops incidents --json lists incidents",
+      "detail": {
+        "incidents": 9
+      },
+      "ok": true
+    },
+    {
+      "check": "ops show --json returns a timeline",
+      "detail": {
+        "members": 42,
+        "shape": true
+      },
+      "ok": true
+    },
+    {
+      "check": "ops compare --paired: McNemar exact and paired interval present",
+      "detail": {
+        "difference": [
+          0.15000000000000002,
+          -0.13400906073921626,
+          0.4042236128979311
+        ],
+        "mcnemar_p": 0.5078125,
+        "pairs": 20,
+        "verdict": "insufficient_evidence"
+      },
+      "ok": true
+    },
+    {
+      "check": "outcome verify corpus: all cases match expected verdict and exit code",
+      "detail": {
+        "cases": 27,
+        "mismatched": {},
+        "verdicts": {
+          "SATISFIED": 6,
+          "UNKNOWN": 15,
+          "VIOLATED": 6
+        }
+      },
+      "ok": true
+    }
+  ],
+  "corpus": {
+    "pick_place/action_aborted_but_object_in_tray": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "pick_place/camera_calibration_expired": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "pick_place/camera_has_no_pose": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "pick_place/camera_is_a_simulator": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "pick_place/camera_pose_before_the_action_ended": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "pick_place/dropped_outside_the_tray": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    },
+    "pick_place/gripper_still_closed": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    },
+    "pick_place/never_grasped": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    },
+    "pick_place/placed": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "pick_place/wrong_object": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    },
+    "psu/all_agree": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "psu/command_unknown_outcome_but_voltage_is_there": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "psu/dmm_before_command": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_calibration_expired": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_calibration_missing": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_clock_uncertainty_too_large": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_for_another_attempt": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_in_a_unit_with_no_conversion": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_in_millivolts": {
+      "exit_ok": true,
+      "expected": "SATISFIED",
+      "got": "SATISFIED"
+    },
+    "psu/dmm_other_clock_no_uncertainty": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_quality_uncertain": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_readings_disagree": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_reads_zero": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    },
+    "psu/dmm_straddles_window_edge": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/dmm_too_late": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/no_command_record": {
+      "exit_ok": true,
+      "expected": "UNKNOWN",
+      "got": "UNKNOWN"
+    },
+    "psu/readback_high": {
+      "exit_ok": true,
+      "expected": "VIOLATED",
+      "got": "VIOLATED"
+    }
+  },
+  "engine": {
+    "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+    "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+    "version": "openmhs 0.1.0"
+  },
+  "source_tree": "src-e9ef873b42f74f201aecf392ee6e61453e1f40a4"
+}

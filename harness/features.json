@@ -1,0 +1,601 @@
+{
+  "schema": "pap.features/1",
+  "statuses": [
+    "unstarted",
+    "in_progress",
+    "blocked",
+    "verified"
+  ],
+  "rules": [
+    "A feature is verified only when every acceptance criterion has evidence: a command that passed, with its output recorded in verification.evidence.",
+    "Acceptance criteria are never removed or weakened to reach verified. Changing one needs a decision entry in harness/decisions.md.",
+    "Mocked engine responses never count as evidence for a criterion that names the real engine."
+  ],
+  "features": [
+    {
+      "id": "INF-001",
+      "title": "Persistent engineering harness",
+      "priority": 1,
+      "depends_on": [],
+      "description": "Repository-held engineering context: instructions, product and architecture documents, feature registry, progress, decisions, blockers, agent roles, the engineering-loop skill, hooks, verify and loop scripts.",
+      "acceptance": [
+        "CLAUDE.md, AGENTS.md, PRODUCT.md, ARCHITECTURE.md, README.md exist and state invariants, boundaries and session start/end steps.",
+        "harness/features.json validates against scripts/check_features.py (ids unique, dependencies exist, statuses allowed, verified features carry evidence).",
+        "harness/progress.md, decisions.md, blockers.md exist and are current.",
+        "scripts/verify.sh runs the registry check and every implemented gate and exits non-zero on failure.",
+        "scripts/loop.sh is opt-in, bounded (iterations, minutes, no-progress stop) and never uses permission bypass.",
+        ".claude/ holds project-local settings with reviewed hooks, five agent roles and the engineering-loop skill.",
+        "docs/open-source-integration-registry.md records every considered project with license and decision."
+      ],
+      "tests": [
+        "python scripts/check_features.py",
+        "bash scripts/verify.sh --quick"
+      ],
+      "paths": [
+        "CLAUDE.md",
+        "AGENTS.md",
+        "PRODUCT.md",
+        "ARCHITECTURE.md",
+        "harness/",
+        "scripts/",
+        ".claude/",
+        "docs/"
+      ],
+      "status": "in_progress",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "CORE-001",
+      "title": "Audit and verify existing OpenMHS capabilities",
+      "priority": 1,
+      "depends_on": [],
+      "description": "Establish from source and real runs which OpenMHS capabilities the platform can rely on, at a pinned commit.",
+      "acceptance": [
+        "docs/openmhs-capability-audit.md lists each claimed capability with status (verified by run, present in source, not found) and the evidence.",
+        "The 469-record / 124-verdict fixture is confirmed by count.",
+        "At least one real ops ingest + ops compare --json and one outcome verify --json run is recorded with output.",
+        "Interface gaps are recorded in docs/engine-contract-gaps.md without modifying OpenMHS."
+      ],
+      "tests": [
+        "bash scripts/audit-openmhs.sh"
+      ],
+      "paths": [
+        "docs/openmhs-capability-audit.md",
+        "docs/engine-contract-gaps.md",
+        "scripts/audit-openmhs.sh"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "python scripts/audit_openmhs.py (pinned release binary sha256:d51af06f..., commit e9ef873): 11/11 checks passed; output in harness/evaluation-results/openmhs-audit.json",
+          "coresense_real_flights_verified.jsonl: 469 records, 124 outcome.verified (counted by the audit)",
+          "ops ingest + ops compare --json (gazebo A/B, reported and verified), ops incidents/show --json, ops compare --paired, outcome verify --json on 27/27 corpus cases recorded in the audit output",
+          "docs/openmhs-capability-audit.md and docs/engine-contract-gaps.md (G-1..G-6) written; OpenMHS clone unmodified (git status clean in D:/openmhs-di)"
+        ]
+      },
+      "limitations": [
+        "Upstream Rust test suite not re-run here (RAM/disk); the audit exercises the CLI surface the platform uses.",
+        "Gateway, MCP and Python importers are present in source but not exercised (not used by the platform)."
+      ]
+    },
+    {
+      "id": "CORE-002",
+      "title": "Version-pinned OpenMHS bridge",
+      "priority": 1,
+      "depends_on": [
+        "CORE-001"
+      ],
+      "description": "Python package that runs the pinned OpenMHS binary without a shell, validates its JSON output, and records engine provenance.",
+      "acceptance": [
+        "scripts/build-openmhs.sh builds the binary from the commit in engine.lock.json without modifying the OpenMHS clone, and records its SHA-256.",
+        "The bridge refuses a binary whose SHA-256 differs from the configured one.",
+        "Every invocation uses an argument list (no shell), a timeout, and a bounded output size; untrusted strings never reach a shell.",
+        "ops ingest / compare / incidents / show and outcome verify outputs are parsed into typed models; an unexpected shape is a structured error, not a crash.",
+        "Integration tests run the real binary on the pinned fixtures and reproduce the Gazebo A/B comparison (verified: a 15/30 attempts failed, b 0/30, Newcombe difference -0.5) and the 124 verdicts fixture.",
+        "Engine version, binary SHA-256, commit and rules version are attached to every result."
+      ],
+      "tests": [
+        "uv run pytest packages/openmhs-bridge"
+      ],
+      "paths": [
+        "packages/openmhs-bridge/",
+        "engine.lock.json",
+        "scripts/build-openmhs.sh"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "OPENMHS_SRC_REPO=C:/Users/HP/Open-MHS CARGO_OFFLINE=1 scripts/build-openmhs.sh --jobs 2: release build in 9m20s from git archive of e9ef873; .engine/build.json sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+          "PAP_REQUIRE_ENGINE=1 uv run pytest packages/openmhs-bridge: 31 passed (digest mismatch refused, no-shell argv, NUL refused, timeout/cancel/output cap kill the process, invalid output -> engine.output_invalid, gazebo A/B reproduced 15/30 -> 0/30 newcombe -0.5, 469/124 fixture ingested with 9 incidents, paired McNemar p=0.5078, Python manifest digests == engine digests, hostile release labels stay values, unexpected manifest resolution -> engine.input_rejected, conditions_of parity with OpenMHS original)",
+          "uv run mypy packages/openmhs-bridge/src (strict): no issues; uv run ruff check: clean",
+          "bash scripts/verify.sh: all gates passed"
+        ]
+      },
+      "limitations": [
+        "Engine digest is per platform; Linux digest for the Compose image will be recorded when INF-003 builds it.",
+        "An unknown release label is answered by the engine with an empty arm and a warning (exit 0); callers must pass expect_a/expect_b, which the pipeline will do."
+      ]
+    },
+    {
+      "id": "DATA-001",
+      "title": "Versioned evidence and episode contracts",
+      "priority": 2,
+      "depends_on": [
+        "CORE-002"
+      ],
+      "description": "Versioned schemas for mapping configurations, normalized episodes and evaluation reports, published as JSON Schema and TypeScript.",
+      "acceptance": [
+        "Pydantic models are the single source; JSON Schemas are generated into packages/contracts/schema and checked for drift in verify.sh.",
+        "Every normalized episode carries organization, project, robot, site, task, scenario, release, timestamps, source artifact + locator, mapping revision and evaluation configuration, or an explicit unavailable marker for each optional one.",
+        "Schema version is carried in every persisted document."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_contracts.py",
+        "uv run python -m app.contracts.export --check"
+      ],
+      "paths": [
+        "services/api/app/contracts/",
+        "packages/contracts/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "INF-002",
+      "title": "Commercial application scaffold",
+      "priority": 2,
+      "depends_on": [
+        "INF-001"
+      ],
+      "description": "FastAPI service with PostgreSQL, SQLAlchemy, Alembic, health checks; Next.js web application.",
+      "acceptance": [
+        "API starts against PostgreSQL; /healthz reports database and engine status.",
+        "Alembic upgrade head then downgrade base then upgrade head succeeds on an empty PostgreSQL database.",
+        "ruff, mypy (strict for app/) and pytest pass.",
+        "Web app builds with next build, strict TypeScript, ESLint and Vitest passing."
+      ],
+      "tests": [
+        "bash scripts/verify.sh --python",
+        "bash scripts/verify.sh --web"
+      ],
+      "paths": [
+        "services/api/",
+        "apps/web/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "AUTH-001",
+      "title": "Organization and project authorization boundaries",
+      "priority": 2,
+      "depends_on": [
+        "INF-002"
+      ],
+      "description": "OIDC bearer-token authentication, organization membership with admin/engineer/viewer roles, project-scoped resource checks, service credentials, audited decisions.",
+      "acceptance": [
+        "OIDC access tokens are validated (signature against JWKS, issuer, audience, expiry); tests use a locally generated key set, not a bypass.",
+        "A development identity mode exists only when PAP_AUTH_MODE=dev and is refused when PAP_ENV=production.",
+        "Every project-scoped route resolves the project through the caller's organization; a resource id from another organization returns 404, never data.",
+        "Viewer cannot write; engineer cannot manage members; admin can.",
+        "Service credentials are stored hashed, scoped to one organization and role, and revocable.",
+        "Each allow/deny on a protected write is recorded as an audit event.",
+        "A parametrized test calls every protected route as an outsider and asserts no cross-organization data is returned."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_auth.py services/api/tests/test_isolation.py"
+      ],
+      "paths": [
+        "services/api/app/auth/",
+        "services/api/app/organizations/",
+        "services/api/app/projects/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-001",
+      "title": "Register baseline and candidate releases",
+      "priority": 2,
+      "depends_on": [
+        "AUTH-001"
+      ],
+      "description": "Releases (software or policy) with an OpenMHS deployment manifest whose canonical digest matches the engine's.",
+      "acceptance": [
+        "POST/GET releases per project; label unique per project; manifest stored with its canonical SHA-256.",
+        "The Python canonical digest equals the digest the engine reports for the same manifest (integration test with the real binary).",
+        "A policy release must carry an immutable model revision (digest or commit), otherwise it is refused."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_releases.py"
+      ],
+      "paths": [
+        "services/api/app/releases/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "DATA-002",
+      "title": "Validated evidence upload and storage",
+      "priority": 2,
+      "depends_on": [
+        "AUTH-001"
+      ],
+      "description": "Upload of source evidence into content-addressed, immutable storage with size limits and safe parsing.",
+      "acceptance": [
+        "Uploads are streamed with a configurable byte limit; over-limit uploads are refused with 413 and leave nothing stored.",
+        "Stored objects are addressed by SHA-256; re-uploading identical bytes returns the existing artifact; stored bytes are never overwritten.",
+        "Filenames are never used as storage paths; path traversal attempts are refused or neutralised and tested.",
+        "Only declared media types are accepted (CSV, JSONL, JSON); archives are refused until archive extraction protection exists.",
+        "A local filesystem adapter and an S3-compatible adapter implement one storage interface; the S3 adapter is tested against a real S3-compatible server or marked unverified."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_artifacts.py"
+      ],
+      "paths": [
+        "services/api/app/evidence/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "DATA-003",
+      "title": "Declarative episode mapping",
+      "priority": 2,
+      "depends_on": [
+        "DATA-001",
+        "DATA-002"
+      ],
+      "description": "Versioned mapping revisions that turn CSV/JSONL rows into episodes, RFC 0005 events and RFC 0004 evidence records, with a validation report.",
+      "acceptance": [
+        "Mapping revisions are immutable; editing creates a new version with its own SHA-256.",
+        "The mapping declares input format, timestamp interpretation, episode key, robot, site, task, scenario, reported outcome, independent measurements with units, the outcome contract and a missing-data policy.",
+        "A validation report lists every row that was rejected or had a field marked unavailable, with row number and reason; no row disappears silently (rows in = episodes + rejected rows).",
+        "Missing metadata is marked unavailable, never invented; a required field that is missing rejects the row.",
+        "Produced events are accepted by the real engine's ops ingest with zero rejections on the demo dataset."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_mapping.py"
+      ],
+      "paths": [
+        "services/api/app/ingestion/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-002",
+      "title": "Durable evaluation jobs",
+      "priority": 2,
+      "depends_on": [
+        "INF-002"
+      ],
+      "description": "PostgreSQL-backed jobs with queued/running/succeeded/failed/cancelled states, run by a separate worker process.",
+      "acceptance": [
+        "Submitting the same inputs twice returns the same job (idempotency by input checksum).",
+        "The worker claims jobs with SELECT ... FOR UPDATE SKIP LOCKED and a lease; two workers never run one job.",
+        "A job whose worker died (lease expired) is re-queued on recovery and finishes; tested by killing a worker process.",
+        "Timeouts, bounded retries for transient errors, structured errors, and cancellation of queued and running jobs are tested.",
+        "Evaluation never runs inside an HTTP request handler."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_jobs.py services/api/tests/test_worker_recovery.py"
+      ],
+      "paths": [
+        "services/api/app/workers/",
+        "services/api/app/evaluations/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-003",
+      "title": "Execute a real OpenMHS release comparison",
+      "priority": 2,
+      "depends_on": [
+        "CORE-002",
+        "DATA-003",
+        "RI-001",
+        "RI-002"
+      ],
+      "description": "The worker verifies outcomes with openmhs outcome verify, ingests events with ops ingest and compares releases with ops compare, reported and verified.",
+      "acceptance": [
+        "A job over the demo dataset runs the real binary for verification, ingest and both comparisons.",
+        "Ingest rejections or manifest digests the engine does not resolve fail the job with a structured error.",
+        "Results equal a direct CLI run on the same events file (byte-identical compare JSON)."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_evaluation_real.py"
+      ],
+      "paths": [
+        "services/api/app/evaluations/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-004",
+      "title": "Persist evaluation results and provenance",
+      "priority": 2,
+      "depends_on": [
+        "RI-003"
+      ],
+      "description": "Comparison outputs, per-episode verdicts and the evidence bundle (events file, engine store, verifier reports) persisted with checksums.",
+      "acceptance": [
+        "Each result row records engine version, binary SHA-256, commit, rules version, mapping revision, input artifact checksums and the evaluation configuration.",
+        "The events file and engine store are stored as immutable artifacts; re-running the engine on the stored events file reproduces the stored comparison."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_evaluation_real.py -k provenance"
+      ],
+      "paths": [
+        "services/api/app/evaluations/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-005",
+      "title": "Release Intelligence API",
+      "priority": 2,
+      "depends_on": [
+        "RI-004"
+      ],
+      "description": "Documented REST endpoints for comparisons, episodes and evidence, published as OpenAPI with a generated TypeScript client.",
+      "acceptance": [
+        "OpenAPI document is generated and committed; the TypeScript client is generated from it and checked for drift.",
+        "Comparison endpoint returns the engine's comparison unchanged plus provenance; no statistic is computed in the API.",
+        "Episode list supports filtering by release, outcome class, scenario, site and robot with pagination."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_release_api.py"
+      ],
+      "paths": [
+        "services/api/app/releases/",
+        "packages/contracts/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-006",
+      "title": "Functional Release Intelligence interface",
+      "priority": 3,
+      "depends_on": [
+        "RI-005"
+      ],
+      "description": "Web workflow: select project, releases and evidence, run an evaluation, read the comparison with uncertainty and warnings.",
+      "acceptance": [
+        "Every number on the comparison page comes from the API; tests assert no hard-coded metrics.",
+        "Reported and verified outcomes are shown separately with sample counts, confidence intervals, unknown rate and the engine's verdict and reasons.",
+        "insufficient_evidence and warnings are shown prominently, not hidden.",
+        "Loading, empty and failure states are covered by Vitest; the full flow by Playwright against the real API and engine."
+      ],
+      "tests": [
+        "pnpm --dir apps/web test",
+        "pnpm --dir apps/web e2e"
+      ],
+      "paths": [
+        "apps/web/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-007",
+      "title": "Episode-level evidence inspection",
+      "priority": 3,
+      "depends_on": [
+        "RI-005"
+      ],
+      "description": "Drill down from a comparison to episodes, their verdict reasons, measurements, units and the source rows.",
+      "acceptance": [
+        "Episode detail shows reported outcome, verdict, verifier reasons, each condition with observed values and units, source artifact and row, mapping revision and engine metadata.",
+        "Contradictory and unknown outcomes explain why, from the verifier report."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_release_api.py -k episode",
+        "pnpm --dir apps/web e2e"
+      ],
+      "paths": [
+        "services/api/app/outcomes/",
+        "apps/web/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "RI-008",
+      "title": "Reproducible HTML and JSON reports",
+      "priority": 3,
+      "depends_on": [
+        "RI-004"
+      ],
+      "description": "Export of a comparison as a self-contained HTML report and a machine-readable JSON report.",
+      "acceptance": [
+        "The JSON report embeds input checksums, engine provenance, mapping revision and the engine outputs; generating it twice gives identical bytes.",
+        "The HTML report is rendered from the JSON report only and states the evidence class (synthetic, simulated, production)."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_reports.py"
+      ],
+      "paths": [
+        "services/api/app/evaluations/reports.py"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "SEC-001",
+      "title": "Tenant isolation and upload security",
+      "priority": 3,
+      "depends_on": [
+        "AUTH-001",
+        "DATA-002"
+      ],
+      "description": "Cross-tenant, upload, parsing and container hardening checks.",
+      "acceptance": [
+        "Isolation test covers every route registered in the application (route list introspected, not hand-written).",
+        "Malformed CSV/JSONL, oversized rows, deeply nested JSON and non-UTF-8 input produce validation errors, not crashes.",
+        "Containers run as non-root; the worker has CPU, memory and time limits.",
+        "gitleaks, Trivy and Semgrep run in CI."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_isolation.py services/api/tests/test_untrusted_input.py"
+      ],
+      "paths": [
+        "services/api/",
+        "infrastructure/docker/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "INF-003",
+      "title": "Reproducible Docker Compose environment",
+      "priority": 3,
+      "depends_on": [
+        "INF-002",
+        "CORE-002"
+      ],
+      "description": "docker compose up starts PostgreSQL, object storage, API, worker (with the pinned engine) and web.",
+      "acceptance": [
+        "One documented command starts all services; health checks pass.",
+        "The engine is built from engine.lock.json inside the image build, not copied from a developer machine.",
+        "Verified on a clean machine or CI runner."
+      ],
+      "tests": [
+        "bash scripts/smoke.sh"
+      ],
+      "paths": [
+        "docker-compose.yml",
+        "infrastructure/docker/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "E2E-001",
+      "title": "Real OpenMHS-backed demonstration",
+      "priority": 3,
+      "depends_on": [
+        "RI-006",
+        "RI-007",
+        "RI-008"
+      ],
+      "description": "Labelled synthetic warehouse pick-and-place dataset taken through the whole workflow end to end.",
+      "acceptance": [
+        "The dataset is generated by a seeded script, labelled synthetic in every file and report, and contains successes, missed grasps, drops, operator interventions, contradictions, unknowns and several scenarios for a baseline and a candidate.",
+        "Playwright drives create project -> releases -> upload -> evaluate -> compare -> episode drilldown -> export against the real API, worker and engine.",
+        "Worker restart recovery, duplicate submission, invalid artifact, unauthorized access, incompatible comparison and insufficient samples are exercised."
+      ],
+      "tests": [
+        "bash scripts/smoke.sh --e2e"
+      ],
+      "paths": [
+        "examples/manipulation-demo/",
+        "tests/e2e/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "OBS-001",
+      "title": "Operational observability",
+      "priority": 4,
+      "depends_on": [
+        "INF-003"
+      ],
+      "description": "Structured logs, OpenTelemetry traces over OTLP, Prometheus metrics for API and worker.",
+      "acceptance": [
+        "Logs are JSON with request and job ids and never contain tokens or uploaded content.",
+        "Job duration, state counts and engine failures are exported as metrics.",
+        "Traces span API request -> job -> engine invocation."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_observability.py"
+      ],
+      "paths": [
+        "services/api/app/observability/",
+        "infrastructure/observability/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    }
+  ]
+}
