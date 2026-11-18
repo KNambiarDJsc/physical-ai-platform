@@ -45,3 +45,8 @@ not; the web app or an IdP such as Keycloak does).
 importing a CoreSense-specific module would couple us to an internal. The bridge carries a 15-line copy
 with attribution; a test compares it to the original when the OpenMHS checkout is present; the engine
 itself refuses conditions that contradict the verdict. Gap G-2 asks OpenMHS to publish it.
+
+## D-009 (2026-11-18) Split the web scaffold out of INF-002 into WEB-001
+INF-002 mixed the API and the web scaffold, so authorization (AUTH-001) would wait on frontend tooling it
+does not use. The web criterion moved unchanged to WEB-001; RI-006 now depends on WEB-001. No criterion
+was removed or weakened.

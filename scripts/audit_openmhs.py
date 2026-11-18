@@ -237,7 +237,7 @@ def main() -> int:
         "checks": checks,
         "corpus": results,
     }
-    out_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     failed = [c["check"] for c in checks if not c["ok"]]
     print(f"{len(checks) - len(failed)}/{len(checks)} checks passed; written {out_path.relative_to(ROOT)}")
     return 1 if failed else 0

@@ -41,12 +41,22 @@
         ".claude/",
         "docs/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "python scripts/check_features.py: registry consistent (ids, deps, statuses, evidence rule, cycle check)",
+          "bash scripts/verify.sh: all gates passed (exit 0); gates without code report 'not present yet'",
+          "PAP_LOOP=0 scripts/loop.sh -> refused (exit 2); dirty tree -> refused (exit 2); PAP_LOOP=1 scripts/loop.sh --dry-run --iterations 3 on a clean tree selected INF-001 and printed claude -p ... --permission-mode acceptEdits --max-budget-usd 5 (no bypass flag)",
+          "hooks exercised with sample payloads: edit outside repo -> exit 2, edit in .engine -> exit 2, git push -> exit 2, --dangerously-skip-permissions -> exit 2, normal edit/command -> exit 0, Stop hook with stop_hook_active -> no block",
+          "docs/open-source-integration-registry.md: adopted, dev-only, planned, deferred, candidate and reference projects with license status",
+          "local commit a915ea5"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "The automatic loop has not run a real iteration (opt-in; manual loop first, per directive).",
+        "Graphify project install pending review (B-003); optional."
+      ]
     },
     {
       "id": "CORE-001",
@@ -152,24 +162,45 @@
     },
     {
       "id": "INF-002",
-      "title": "Commercial application scaffold",
+      "title": "API service scaffold",
       "priority": 2,
       "depends_on": [
         "INF-001"
       ],
-      "description": "FastAPI service with PostgreSQL, SQLAlchemy, Alembic, health checks; Next.js web application.",
+      "description": "FastAPI service with PostgreSQL, SQLAlchemy, Alembic and health checks.",
       "acceptance": [
         "API starts against PostgreSQL; /healthz reports database and engine status.",
         "Alembic upgrade head then downgrade base then upgrade head succeeds on an empty PostgreSQL database.",
-        "ruff, mypy (strict for app/) and pytest pass.",
+        "ruff, mypy (strict for app/) and pytest pass."
+      ],
+      "tests": [
+        "bash scripts/verify.sh --python"
+      ],
+      "paths": [
+        "services/api/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "evidence": [],
+        "verified_at": null
+      },
+      "limitations": []
+    },
+    {
+      "id": "WEB-001",
+      "title": "Web application scaffold",
+      "priority": 2,
+      "depends_on": [
+        "INF-001"
+      ],
+      "description": "Next.js App Router application with strict TypeScript, Tailwind, shadcn/ui and test tooling.",
+      "acceptance": [
         "Web app builds with next build, strict TypeScript, ESLint and Vitest passing."
       ],
       "tests": [
-        "bash scripts/verify.sh --python",
         "bash scripts/verify.sh --web"
       ],
       "paths": [
-        "services/api/",
         "apps/web/"
       ],
       "status": "unstarted",
@@ -409,7 +440,8 @@
       "title": "Functional Release Intelligence interface",
       "priority": 3,
       "depends_on": [
-        "RI-005"
+        "RI-005",
+        "WEB-001"
       ],
       "description": "Web workflow: select project, releases and evidence, run an evaluation, read the comparison with uncertainty and warnings.",
       "acceptance": [
