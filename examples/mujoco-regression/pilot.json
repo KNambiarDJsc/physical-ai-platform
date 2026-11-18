@@ -1,0 +1,90 @@
+{
+  "environment": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "python": "3.12.11",
+    "machine": "AMD64",
+    "system": "Windows",
+    "cpu_count": 16
+  },
+  "groups": {
+    "A": {
+      "group": "A",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 10
+      },
+      "config_sha256": "sha256:0b8697de85456f684a4073f62a119dd81166866577d9f1541079cca82096a4ba",
+      "seeds": [
+        900000,
+        900030
+      ],
+      "episodes": 30,
+      "wall_s": 0.215,
+      "peak_rss_mb": 57.0,
+      "reported_not_succeeded": 1,
+      "tip_outside_tol": 0
+    },
+    "B": {
+      "group": "B",
+      "config": {
+        "true_links": [
+          0.303,
+          0.247
+        ],
+        "nominal_links": [
+          0.3,
+          0.25
+        ],
+        "encoder_counts": 4096,
+        "control_hz": 100,
+        "kp": [
+          30.0,
+          15.0
+        ],
+        "kd": [
+          3.0,
+          1.2
+        ],
+        "move_s": 1.0,
+        "timeout_s": 3.0,
+        "success_tol_m": 0.02,
+        "still_rad_s": 0.2,
+        "still_steps": 10,
+        "latency_ms": 50
+      },
+      "config_sha256": "sha256:e913bdb68f2d45fa28a57c46bf65eda95b04f1d4810e35d8559560af39608354",
+      "seeds": [
+        900000,
+        900030
+      ],
+      "episodes": 30,
+      "wall_s": 0.417,
+      "peak_rss_mb": 57.3,
+      "reported_not_succeeded": 30,
+      "tip_outside_tol": 28
+    }
+  }
+}
