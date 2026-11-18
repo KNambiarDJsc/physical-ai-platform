@@ -179,12 +179,18 @@
       "paths": [
         "services/api/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "PAP_REQUIRE_ENGINE=1 uv run pytest services/api/tests/test_scaffold.py: 7 passed on PostgreSQL 16 (pgserver): alembic upgrade head -> downgrade base -> upgrade head on an empty database; compare_metadata(models, migrated db) == []; /healthz 200 with database.schema_revision and engine.commit e9ef873; /healthz 503 degraded with a wrong engine digest; PAP_ENV=production + PAP_AUTH_MODE=dev refused; oidc mode without issuer refused; SQLite URL refused",
+          "uv run mypy services/api/app (strict): no issues in 14 files; ruff check/format clean",
+          "bash scripts/verify.sh: all gates passed (38 tests, audit 11/11)"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "App start verified in-process (FastAPI TestClient runs the ASGI app with its lifespan); a uvicorn process start is covered by scripts/smoke.sh under INF-003."
+      ]
     },
     {
       "id": "WEB-001",
