@@ -579,12 +579,22 @@
       "paths": [
         "apps/web/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "vitest ComparisonView.test.tsx (fixture = a real /comparison API response captured from the real-engine job test): reported and verified panels separate with the engine's verdicts and reasons; synthetic label and every engine warning shown as alerts; changing numbers in the response changes what is rendered (no hard-coded metrics); no verified result -> explicit notice; provenance shows engine commit and input checksum",
+          "loading (Loading…), empty (No evaluations yet / No projects yet), queued/running (polling notice), failed (error code and message) and cancelled states implemented on the evaluation and project pages",
+          "Playwright apps/web/e2e/release-flow.spec.ts against scripts/dev_stack.py (pgserver PostgreSQL 16.2, uvicorn API, worker with the pinned engine sha256:d51af06f, next start): sign in, add releases 2.14.0 and 2.15.0-rc1, upload baseline.csv and candidate.csv, add the mapping, start a paired evaluation, the page polls until the worker finishes, reported 'Improvement' and verified 'Insufficient evidence' shown, SYNTHETIC EVIDENCE label, paired panel, engine commit in provenance; filter Contradiction -> 32 episodes; open one -> conditions and the verifier's reasons. 1 passed (10.5 s).",
+          "Visual review of the captured screenshots found and fixed: 95% interval and unknown-bounds columns hidden by horizontal scroll at 1280 px (panels now stack below 2xl), collapsed interval plot, long digests overflowing; accessibility defect found by the e2e: selects nested in labels had names like 'Mapping Choose…' (label and select now siblings via htmlFor)",
+          "bash scripts/verify.sh --web: typecheck, lint (0 warnings), 8 unit tests, client drift, build"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Dark theme defined by tokens but not visually reviewed yet.",
+        "Comparison intervals are drawn as SVG from engine values; ECharts is installed but not used yet.",
+        "The e2e is not part of verify.sh: it needs the running stack (scripts/smoke.sh under INF-003/E2E-001)."
+      ]
     },
     {
       "id": "RI-007",
@@ -606,12 +616,20 @@
         "services/api/app/outcomes/",
         "apps/web/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "Episode detail page shows reported value and source value, verdict, robot/site/scenario with explicit 'unavailable' markers, start/end with clock domain, source artifact digest and row, mapping name@version sha256, evidence class, each condition with result and observed values with units, and the verifier's reason codes and details",
+          "outcome classes explained in words per class (contradiction, unknown, ...); unknowns carry reasons (test_pipeline_real asserts every unknown has reason codes)",
+          "Playwright apps/web/e2e/release-flow.spec.ts against scripts/dev_stack.py (pgserver PostgreSQL 16.2, uvicorn API, worker with the pinned engine sha256:d51af06f, next start): sign in, add releases 2.14.0 and 2.15.0-rc1, upload baseline.csv and candidate.csv, add the mapping, start a paired evaluation, the page polls until the worker finishes, reported 'Improvement' and verified 'Insufficient evidence' shown, SYNTHETIC EVIDENCE label, paired panel, engine commit in provenance; filter Contradiction -> 32 episodes; open one -> conditions and the verifier's reasons. 1 passed (10.5 s).",
+          "API: test_jobs.py::test_full_evaluation episode filters, pagination and detail with verifier report"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Raw source rows are referenced by artifact and row number, not displayed inline.",
+        "No time-series or replay view of measurements (Rerun evaluation deferred)."
+      ]
     },
     {
       "id": "RI-008",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -84,6 +85,10 @@ def test_full_evaluation(client: TestClient, demo: dict[str, Any], omhs: Any, tm
 
     # RI-005: the comparison is the engine's output, unchanged
     cmp_ = ok(client.get(f"{P}/evaluations/{job['id']}/comparison", headers=as_user("alice")))
+    if os.environ.get("PAP_WRITE_WEB_FIXTURE") == "1":  # a real API response for the web component tests
+        out = Path(__file__).resolve().parents[3] / "apps" / "web" / "src" / "test" / "comparison.fixture.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(cmp_, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     assert json.loads(cmp_["verified"]["raw"]) == cmp_["verified"]["result"]
     assert cmp_["verified"]["result"]["b"]["attempt_outcomes"] == [77, 34, 9]
     assert cmp_["reported"]["result"]["verdict"] == "improvement"

@@ -2,6 +2,28 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-18 — Session 1 (later): web application and the first browser-verified end-to-end flow
+
+**State now:** 16 of 23 features verified (adds WEB-001, RI-005, RI-006, RI-007). Open: SEC-001 (containers,
+CI scanners), RI-008 (reports), INF-003 (Compose, needs Docker), E2E-001 (failure-path e2e + clean install),
+AUTH-002 (browser OIDC), OBS-001; DATA-004 blocked on Docker.
+
+**Evidence:** `bash scripts/verify.sh` full gate green (132 Python tests, audit 11/11, 8 web unit tests, build).
+Playwright flow (`apps/web/e2e/release-flow.spec.ts`, run against `uv run python scripts/dev_stack.py`) passed in
+Chromium: releases -> upload -> mapping -> evaluation -> comparison -> episode drill-down, on the real worker and
+pinned engine. It is not in verify.sh because it needs the running stack.
+
+**Findings from looking at the screenshots:** columns hidden by horizontal scroll at 1280 px, collapsed
+interval plot, overflowing digests, and unnamed form selects (a11y). All fixed.
+
+**Next:** RI-008 reports (deterministic JSON, HTML rendered from it) -> E2E-001 failure paths (invalid
+artifact, unauthorized, duplicate, worker restart through the UI, incompatible releases) + smoke.sh ->
+SEC-001 -> INF-003 when Docker is available. Dark theme not yet reviewed visually.
+
+**Gotchas:** stopping dev_stack on Windows: kill by PID tree (`taskkill /T /F`); a PowerShell filter on the
+command line also matches itself. Python heredocs mangle `
+` in string literals; use the Edit tool.
+
 ## 2026-11-18 — Session 1 (continued): the first real Release Intelligence workflow runs end to end in the API
 
 **State now:** 12 of 22 features verified: INF-001, INF-002, CORE-001, CORE-002, DATA-001, DATA-002, DATA-003,

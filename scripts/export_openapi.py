@@ -1,4 +1,4 @@
-"""Write (or --check) packages/contracts/openapi.json from the FastAPI application. The TS client is generated from it."""
+"""Write (or --check) packages/contracts/openapi.json from the FastAPI app; the TS client is generated from it."""
 
 from __future__ import annotations
 
@@ -23,7 +23,9 @@ def main() -> int:
     text = render()
     if "--check" in sys.argv:
         if not OUT.exists() or OUT.read_text(encoding="utf-8") != text:
-            print("packages/contracts/openapi.json is out of date: run python scripts/export_openapi.py", file=sys.stderr)
+            print(
+                "packages/contracts/openapi.json is out of date: run python scripts/export_openapi.py", file=sys.stderr
+            )
             return 1
         return 0
     OUT.write_text(text, encoding="utf-8", newline="\n")

@@ -1,0 +1,536 @@
+{
+  "config": {
+    "margin": 0.01,
+    "min_known": 30,
+    "paired": true,
+    "per_attempt": false,
+    "schema": "pap.evaluation-config/1",
+    "stratify_by_site": true,
+    "task_type": "pick_place"
+  },
+  "evaluation": "92690060-93e0-4d69-b599-a48eaa5ce284",
+  "paired": {
+    "raw": "{\"task_type\":\"pick_place\",\"outcome\":\"verified\",\"a\":{\"selector\":\"pick-stack-2.14.0\",\"manifests\":[\"sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5\"],\"attempts\":120,\"attempt_outcomes\":[84,31,5],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":31,\"failed\":6,\"unknown\":3,\"excluded\":{},\"rate\":0.16216216216216217,\"ci95\":[0.07651207234011151,0.3113648370093497],\"unknown_bounds\":[0.15,0.225],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-8227f9768187\",\"INC-754e13887775\",\"INC-04fbdf0911de\",\"INC-0b75cd8f09fa\",\"INC-ffe575fae89c\"],\"duration_s\":[10.235,13.1622,120],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"pick-stack-2.15.0-rc1\",\"manifests\":[\"sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573\"],\"attempts\":120,\"attempt_outcomes\":[77,34,9],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":28,\"failed\":6,\"unknown\":6,\"excluded\":{},\"rate\":0.17647058823529413,\"ci95\":[0.0834896904537232,0.33513737399842747],\"unknown_bounds\":[0.15,0.3],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-5c07ba17a5bf\",\"INC-863c0e6c2c63\",\"INC-3c10e560d1c7\",\"INC-d64484eb5821\",\"INC-a0fb74a469ce\"],\"duration_s\":[10.266,12.960500000000001,120],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[-0.03125,-0.22002397538615795,0.15940327455614065],\"difference_method\":\"newcombe_paired\",\"unknown_bounds\":[-0.07500000000000001,0.15],\"strata\":[{\"site\":\"site-east\",\"a\":[4,26],\"b\":[4,22],\"difference\":[0.02797202797202797,-0.1835847468170525,0.25130611684163284]},{\"site\":\"site-west\",\"a\":[2,11],\"b\":[2,12],\"difference\":[-0.015151515151515166,-0.33366255988150717,0.29498255495330516]}],\"paired\":{\"pairs\":32,\"both_fail\":0,\"a_only_fails\":5,\"b_only_fails\":4,\"both_ok\":23,\"unknown_pairs\":8,\"unmatched_a\":0,\"unmatched_b\":0,\"difference\":[-0.03125,-0.22002397538615795,0.15940327455614065],\"mcnemar_p\":1.0},\"verdict\":\"insufficient_evidence\",\"reasons\":[\"the 95 % interval spans both no change and \u00b10.010\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts\",\"8 scenarios have no known outcome in one of the arms and are left out of the pairs\",\"a paired comparison is not stratified by site\",\"pooled and site-stratified differences disagree (+0.014 vs -0.031): the site mix differs between arms\"],\"rules_version\":\"corr-1\"}\n",
+    "raw_sha256": "sha256:21775226d8f7450aa9e86855e196272d0303aaff0afa2696fb1fabf70a49306f",
+    "result": {
+      "a": {
+        "attempt_outcomes": [
+          84,
+          31,
+          5
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.07651207234011151,
+          0.3113648370093497
+        ],
+        "duration_s": [
+          10.235,
+          13.1622,
+          120
+        ],
+        "excluded": {},
+        "failed": 6,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-8227f9768187",
+          "INC-754e13887775",
+          "INC-04fbdf0911de",
+          "INC-0b75cd8f09fa",
+          "INC-ffe575fae89c"
+        ],
+        "manifests": [
+          "sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5"
+        ],
+        "rate": 0.16216216216216217,
+        "scenarios": 40,
+        "selector": "pick-stack-2.14.0",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 31,
+        "unit": "scenario",
+        "unknown": 3,
+        "unknown_bounds": [
+          0.15,
+          0.225
+        ],
+        "wall_s": null
+      },
+      "b": {
+        "attempt_outcomes": [
+          77,
+          34,
+          9
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.0834896904537232,
+          0.33513737399842747
+        ],
+        "duration_s": [
+          10.266,
+          12.960500000000001,
+          120
+        ],
+        "excluded": {},
+        "failed": 6,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-5c07ba17a5bf",
+          "INC-863c0e6c2c63",
+          "INC-3c10e560d1c7",
+          "INC-d64484eb5821",
+          "INC-a0fb74a469ce"
+        ],
+        "manifests": [
+          "sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573"
+        ],
+        "rate": 0.17647058823529413,
+        "scenarios": 40,
+        "selector": "pick-stack-2.15.0-rc1",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 28,
+        "unit": "scenario",
+        "unknown": 6,
+        "unknown_bounds": [
+          0.15,
+          0.3
+        ],
+        "wall_s": null
+      },
+      "difference": [
+        -0.03125,
+        -0.22002397538615795,
+        0.15940327455614065
+      ],
+      "difference_method": "newcombe_paired",
+      "outcome": "verified",
+      "paired": {
+        "a_only_fails": 5,
+        "b_only_fails": 4,
+        "both_fail": 0,
+        "both_ok": 23,
+        "difference": [
+          -0.03125,
+          -0.22002397538615795,
+          0.15940327455614065
+        ],
+        "mcnemar_p": 1.0,
+        "pairs": 32,
+        "unknown_pairs": 8,
+        "unmatched_a": 0,
+        "unmatched_b": 0
+      },
+      "reasons": [
+        "the 95 % interval spans both no change and \u00b10.010"
+      ],
+      "rules_version": "corr-1",
+      "strata": [
+        {
+          "a": [
+            4,
+            26
+          ],
+          "b": [
+            4,
+            22
+          ],
+          "difference": [
+            0.02797202797202797,
+            -0.1835847468170525,
+            0.25130611684163284
+          ],
+          "site": "site-east"
+        },
+        {
+          "a": [
+            2,
+            11
+          ],
+          "b": [
+            2,
+            12
+          ],
+          "difference": [
+            -0.015151515151515166,
+            -0.33366255988150717,
+            0.29498255495330516
+          ],
+          "site": "site-west"
+        }
+      ],
+      "task_type": "pick_place",
+      "unknown_bounds": [
+        -0.07500000000000001,
+        0.15
+      ],
+      "verdict": "insufficient_evidence",
+      "warnings": [
+        "attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts",
+        "8 scenarios have no known outcome in one of the arms and are left out of the pairs",
+        "a paired comparison is not stratified by site",
+        "pooled and site-stratified differences disagree (+0.014 vs -0.031): the site mix differs between arms"
+      ]
+    }
+  },
+  "provenance": {
+    "bundle": {
+      "engine_store": "sha256:b4338e8934ab903adba71065b3f2aa57459741e491683802801a172525fd5181",
+      "events": "sha256:d52825d46895ffba6374017e5d2f3db9a68fa0f8ea3b308677d53240e690f5c2"
+    },
+    "engine": {
+      "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+      "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+      "engine": "openmhs",
+      "interfaces": {
+        "artifact_schema": "openmhs.artifact/0.1",
+        "deployment_schema": "openmhs.deployment/0.1",
+        "event_schema": "openmhs.event/0.1",
+        "ops_rules_version": "corr-1",
+        "outcome_contract_version": "0.1"
+      },
+      "version": "openmhs 0.1.0"
+    },
+    "evidence_class": [
+      "synthetic"
+    ],
+    "input_sha256": "sha256:b20ee8dc50c54dd900616d991aa0665cba4e4152efe06fa42f785aee70fa97ee",
+    "inputs": {
+      "pick-stack-2.14.0": [
+        "sha256:a970a76a4a2bc644e21565afb59f13ad7788e9fe938b5ae7af9a00424d9a267d"
+      ],
+      "pick-stack-2.15.0-rc1": [
+        "sha256:c5f12e6c84d6cad680f6cf5db2189da5fa3281e6deed3feab31c6f15eafdc5b2"
+      ]
+    },
+    "mapping": "warehouse-pick-csv@1 sha256:4be637ddb8f90507a3b3a4795c69b42eaeaa52c56dd4d2f6c1113b163a909710",
+    "rules_version": "corr-1"
+  },
+  "reported": {
+    "raw": "{\"task_type\":\"pick_place\",\"outcome\":\"reported\",\"a\":{\"selector\":\"pick-stack-2.14.0\",\"manifests\":[\"sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5\"],\"attempts\":120,\"attempt_outcomes\":[96,24,0],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":35,\"failed\":5,\"unknown\":0,\"excluded\":{},\"rate\":0.125,\"ci95\":[0.05459500250945401,0.261121198388511],\"unknown_bounds\":[0.125,0.125],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-8227f9768187\",\"INC-754e13887775\",\"INC-04fbdf0911de\",\"INC-0b75cd8f09fa\",\"INC-ffe575fae89c\"],\"duration_s\":[10.235,13.1622,120],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"pick-stack-2.15.0-rc1\",\"manifests\":[\"sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573\"],\"attempts\":120,\"attempt_outcomes\":[111,9,0],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":40,\"failed\":0,\"unknown\":0,\"excluded\":{},\"rate\":0.0,\"ci95\":[0.0,0.08762160119728664],\"unknown_bounds\":[0.0,0.0],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-5c07ba17a5bf\",\"INC-863c0e6c2c63\",\"INC-3c10e560d1c7\",\"INC-d64484eb5821\",\"INC-a0fb74a469ce\"],\"duration_s\":[10.266,12.960500000000001,120],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[-0.125,-0.2274084917584666,-0.0225915082415334],\"difference_method\":\"mantel_haenszel_by_site\",\"unknown_bounds\":[-0.125,-0.125],\"strata\":[{\"site\":\"site-east\",\"a\":[3,26],\"b\":[0,26],\"difference\":[-0.11538461538461539,-0.2897590321171364,0.03377665545477343]},{\"site\":\"site-west\",\"a\":[2,14],\"b\":[0,14],\"difference\":[-0.14285714285714285,-0.39941379496970353,0.09571993375792562]}],\"paired\":null,\"verdict\":\"improvement\",\"reasons\":[\"the whole 95 % interval is below -0.010\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts\"],\"rules_version\":\"corr-1\"}\n",
+    "raw_sha256": "sha256:7107e445163cbce7d8a8dd8711076b41f737ffdee014a7eb36e30aa46d4ea7fc",
+    "result": {
+      "a": {
+        "attempt_outcomes": [
+          96,
+          24,
+          0
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.05459500250945401,
+          0.261121198388511
+        ],
+        "duration_s": [
+          10.235,
+          13.1622,
+          120
+        ],
+        "excluded": {},
+        "failed": 5,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-8227f9768187",
+          "INC-754e13887775",
+          "INC-04fbdf0911de",
+          "INC-0b75cd8f09fa",
+          "INC-ffe575fae89c"
+        ],
+        "manifests": [
+          "sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5"
+        ],
+        "rate": 0.125,
+        "scenarios": 40,
+        "selector": "pick-stack-2.14.0",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 35,
+        "unit": "scenario",
+        "unknown": 0,
+        "unknown_bounds": [
+          0.125,
+          0.125
+        ],
+        "wall_s": null
+      },
+      "b": {
+        "attempt_outcomes": [
+          111,
+          9,
+          0
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.0,
+          0.08762160119728664
+        ],
+        "duration_s": [
+          10.266,
+          12.960500000000001,
+          120
+        ],
+        "excluded": {},
+        "failed": 0,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-5c07ba17a5bf",
+          "INC-863c0e6c2c63",
+          "INC-3c10e560d1c7",
+          "INC-d64484eb5821",
+          "INC-a0fb74a469ce"
+        ],
+        "manifests": [
+          "sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573"
+        ],
+        "rate": 0.0,
+        "scenarios": 40,
+        "selector": "pick-stack-2.15.0-rc1",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 40,
+        "unit": "scenario",
+        "unknown": 0,
+        "unknown_bounds": [
+          0.0,
+          0.0
+        ],
+        "wall_s": null
+      },
+      "difference": [
+        -0.125,
+        -0.2274084917584666,
+        -0.0225915082415334
+      ],
+      "difference_method": "mantel_haenszel_by_site",
+      "outcome": "reported",
+      "paired": null,
+      "reasons": [
+        "the whole 95 % interval is below -0.010"
+      ],
+      "rules_version": "corr-1",
+      "strata": [
+        {
+          "a": [
+            3,
+            26
+          ],
+          "b": [
+            0,
+            26
+          ],
+          "difference": [
+            -0.11538461538461539,
+            -0.2897590321171364,
+            0.03377665545477343
+          ],
+          "site": "site-east"
+        },
+        {
+          "a": [
+            2,
+            14
+          ],
+          "b": [
+            0,
+            14
+          ],
+          "difference": [
+            -0.14285714285714285,
+            -0.39941379496970353,
+            0.09571993375792562
+          ],
+          "site": "site-west"
+        }
+      ],
+      "task_type": "pick_place",
+      "unknown_bounds": [
+        -0.125,
+        -0.125
+      ],
+      "verdict": "improvement",
+      "warnings": [
+        "attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts"
+      ]
+    }
+  },
+  "summary": {
+    "classes": {
+      "pick-stack-2.14.0": {
+        "contradiction": 7,
+        "supported_success": 84,
+        "unknown": 5,
+        "verified_failure": 24
+      },
+      "pick-stack-2.15.0-rc1": {
+        "contradiction": 25,
+        "supported_success": 77,
+        "unknown": 9,
+        "verified_failure": 9
+      }
+    },
+    "episodes": 240,
+    "rejected_rows": 6,
+    "verdict_reported": "improvement",
+    "verdict_verified": "insufficient_evidence"
+  },
+  "verified": {
+    "raw": "{\"task_type\":\"pick_place\",\"outcome\":\"verified\",\"a\":{\"selector\":\"pick-stack-2.14.0\",\"manifests\":[\"sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5\"],\"attempts\":120,\"attempt_outcomes\":[84,31,5],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":31,\"failed\":6,\"unknown\":3,\"excluded\":{},\"rate\":0.16216216216216217,\"ci95\":[0.07651207234011151,0.3113648370093497],\"unknown_bounds\":[0.15,0.225],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-8227f9768187\",\"INC-754e13887775\",\"INC-04fbdf0911de\",\"INC-0b75cd8f09fa\",\"INC-ffe575fae89c\"],\"duration_s\":[10.235,13.1622,120],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"pick-stack-2.15.0-rc1\",\"manifests\":[\"sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573\"],\"attempts\":120,\"attempt_outcomes\":[77,34,9],\"scenarios\":40,\"unit\":\"scenario\",\"succeeded\":28,\"failed\":6,\"unknown\":6,\"excluded\":{},\"rate\":0.17647058823529413,\"ci95\":[0.0834896904537232,0.33513737399842747],\"unknown_bounds\":[0.15,0.3],\"sites\":{\"site-east\":78,\"site-west\":42},\"incidents\":[\"INC-5c07ba17a5bf\",\"INC-863c0e6c2c63\",\"INC-3c10e560d1c7\",\"INC-d64484eb5821\",\"INC-a0fb74a469ce\"],\"duration_s\":[10.266,12.960500000000001,120],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[0.013954442848348033,-0.16149319796459563,0.18940208366129171],\"difference_method\":\"mantel_haenszel_by_site\",\"unknown_bounds\":[-0.07500000000000001,0.15],\"strata\":[{\"site\":\"site-east\",\"a\":[4,26],\"b\":[4,22],\"difference\":[0.02797202797202797,-0.1835847468170525,0.25130611684163284]},{\"site\":\"site-west\",\"a\":[2,11],\"b\":[2,12],\"difference\":[-0.015151515151515166,-0.33366255988150717,0.29498255495330516]}],\"paired\":null,\"verdict\":\"insufficient_evidence\",\"reasons\":[\"the 95 % interval spans both no change and \u00b10.010\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts\"],\"rules_version\":\"corr-1\"}\n",
+    "raw_sha256": "sha256:b3acc7421d729f93a67bdb16155cc6300d03a450b30e10e92cd4d639054a34cb",
+    "result": {
+      "a": {
+        "attempt_outcomes": [
+          84,
+          31,
+          5
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.07651207234011151,
+          0.3113648370093497
+        ],
+        "duration_s": [
+          10.235,
+          13.1622,
+          120
+        ],
+        "excluded": {},
+        "failed": 6,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-8227f9768187",
+          "INC-754e13887775",
+          "INC-04fbdf0911de",
+          "INC-0b75cd8f09fa",
+          "INC-ffe575fae89c"
+        ],
+        "manifests": [
+          "sha256:7549e79b900e93c757b3ec74e9a3f4077671970b7482b35772bcfe7dd98a66a5"
+        ],
+        "rate": 0.16216216216216217,
+        "scenarios": 40,
+        "selector": "pick-stack-2.14.0",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 31,
+        "unit": "scenario",
+        "unknown": 3,
+        "unknown_bounds": [
+          0.15,
+          0.225
+        ],
+        "wall_s": null
+      },
+      "b": {
+        "attempt_outcomes": [
+          77,
+          34,
+          9
+        ],
+        "attempts": 120,
+        "ci95": [
+          0.0834896904537232,
+          0.33513737399842747
+        ],
+        "duration_s": [
+          10.266,
+          12.960500000000001,
+          120
+        ],
+        "excluded": {},
+        "failed": 6,
+        "goal_verdicts": {},
+        "incidents": [
+          "INC-5c07ba17a5bf",
+          "INC-863c0e6c2c63",
+          "INC-3c10e560d1c7",
+          "INC-d64484eb5821",
+          "INC-a0fb74a469ce"
+        ],
+        "manifests": [
+          "sha256:d671b87093c68737803c3f6137b34370e1bc641861d604bcc5cfad3598a55573"
+        ],
+        "rate": 0.17647058823529413,
+        "scenarios": 40,
+        "selector": "pick-stack-2.15.0-rc1",
+        "sites": {
+          "site-east": 78,
+          "site-west": 42
+        },
+        "succeeded": 28,
+        "unit": "scenario",
+        "unknown": 6,
+        "unknown_bounds": [
+          0.15,
+          0.3
+        ],
+        "wall_s": null
+      },
+      "difference": [
+        0.013954442848348033,
+        -0.16149319796459563,
+        0.18940208366129171
+      ],
+      "difference_method": "mantel_haenszel_by_site",
+      "outcome": "verified",
+      "paired": null,
+      "reasons": [
+        "the 95 % interval spans both no change and \u00b10.010"
+      ],
+      "rules_version": "corr-1",
+      "strata": [
+        {
+          "a": [
+            4,
+            26
+          ],
+          "b": [
+            4,
+            22
+          ],
+          "difference": [
+            0.02797202797202797,
+            -0.1835847468170525,
+            0.25130611684163284
+          ],
+          "site": "site-east"
+        },
+        {
+          "a": [
+            2,
+            11
+          ],
+          "b": [
+            2,
+            12
+          ],
+          "difference": [
+            -0.015151515151515166,
+            -0.33366255988150717,
+            0.29498255495330516
+          ],
+          "site": "site-west"
+        }
+      ],
+      "task_type": "pick_place",
+      "unknown_bounds": [
+        -0.07500000000000001,
+        0.15
+      ],
+      "verdict": "insufficient_evidence",
+      "warnings": [
+        "attempts repeat scenarios: counted per scenario (40 in a from 120 attempts, 40 in b from 120 attempts), each judged by the majority of its attempts"
+      ]
+    }
+  }
+}
