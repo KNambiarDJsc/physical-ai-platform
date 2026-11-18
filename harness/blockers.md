@@ -9,6 +9,7 @@ stack (INF-003), Keycloak (live OIDC), MinIO-class S3 server and container image
 locally. Unblock: user starts Docker Desktop, or these run in GitHub Actions. Owner: user.
 2026-11-18: everything that needs Docker is now written and waiting: `bash scripts/smoke.sh --compose --e2e`
 (local) and the `compose` + `security` jobs in .github/workflows/ci.yml (needs a push, which needs approval).
+2026-11-18: no longer blocks DATA-004 (S3 tested against SeaweedFS running natively, D-021).
 
 ## B-002 No external customer data
 All evidence available is open data (CoreSense, CC BY 4.0), simulation (Gazebo, LeRobot PushT) or

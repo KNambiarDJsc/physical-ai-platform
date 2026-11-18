@@ -426,13 +426,21 @@
       "paths": [
         "services/api/app/evidence/"
       ],
-      "status": "blocked",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "test_storage_s3.py against a real S3-compatible server (SeaweedFS 4.52, Windows release, SHA-256 checked against the value GitHub publishes for the asset), started by the test session: 5 passed with PAP_REQUIRE_S3=1.",
+          "One contract test run against both adapters (LocalStorage and S3Storage): content-addressed keys, write-once (same content is not written again), digest-checked reads, byte limit (TooLarge), a key that tries to leave the store is refused, the empty object.",
+          "S3: an object replaced behind the platform's back is refused on read (digest mismatch); an upload over the limit leaves nothing in the bucket.",
+          "Full evaluation with PAP_STORAGE_BACKEND=s3: both CSVs uploaded through the API land in the bucket under pap/sha256/..; the worker reads them back from S3 and runs the real engine (reported improvement, verified insufficient_evidence); the evidence bundle (events file, engine store) is written to S3.",
+          "Storage interface narrowed to put/get (path() was only used inside the local adapter)."
+        ]
       },
       "limitations": [
-        "Blocked on B-001: no Docker engine for an S3-compatible server on this workstation; can run in CI."
+        "Tested against SeaweedFS only; AWS S3, MinIO, Ceph and R2 speak the same API, but each is unverified until run.",
+        "Write-once is enforced by the adapter (never re-uploads an existing key); bucket-level immutability (object lock, versioning) is a deployment setting and not configured by the platform.",
+        "Locally the server binary was fetched and SHA-256-checked by hand into D:/tools and given to the tests through PAP_WEED_BIN; the user approved using that binary on 2026-11-18. scripts/get-seaweedfs.sh (the same pinned release and checksum) is what CI runs; it has not been run on this machine."
       ]
     },
     {

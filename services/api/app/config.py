@@ -25,9 +25,15 @@ class Settings(BaseSettings):
     oidc_algorithms: list[str] = Field(default_factory=lambda: ["RS256", "ES256"])
     allow_org_creation: bool = True
 
-    storage_backend: Literal["local"] = "local"
+    storage_backend: Literal["local", "s3"] = "local"
     storage_path: Path = REPO_ROOT / "var" / "artifacts"
     max_upload_bytes: int = Field(default=100 * 1024 * 1024, gt=0)
+    # S3-compatible storage (PAP_STORAGE_BACKEND=s3). Credentials: standard AWS_* variables or the instance role.
+    s3_bucket: str | None = None
+    s3_prefix: str = ""
+    s3_endpoint_url: str | None = None  # unset = AWS; set for SeaweedFS, MinIO, Ceph, R2, ...
+    s3_region: str = "us-east-1"
+    s3_path_style: bool = True
 
     engine_lock_path: Path = REPO_ROOT / "engine.lock.json"
     engine_timeout_s: float = Field(default=300.0, gt=0)
@@ -45,6 +51,8 @@ class Settings(BaseSettings):
     def _refuse_unsafe_combinations(self) -> Settings:
         if self.env == "production" and self.auth_mode == "dev":
             raise ValueError("PAP_AUTH_MODE=dev is refused when PAP_ENV=production")
+        if self.storage_backend == "s3" and not self.s3_bucket:
+            raise ValueError("PAP_STORAGE_BACKEND=s3 needs PAP_S3_BUCKET")
         if self.auth_mode == "oidc" and not (self.oidc_issuer and self.oidc_audience):
             raise ValueError("PAP_AUTH_MODE=oidc needs PAP_OIDC_ISSUER and PAP_OIDC_AUDIENCE")
         return self

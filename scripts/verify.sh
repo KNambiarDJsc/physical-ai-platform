@@ -45,7 +45,11 @@ python_gates() {
   if [ "$MODE" = "quick" ]; then
     step "pytest" uv run pytest -q
   else
-    step "pytest (engine required)" env PAP_REQUIRE_ENGINE=1 uv run pytest -q
+    # The S3 adapter tests need a SeaweedFS binary (PAP_WEED_BIN or bash scripts/get-seaweedfs.sh); when one is
+    # present they must run, otherwise they skip and the summary says so.
+    s3=0
+    if [ -n "${PAP_WEED_BIN:-}" ] || compgen -G ".tools/seaweedfs/weed*" >/dev/null; then s3=1; else absent "S3 server for test_storage_s3.py"; fi
+    step "pytest (engine required)" env PAP_REQUIRE_ENGINE=1 PAP_REQUIRE_S3="$s3" uv run pytest -q
     step "openmhs audit" uv run python scripts/audit_openmhs.py
   fi
 }

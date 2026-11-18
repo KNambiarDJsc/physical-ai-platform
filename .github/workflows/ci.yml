@@ -52,6 +52,8 @@ jobs:
           git init -q "$RUNNER_TEMP/openmhs" && cd "$RUNNER_TEMP/openmhs"
           git remote add origin "$repo" && git fetch -q --depth 1 origin "$commit"
           cd "$GITHUB_WORKSPACE" && OPENMHS_SRC_REPO="$RUNNER_TEMP/openmhs" uv run bash scripts/build-openmhs.sh --jobs 4
+      - name: S3-compatible server for the storage tests (pinned SeaweedFS, checksum-verified)
+        run: bash scripts/get-seaweedfs.sh
       - name: Full gate
         run: uv run bash scripts/verify.sh
       - name: Smoke and browser suites

@@ -44,6 +44,11 @@ warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 exclude = ["\\.engine/", "tests/"]
 
+[[tool.mypy.overrides]]
+# boto3/botocore ship no type information; the S3 adapter wraps them behind the typed Storage interface.
+module = ["boto3", "botocore.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
 testpaths = ["packages/openmhs-bridge/tests", "services/api/tests"]

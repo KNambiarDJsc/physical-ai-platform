@@ -128,3 +128,10 @@ ids); it is switched off (`telemetry={...False}`) and the `observe` middleware m
 Engine telemetry comes from a bridge observer hook (command, timing, outcome; never arguments or output), so the
 bridge stays free of OTel/Prometheus. Job-state gauges are read from the database at scrape time so they are
 right across processes; job and engine metrics are served by the worker on PAP_WORKER_METRICS_PORT.
+
+## D-021 (2026-11-18) S3 adapter tested against SeaweedFS run natively, not mocked (unblocks DATA-004)
+DATA-004 was blocked on Docker (B-001) for an S3 server. SeaweedFS (the registry's preferred self-hostable S3,
+Apache-2.0) ships a Windows binary, so the tests start a real server per session instead of using a mock such as
+moto, which would test our assumptions about S3 rather than S3. The adapter spools the upload to a temporary
+file so the size limit and SHA-256 are known before sending, skips the upload when the key exists (write-once),
+sends the SHA-256 checksum for the server to verify, and checks the digest of every object it reads.

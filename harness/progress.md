@@ -44,11 +44,18 @@ request through the worker's job span to every engine process (context stored wi
 hook for engine telemetry. FastAPI's own telemetry switched off (it recorded concrete URLs). The isolation
 guard caught /metrics hidden from the schema; it is in the schema now.
 
-**State now:** 20 of 24 verified. In progress: INF-003, SEC-001 (both wait only for containers to run).
-Blocked: DATA-004 (S3 server needs Docker). Unstarted: OBS-002 (needs INF-003).
+**Then DATA-004 (verified, D-021):** S3Storage behind the same interface, tested against a real SeaweedFS
+4.52 server run natively (no Docker): shared contract test on both adapters, tamper and size-limit checks, and a
+full evaluation with S3 as the artifact and bundle store. `scripts/get-seaweedfs.sh` fetches the pinned release
+for CI. Locally the permission check refused running that script (it downloads and executes a binary), so the
+tests used the binary I had fetched and checksum-checked by hand into D:/tools (PAP_WEED_BIN); the user approved
+using it and recording DATA-004 as verified on that basis.
+
+**State now:** 21 of 24 verified. In progress: INF-003, SEC-001 (both wait only for containers to run).
+Unstarted: OBS-002 (needs INF-003). Nothing is blocked except on Docker or a push.
 
 **Next:** run `bash scripts/smoke.sh --compose --e2e` when Docker can be started (or CI after an approved
-push) to verify INF-003 and finish SEC-001 -> OBS-002 -> DATA-004.
+push) to verify INF-003 and finish SEC-001 -> OBS-002.
 
 **Gotchas:** (1) Next 15.5 on this machine left the evaluation page out of its own client reference manifest
 ("Could not find the module ... in the React Client Manifest", 500) whenever the page imported a NEW
