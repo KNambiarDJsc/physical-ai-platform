@@ -20,6 +20,7 @@ recording. Owner: user (customer discovery).
 `graphify` 0.9.97 is installed as a uv tool. `graphify claude install --project` writes hooks and skills
 into `.claude/`; it has not been run here, pending review of what it installs. Graphify stays optional
 and is not needed for any gate. Owner: next session (review), user (approve).
+RESOLVED 2026-11-18 (user approved; D-022): reviewed in a throwaway clone, installed in a narrower form.
 
 ## B-004 Live OIDC provider not exercised
 JWT validation is tested with a locally generated RSA key set and JWKS. A real IdP (Keycloak) round trip

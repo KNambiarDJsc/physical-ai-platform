@@ -41,7 +41,7 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | pytest | Tests | 8.4.2 | MIT verified | |
 | httpx | API test client | 0.28.1 | BSD-3-Clause verified | |
 | pgserver (github.com/orm011/pgserver) | Throwaway real PostgreSQL for tests without Docker | 0.1.4 | **not declared in package metadata; verify** | Dev/test only (decision D-006); never in images. Replace with testcontainers once Docker is available |
-| Graphify (github.com/Graphify-Labs/graphify, `graphifyy`) | Optional code knowledge graph | 0.9.97 (uv tool, global) | verify before project install | Optional; not in any gate; project install pending review (blocker B-003) |
+| Graphify (github.com/Graphify-Labs/graphify, `graphifyy`) | Optional code knowledge graph | 0.9.97 (uv tool, global) | verify before project install | Optional; not in any gate. Hooks in the untracked .claude/settings.local.json, graph gitignored, `.graphifyignore` excludes evidence/results/secrets; AST-only, no LLM backend configured (D-022) |
 
 ## Planned (scheduled feature needs it; adopt when that feature starts)
 

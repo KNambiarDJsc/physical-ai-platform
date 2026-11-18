@@ -1,0 +1,17 @@
+# Graphify indexes code and docs only. Evidence, results, credentials and build output never enter the graph.
+var/
+.engine/
+.tools/
+.venv/
+**/node_modules/
+apps/web/.next/
+apps/web/test-results/
+harness/evaluation-results/
+examples/**/data/
+**/*.csv
+**/*.jsonl
+**/*.sqlite
+**/*.mcap
+**/*.db3
+.env
+.env.*

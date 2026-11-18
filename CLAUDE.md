@@ -72,3 +72,11 @@ script). Database for tests: `PAP_TEST_DATABASE_URL`; when unset, tests start a 
 
 Commits, docs and PR text are written in the user's voice. No AI tool names, no "Generated with" footers,
 no co-author trailers. Keep prose plain and specific; numbers carry their basis (n, interval, evidence class).
+
+## Graphify (optional)
+
+A local code graph may exist in `graphify-out/` (gitignored, built with `graphify update .`, AST only, no LLM).
+When it exists, `graphify query "<question>"`, `graphify path "A" "B"` and `graphify explain "X"` are a quick
+first look for codebase questions; read the source before relying on an answer. Nothing depends on it: no gate,
+hook or script requires Graphify. `.graphifyignore` keeps evidence data, results and credentials out of it.
+Personal hooks that nudge towards the graph live in `.claude/settings.local.json` (not committed).

@@ -135,3 +135,14 @@ Apache-2.0) ships a Windows binary, so the tests start a real server per session
 moto, which would test our assumptions about S3 rather than S3. The adapter spools the upload to a temporary
 file so the size limit and SHA-256 are known before sending, skips the upload when the key exists (write-once),
 sends the SHA-256 checksum for the server to verify, and checks the digest of every object it reads.
+
+## D-022 (2026-11-18) Graphify installed as a personal, optional tool, not the way its installer does it
+Reviewed by running `graphify claude install` in a throwaway clone and diffing: it adds two PreToolUse hooks to
+the committed `.claude/settings.json` with an absolute path to this machine's executable (breaks for anyone
+else and CI, and leaks a local path), a CLAUDE.md section that makes graph queries mandatory, a stray
+`.graphify-bak`, and drops the final newline. The hooks are advisory (they add context, never block). Installed
+instead: the same hooks in `.claude/settings.local.json` (gitignored), a short CLAUDE.md note that keeps it
+optional and says to read the source before relying on an answer, and `.graphifyignore` excluding var/, the
+engine build, evidence files (csv/jsonl/sqlite/mcap/db3), evaluation results and .env files. The graph
+(`graphify-out/`, gitignored) is built with `graphify update .` (AST only); no LLM API key is configured, so
+no code leaves the machine. Checked: no evidence fragment, local data path or secret in graph.json.

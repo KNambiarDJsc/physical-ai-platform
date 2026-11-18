@@ -31,3 +31,4 @@ graphify-out/
 Thumbs.db
 *.tsbuildinfo
 .tools/
+.claude/settings.local.json
