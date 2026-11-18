@@ -1,0 +1,41 @@
+{
+  "dataset": "10.5281/zenodo.23243295",
+  "license": "CC-BY-4.0",
+  "openmhs_commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+  "pose_window_ms": 50.0,
+  "bags": {
+    "rosbag2_real_paths_2_OK_double_failure": {
+      "db3": "rosbag2_2026_10_07-12_12_08_0.db3",
+      "db3_sha256": "sha256:ed008e9bd175edf60574afd7e2f4e750f6d9c134013e0cecdb5b841602a9dff8",
+      "csv": "double_failure.csv",
+      "csv_sha256": "sha256:1377aa941bd3474a9332d9e42fc0bad7b5c446f929c0201b78646072d8bade60",
+      "rows": 41,
+      "goals": 41,
+      "no_terminal_status": 0,
+      "no_waypoint": 0,
+      "no_pose_in_window": 0
+    },
+    "rosbag2_real_paths_2_OK_no_failure": {
+      "db3": "rosbag2_2026_10_07-10_14_31_0.db3",
+      "db3_sha256": "sha256:9860603685f0198a3508a93978396a6a5d4994747e52c3c1dc54ecf45ed4ad8f",
+      "csv": "no_failure.csv",
+      "csv_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "rows": 35,
+      "goals": 35,
+      "no_terminal_status": 0,
+      "no_waypoint": 0,
+      "no_pose_in_window": 0
+    },
+    "rosbag2_real_paths_2_OK_panel_failure": {
+      "db3": "rosbag2_2026_10_07-12_08_42_0.db3",
+      "db3_sha256": "sha256:fb5e13bac42aedffa396794ecd7d47904f9fae1b4f68daea8fd8a9f7c48e9bb1",
+      "csv": "panel_failure.csv",
+      "csv_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "rows": 39,
+      "goals": 39,
+      "no_terminal_status": 0,
+      "no_waypoint": 0,
+      "no_pose_in_window": 0
+    }
+  }
+}

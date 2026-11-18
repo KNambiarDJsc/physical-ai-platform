@@ -858,6 +858,43 @@
         "verified_at": null
       },
       "limitations": []
+    },
+    {
+      "id": "EVID-001",
+      "title": "Real robot evidence through the platform (CoreSense drone flights)",
+      "priority": 2,
+      "depends_on": [
+        "RI-005",
+        "RI-008"
+      ],
+      "description": "Milestone B: one genuine recorded robot dataset imported through the existing evidence contract and evaluated by the pinned engine, with provenance, accounting and limits documented.",
+      "acceptance": [
+        "Real recorded episodes (not simulated, not synthetic) enter through pap.mapping/1 and are evaluated by the API, worker and pinned engine; reports are kept.",
+        "Provenance (dataset DOI, license, bag and derived-file checksums), episodes processed, rejected rows, missing metadata, available measurements, the verification rule and its assumptions, claims the evidence cannot support, integration effort and reproducibility are documented.",
+        "No outcome or measurement is fabricated: missing data stays missing (unknown)."
+      ],
+      "tests": [
+        "uv run python examples/coresense/evaluate.py --api http://127.0.0.1:8765"
+      ],
+      "paths": [
+        "examples/coresense/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-19",
+        "evidence": [
+          "CoreSense Inspection Testbed ROSbag Dataset (Zenodo 10.5281/zenodo.23243295, CC BY 4.0): 115 GoTo goals of 3 real Crazyflie drones in 3 bags (nominal, panel failure, double failure) extracted with the pinned OpenMHS commit's rosbag2 reader; 0 rows rejected; every goal has a terminal status, a joined waypoint and an OptiTrack sample within 50 ms (largest gap 5.9 ms).",
+          "Evaluated through the API, worker and pinned engine (examples/coresense/results): robots reported 0 of 35 waypoints failed in every condition; the motion-capture evidence shows 31/35 (nominal), 31/32 known (panel) and 32/34 known (double) waypoints outside a +-0.20 m box at the claim; both condition comparisons are insufficient_evidence (engine), correctly for these sample sizes.",
+          "Two runs of the same evaluation: identical counts, rates, intervals, verdicts and episode classes; only incident ids differ (derived from the per-run organization).",
+          "Found and fixed through this data: cancelled goals were counted as failure claims (contradictions); now classed by the evidence alone (test_outcome_class_table). Added the 'physical' evidence class."
+        ]
+      },
+      "limitations": [
+        "No software revision in the dataset: the compared 'releases' are flight conditions of the same software, so nothing here is a release comparison.",
+        "The 0.20 m tolerance is the Aerostack2 default (flight configuration unpublished); the reference pose also feeds the controller; failures were induced; one host clock assumed.",
+        "Only GoTo goals are evaluated; Takeoff, Land and mission outcomes are not.",
+        "Nearest-sample rule (9/107 claimed arrivals inside the box) differs from the OpenMHS verifier's every-sample rule (4/107); both documented."
+      ]
     }
   ]
 }

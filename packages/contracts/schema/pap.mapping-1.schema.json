@@ -489,6 +489,7 @@
       "enum": [
         "synthetic",
         "simulated",
+        "physical",
         "production"
       ],
       "title": "Evidence Class",

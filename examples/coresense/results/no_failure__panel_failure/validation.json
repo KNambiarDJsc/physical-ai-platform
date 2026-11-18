@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "artifact": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "episodes": 35,
+      "name": "no_failure.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "condition-no_failure",
+      "rows": 35,
+      "unavailable": {}
+    },
+    {
+      "artifact": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "episodes": 39,
+      "name": "panel_failure.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "condition-panel_failure",
+      "rows": 39,
+      "unavailable": {}
+    }
+  ]
+}

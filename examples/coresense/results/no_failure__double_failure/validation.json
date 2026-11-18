@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "artifact": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "episodes": 35,
+      "name": "no_failure.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "condition-no_failure",
+      "rows": 35,
+      "unavailable": {}
+    },
+    {
+      "artifact": "sha256:1377aa941bd3474a9332d9e42fc0bad7b5c446f929c0201b78646072d8bade60",
+      "episodes": 41,
+      "name": "double_failure.csv",
+      "rejected": 0,
+      "rejections": [],
+      "rejections_truncated": 0,
+      "release": "condition-double_failure",
+      "rows": 41,
+      "unavailable": {}
+    }
+  ]
+}

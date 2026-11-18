@@ -108,7 +108,7 @@ class MappingSpec(_Strict):
     schema_: Literal["pap.mapping/1"] = Field(alias="schema")
     name: str = Field(pattern=NAME)
     description: str | None = Field(default=None, max_length=2000)
-    evidence_class: Literal["synthetic", "simulated", "production"] = Field(
+    evidence_class: Literal["synthetic", "simulated", "physical", "production"] = Field(
         description="Where the data comes from. Synthetic and simulated evidence is labelled as such everywhere."
     )
     input: InputSpec

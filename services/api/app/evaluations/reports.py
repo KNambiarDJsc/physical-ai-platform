@@ -35,6 +35,8 @@ EVIDENCE_NOTICE = {
     "performance of any real system.",
     "simulated": "SIMULATED EVIDENCE. Recorded from a simulator. Conclusions do not transfer to hardware without "
     "physical validation.",
+    "physical": "PHYSICAL TEST EVIDENCE. Recorded from real robots in a test facility, not from a production "
+    "deployment. Conditions there (operators, environment, induced faults) may not match the field.",
     "production": "PRODUCTION EVIDENCE. Recorded from deployed systems.",
 }
 COMPARISONS = ("compare_reported", "compare_verified", "compare_paired")

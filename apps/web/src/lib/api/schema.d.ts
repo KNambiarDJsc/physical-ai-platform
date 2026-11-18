@@ -1118,7 +1118,7 @@ export interface components {
              * @description Where the data comes from. Synthetic and simulated evidence is labelled as such everywhere.
              * @enum {string}
              */
-            evidence_class: "synthetic" | "simulated" | "production";
+            evidence_class: "synthetic" | "simulated" | "physical" | "production";
             input: components["schemas"]["InputSpec"];
             /** Measurements */
             measurements?: components["schemas"]["Measurement"][];

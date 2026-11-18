@@ -2,6 +2,24 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-19 — Session 3: deployment validation on CI, first real robot evidence
+
+**Pushed** to the private repo KNambiarDJsc/physical-ai-platform (user approved). CI findings, all real:
+the worker ignored a cancellation or an exceeded time limit when a whole run fitted inside the first heartbeat
+interval (fixed, D-022 note in the commit; deterministic tests); the Python/Node base images carried 46/23 fixable
+HIGH/CRITICAL OS findings (D-023: newer digests, npm removed from the web runtime). The Compose job on a clean
+runner built the images (engine compiled in the image), ran the stack, passed the non-root, worker-limit, engine
+and proxy checks, the API smoke and 7/7 browser tests including a worker killed from the host. The security job
+(gitleaks, Semgrep with rule self-test, Trivy fs) passed. Graphify installed in a narrower form (D-022).
+
+**Milestone B (EVID-001, verified):** CoreSense real drone flights through the platform, see
+examples/coresense/README.md. Robots reported every GoTo succeeded; motion capture shows about 9 in 10 claimed
+arrivals outside the assumed 0.20 m at the claim (the drones arrive about 0.5 s later). Found and fixed: cancelled
+goals counted as contradictions; added the `physical` evidence class.
+
+**Next:** confirm the CI run for the worker/image fixes; INF-003 and SEC-001 to verified once it is green;
+Milestone C (controlled regression with a known degradation and a negative control).
+
 ## 2026-11-18 — Session 2: reports, failure-path e2e and the smoke script
 
 **State now:** 18 of 23 features verified (adds RI-008, E2E-001). Open: SEC-001 (containers, worker limits, CI

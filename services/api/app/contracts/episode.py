@@ -64,7 +64,7 @@ class Episode(BaseModel):
     measurements: dict[str, str | None] = Field(description="Raw cell per measurement name; None = blank cell")
     source: SourceLocator
     mapping: str = Field(description="Mapping name@version sha256")
-    evidence_class: Literal["synthetic", "simulated", "production"]
+    evidence_class: Literal["synthetic", "simulated", "physical", "production"]
 
 
 class EpisodeContext(BaseModel):

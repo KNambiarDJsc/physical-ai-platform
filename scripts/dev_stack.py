@@ -55,6 +55,7 @@ def main() -> int:
     import psycopg
     from alembic import command
     from alembic.config import Config
+    from sqlalchemy.engine import make_url
 
     (VAR / "dev-pg").mkdir(parents=True, exist_ok=True)
     pg = pgserver.get_server(str(VAR / "dev-pg"), cleanup_mode="stop")
@@ -62,7 +63,9 @@ def main() -> int:
     with psycopg.connect(admin, autocommit=True) as c:
         if not c.execute("select 1 from pg_database where datname = 'pap_dev'").fetchone():
             c.execute("CREATE DATABASE pap_dev")
-    db = admin.replace("postgresql://", "postgresql+psycopg://", 1).rsplit("/", 1)[0] + "/pap_dev"
+    # Parsed, not string-edited: on Linux pgserver uses a Unix socket and the URI carries its directory in the query
+    # (?host=/path/...), which splitting on "/" cut apart (found on CI).
+    db = make_url(admin).set(drivername="postgresql+psycopg", database="pap_dev").render_as_string(hide_password=False)
     cfg = Config(str(API_DIR / "alembic.ini"))
     cfg.set_main_option("script_location", str(API_DIR / "migrations"))
     cfg.attributes["url"] = db

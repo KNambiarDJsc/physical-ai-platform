@@ -115,3 +115,27 @@ def test_rejected_artifact_fails_the_whole_evaluation(omhs: Any, tmp_path: Path)
     with pytest.raises(PipelineError) as info:
         run_pipeline(omhs, dataclasses.replace(inp, candidate=cand), tmp_path)
     assert info.value.code == "input.artifact_rejected" and info.value.detail["code"] == "input.encoding"
+
+
+@pytest.mark.parametrize(
+    ("reported", "verdict", "evidence", "expected"),
+    [
+        ("succeeded", "satisfied", True, "supported_success"),
+        ("succeeded", "violated", True, "contradiction"),
+        ("failed", "satisfied", True, "contradiction"),
+        ("failed", "violated", True, "verified_failure"),
+        ("timeout", "satisfied", True, "contradiction"),
+        ("aborted", "violated", True, "verified_failure"),
+        # A cancelled goal claims nothing: the evidence alone decides, it is never a contradiction.
+        ("canceled", "satisfied", True, "verified_success"),
+        ("canceled", "violated", True, "verified_failure"),
+        ("unknown", "satisfied", True, "verified_success"),
+        ("succeeded", "unknown", True, "unknown"),
+        ("succeeded", None, False, "reported_only"),
+        ("unknown", None, False, "insufficient_evidence"),
+    ],
+)
+def test_outcome_class_table(reported: str, verdict: str | None, evidence: bool, expected: str) -> None:
+    from app.evaluations.pipeline import outcome_class
+
+    assert outcome_class(reported, verdict, evidence) == expected

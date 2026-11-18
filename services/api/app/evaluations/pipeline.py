@@ -20,7 +20,10 @@ from ..contracts.mapping import MappingSpec
 from ..ingestion.mapping import ArtifactRejected, MappedEpisode, apply_mapping, verifier_input
 
 VERDICT = {"SATISFIED": "satisfied", "VIOLATED": "violated", "UNKNOWN": "unknown"}
-REPORTED_FAIL = {"failed", "aborted", "canceled", "timeout"}
+# The robot saying it did not achieve the task. "canceled" is not in it: a cancelled goal (e.g. re-assigned by a
+# fleet auction) makes no claim either way, so the evidence alone classes it. Found on real flights (CoreSense):
+# cancelled goals the drone happened to be near were counted as contradictions.
+REPORTED_FAIL = {"failed", "aborted", "timeout"}
 
 
 class PipelineError(Exception):

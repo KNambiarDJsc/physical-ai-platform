@@ -1,0 +1,41 @@
+{
+  "schema": "pap.mapping/1",
+  "name": "coresense-goto-mocap",
+  "description": "REAL test flights (CoreSense Inspection Testbed, Zenodo 10.5281/zenodo.23243295, CC BY 4.0): one row per Aerostack2 GoTo goal of a Crazyflie drone; the drone's own action status is the claim, the OptiTrack pose nearest the claim (within 50 ms) is the evidence. The 0.20 m tolerance is the Aerostack2 go_to_threshold default (the flights' configuration is not published). The mocap pose also feeds the controller, so the reference is not fully independent.",
+  "evidence_class": "physical",
+  "input": {"format": "csv"},
+  "episode_id": {"column": "episode_id"},
+  "robot": {"column": "drone"},
+  "task_type": {"const": "goto"},
+  "site": {"const": "coresense-testbed"},
+  "scenario": {"column": "waypoint"},
+  "started_at": {"column": "start_time", "format": "rfc3339", "clock_domain": "coresense-recorder", "uncertainty_ms": 5},
+  "ended_at": {"column": "end_time", "format": "rfc3339", "clock_domain": "coresense-recorder", "uncertainty_ms": 5},
+  "reported_outcome": {
+    "column": "robot_status",
+    "values": {"SUCCEEDED": "succeeded", "CANCELED": "canceled", "ABORTED": "aborted"},
+    "missing": "unknown"
+  },
+  "measurements": [
+    {
+      "name": "dx", "column": "dx_m", "signal": "pose.x_offset_from_waypoint", "unit": "m",
+      "kind": "independent_sensor", "system": "optitrack", "device": "mocap-localization",
+      "time": {"column": "pose_time", "format": "rfc3339", "clock_domain": "coresense-recorder", "uncertainty_ms": 5}
+    },
+    {
+      "name": "dy", "column": "dy_m", "signal": "pose.y_offset_from_waypoint", "unit": "m",
+      "kind": "independent_sensor", "system": "optitrack", "device": "mocap-localization",
+      "time": {"column": "pose_time", "format": "rfc3339", "clock_domain": "coresense-recorder", "uncertainty_ms": 5}
+    }
+  ],
+  "contract": {
+    "name": "goto-arrived-at-waypoint",
+    "version": "0.1",
+    "window_ms": [-50, 50],
+    "max_clock_uncertainty_ms": 20,
+    "conditions": [
+      {"name": "x within 0.20 m of the waypoint", "evidence": "dx", "op": "between", "min": {"value": -0.2, "unit": "m"}, "max": {"value": 0.2, "unit": "m"}},
+      {"name": "y within 0.20 m of the waypoint", "evidence": "dy", "op": "between", "min": {"value": -0.2, "unit": "m"}, "max": {"value": 0.2, "unit": "m"}}
+    ]
+  }
+}

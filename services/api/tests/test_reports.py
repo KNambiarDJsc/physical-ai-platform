@@ -122,7 +122,11 @@ def test_html_escapes_and_states_every_evidence_class(client: TestClient, finish
     out = render_html(hostile)
     assert "<script>alert(1)" not in out and "&lt;script&gt;alert(1)&lt;/script&gt;" in out
     assert "<img src=x" not in out
-    for cls, phrase in (("simulated", "SIMULATED EVIDENCE"), ("production", "PRODUCTION EVIDENCE")):
+    for cls, phrase in (
+        ("simulated", "SIMULATED EVIDENCE"),
+        ("physical", "PHYSICAL TEST EVIDENCE"),
+        ("production", "PRODUCTION EVIDENCE"),
+    ):
         r = copy.deepcopy(rep)
         r["evidence_class"] = [cls]
         assert phrase in render_html(r)

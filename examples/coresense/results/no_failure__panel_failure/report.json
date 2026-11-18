@@ -1,0 +1,1385 @@
+{
+  "engine_outputs": {
+    "compare_paired": {
+      "raw": "{\"task_type\":\"goto\",\"outcome\":\"verified\",\"a\":{\"selector\":\"condition-no_failure\",\"manifests\":[\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\"],\"attempts\":35,\"attempt_outcomes\":[4,31,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":4,\"failed\":31,\"unknown\":0,\"excluded\":{},\"rate\":0.8857142857142857,\"ci95\":[0.7404853135378618,0.9546482066690264],\"unknown_bounds\":[0.8857142857142857,0.8857142857142857],\"sites\":{\"coresense-testbed\":35},\"incidents\":[\"INC-b0ac55dcc0cc\",\"INC-8efc635eb323\",\"INC-2efbb5daa933\",\"INC-4afbcdfefaa9\",\"INC-701cac681590\"],\"duration_s\":[2.017,2.3814,35],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"condition-panel_failure\",\"manifests\":[\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\"],\"attempts\":39,\"attempt_outcomes\":[4,35,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":1,\"failed\":31,\"unknown\":3,\"excluded\":{},\"rate\":0.96875,\"ci95\":[0.8425573617998744,0.9944621398359969],\"unknown_bounds\":[0.8857142857142857,0.9714285714285714],\"sites\":{\"coresense-testbed\":39},\"incidents\":[\"INC-fdc2bf1eab14\",\"INC-c19b4b00b602\",\"INC-58df5b863091\",\"INC-fef55721cd42\",\"INC-884638173667\"],\"duration_s\":[2.017,2.3182,39],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[0.09375,-0.03938221768349415,0.24628819924161857],\"difference_method\":\"newcombe_paired\",\"unknown_bounds\":[0.0,0.08571428571428574],\"strata\":[{\"site\":\"coresense-testbed\",\"a\":[31,35],\"b\":[31,32],\"difference\":[0.08303571428571432,-0.06075742669848644,0.23052323407761519]}],\"paired\":{\"pairs\":32,\"both_fail\":28,\"a_only_fails\":0,\"b_only_fails\":3,\"both_ok\":1,\"unknown_pairs\":3,\"unmatched_a\":0,\"unmatched_b\":0,\"difference\":[0.09375,-0.03938221768349415,0.24628819924161857],\"mcnemar_p\":0.25},\"verdict\":\"insufficient_evidence\",\"reasons\":[\"the 95 % interval spans both no change and ±0.010\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (35 in a from 35 attempts, 35 in b from 39 attempts), each judged by the majority of its attempts\",\"3 scenarios have no known outcome in one of the arms and are left out of the pairs\"],\"rules_version\":\"corr-1\"}\n",
+      "raw_sha256": "sha256:f8b1eb251bd11202d0142101bd8b0f105d678d4a0969a9bcf952ba8a0f299008"
+    },
+    "compare_reported": {
+      "raw": "{\"task_type\":\"goto\",\"outcome\":\"reported\",\"a\":{\"selector\":\"condition-no_failure\",\"manifests\":[\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\"],\"attempts\":35,\"attempt_outcomes\":[35,0,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":35,\"failed\":0,\"unknown\":0,\"excluded\":{},\"rate\":0.0,\"ci95\":[6.938893903907228e-18,0.09890099232440402],\"unknown_bounds\":[0.0,0.0],\"sites\":{\"coresense-testbed\":35},\"incidents\":[\"INC-b0ac55dcc0cc\",\"INC-8efc635eb323\",\"INC-2efbb5daa933\",\"INC-4afbcdfefaa9\",\"INC-701cac681590\"],\"duration_s\":[2.017,2.3814,35],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"condition-panel_failure\",\"manifests\":[\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\"],\"attempts\":39,\"attempt_outcomes\":[36,0,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":35,\"failed\":0,\"unknown\":0,\"excluded\":{\"canceled\":3},\"rate\":0.0,\"ci95\":[6.938893903907228e-18,0.09890099232440402],\"unknown_bounds\":[0.0,0.0],\"sites\":{\"coresense-testbed\":39},\"incidents\":[\"INC-fdc2bf1eab14\",\"INC-c19b4b00b602\",\"INC-58df5b863091\",\"INC-fef55721cd42\",\"INC-884638173667\"],\"duration_s\":[2.017,2.3182,39],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[0.0,-0.09890099232440402,0.09890099232440402],\"difference_method\":\"newcombe\",\"unknown_bounds\":[0.0,0.0],\"strata\":[{\"site\":\"coresense-testbed\",\"a\":[0,35],\"b\":[0,35],\"difference\":[0.0,-0.09890099232440402,0.09890099232440402]}],\"paired\":null,\"verdict\":\"insufficient_evidence\",\"reasons\":[\"fewer than 5 failures in both arms together (0)\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (35 in a from 35 attempts, 35 in b from 39 attempts), each judged by the majority of its attempts\"],\"rules_version\":\"corr-1\"}\n",
+      "raw_sha256": "sha256:73cc83fbd56797a94c1b6bc1d1f43852ee89a4b99885dab9f387aa795c3aec0c"
+    },
+    "compare_verified": {
+      "raw": "{\"task_type\":\"goto\",\"outcome\":\"verified\",\"a\":{\"selector\":\"condition-no_failure\",\"manifests\":[\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\"],\"attempts\":35,\"attempt_outcomes\":[4,31,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":4,\"failed\":31,\"unknown\":0,\"excluded\":{},\"rate\":0.8857142857142857,\"ci95\":[0.7404853135378618,0.9546482066690264],\"unknown_bounds\":[0.8857142857142857,0.8857142857142857],\"sites\":{\"coresense-testbed\":35},\"incidents\":[\"INC-b0ac55dcc0cc\",\"INC-8efc635eb323\",\"INC-2efbb5daa933\",\"INC-4afbcdfefaa9\",\"INC-701cac681590\"],\"duration_s\":[2.017,2.3814,35],\"wall_s\":null,\"goal_verdicts\":{}},\"b\":{\"selector\":\"condition-panel_failure\",\"manifests\":[\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\"],\"attempts\":39,\"attempt_outcomes\":[4,35,0],\"scenarios\":35,\"unit\":\"scenario\",\"succeeded\":1,\"failed\":31,\"unknown\":3,\"excluded\":{},\"rate\":0.96875,\"ci95\":[0.8425573617998744,0.9944621398359969],\"unknown_bounds\":[0.8857142857142857,0.9714285714285714],\"sites\":{\"coresense-testbed\":39},\"incidents\":[\"INC-fdc2bf1eab14\",\"INC-c19b4b00b602\",\"INC-58df5b863091\",\"INC-fef55721cd42\",\"INC-884638173667\"],\"duration_s\":[2.017,2.3182,39],\"wall_s\":null,\"goal_verdicts\":{}},\"difference\":[0.08303571428571432,-0.06075742669848644,0.23052323407761519],\"difference_method\":\"newcombe\",\"unknown_bounds\":[0.0,0.08571428571428574],\"strata\":[{\"site\":\"coresense-testbed\",\"a\":[31,35],\"b\":[31,32],\"difference\":[0.08303571428571432,-0.06075742669848644,0.23052323407761519]}],\"paired\":null,\"verdict\":\"insufficient_evidence\",\"reasons\":[\"the 95 % interval spans both no change and ±0.010\"],\"warnings\":[\"attempts repeat scenarios: counted per scenario (35 in a from 35 attempts, 35 in b from 39 attempts), each judged by the majority of its attempts\"],\"rules_version\":\"corr-1\"}\n",
+      "raw_sha256": "sha256:3dc8b9308b7ce14c3f1ce537224dfa4ba4b27c8ac724f16733c87a3a5d1d69ad"
+    },
+    "incidents": {
+      "raw": "[{\"incident_id\":\"INC-fdc2bf1eab14\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/5b805d922c8e\",\"task_type\":\"goto\",\"opened_ns\":1791375003869000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.8 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.061 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-c19b4b00b602\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/7f5fc4496b1b\",\"task_type\":\"goto\",\"opened_ns\":1791375001004000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.075 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-58df5b863091\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/086ce7eee915\",\"task_type\":\"goto\",\"opened_ns\":1791374998502000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.073 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-fef55721cd42\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/82420ad49542\",\"task_type\":\"goto\",\"opened_ns\":1791374997652000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.9 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.071 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-884638173667\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/822c94dc7089\",\"task_type\":\"goto\",\"opened_ns\":1791374995575000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.057 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-747636f68513\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/5dc8688ad92a\",\"task_type\":\"goto\",\"opened_ns\":1791374995147000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.068 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-149d4ee58984\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/b604a1113b6d\",\"task_type\":\"goto\",\"opened_ns\":1791374993074000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.069 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-f81c88f26744\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/d1056d801b87\",\"task_type\":\"goto\",\"opened_ns\":1791374992190000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.074 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-7bd73db0a9cf\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/a15f8a78da62\",\"task_type\":\"goto\",\"opened_ns\":1791374990739000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.051 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-cf904c872be6\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/a4c42d97300c\",\"task_type\":\"goto\",\"opened_ns\":1791374990158000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.048 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-9f761b6f049e\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/e42f16806cfb\",\"task_type\":\"goto\",\"opened_ns\":1791374989628000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.079 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-f99c870060fe\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/ab8d16d608b1\",\"task_type\":\"goto\",\"opened_ns\":1791374987941000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.039 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-c692e2d905e6\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/c09fdc9af187\",\"task_type\":\"goto\",\"opened_ns\":1791374986849000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.3 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.047 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-0dd2c85be5fc\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/bb48e3470e29\",\"task_type\":\"goto\",\"opened_ns\":1791374985132000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.9 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.076 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-22407cb1f3ed\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/20b7e0907af7\",\"task_type\":\"goto\",\"opened_ns\":1791374984489000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.043 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-3c353a837a04\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/6256d7d8b58e\",\"task_type\":\"goto\",\"opened_ns\":1791374982213000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.9 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.071 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-c8e902d34245\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/eb1eca9526be\",\"task_type\":\"goto\",\"opened_ns\":1791374981755000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.3 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.036 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-369b4148f145\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/209b1b39ec16\",\"task_type\":\"goto\",\"opened_ns\":1791374981726000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 0.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: below the bound by at least 0.013 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-269901676a90\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/c5011955e508\",\"task_type\":\"goto\",\"opened_ns\":1791374978697000000,\"triggers\":[\"verified_violated\"],\"fingerprint\":\"goto/verified_violated/canceled\",\"reported\":\"canceled\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.349 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-6dd2954e1b02\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/198660ad019c\",\"task_type\":\"goto\",\"opened_ns\":1791374976102000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.083 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-933f09b29449\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/a6742e1c5be8\",\"task_type\":\"goto\",\"opened_ns\":1791374975834000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.064 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-85d2065ae1bc\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/1ae6eef0f6a3\",\"task_type\":\"goto\",\"opened_ns\":1791374975751000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.082 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-8c668e9e6aad\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/c90615192b3e\",\"task_type\":\"goto\",\"opened_ns\":1791374973237000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.044 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-6edd1d5b82fc\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/51e3be3951d0\",\"task_type\":\"goto\",\"opened_ns\":1791374972911000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.078 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-dac6e4d3c934\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/383543568c45\",\"task_type\":\"goto\",\"opened_ns\":1791374970866000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.072 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-e44d8c1699f4\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/9761010573b9\",\"task_type\":\"goto\",\"opened_ns\":1791374970533000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.082 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-cd9c68a0b825\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/e4ac4945f4d1\",\"task_type\":\"goto\",\"opened_ns\":1791374970002000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.2 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.058 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-b3d5f67b6ce4\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/07563ad6740b\",\"task_type\":\"goto\",\"opened_ns\":1791374967964000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.069 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-e283865de5dc\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/4f73e7ccda68\",\"task_type\":\"goto\",\"opened_ns\":1791374967092000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.3 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.016 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-ab01c6f399a5\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/359a3396c6da\",\"task_type\":\"goto\",\"opened_ns\":1791374965604000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.9 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.050 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-3f2182c2ba25\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/a4046036bd78\",\"task_type\":\"goto\",\"opened_ns\":1791374964590000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.8 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.053 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-927594976205\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/6f8e256e396f\",\"task_type\":\"goto\",\"opened_ns\":1791374961992000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.072 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-e7e96b10ba79\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone1/goto/78d0c28943c4\",\"task_type\":\"goto\",\"opened_ns\":1791374961823000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 3.3 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.060 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-888d33331826\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone0/goto/1254cb82b264\",\"task_type\":\"goto\",\"opened_ns\":1791374961786000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.067 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-3c2b465d8ae2\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-panel_failure/panel_failure/drone2/goto/350f8370a9bd\",\"task_type\":\"goto\",\"opened_ns\":1791374956746000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881\",\"release\":\"condition-panel_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 4.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.052 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-b0ac55dcc0cc\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone2/goto/9b4c6c687c32\",\"task_type\":\"goto\",\"opened_ns\":1791368143428000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.067 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-8efc635eb323\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone1/goto/4a593c2785d3\",\"task_type\":\"goto\",\"opened_ns\":1791368141252000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.8 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.070 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-2efbb5daa933\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone0/goto/d4f429803145\",\"task_type\":\"goto\",\"opened_ns\":1791368140587000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.074 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-4afbcdfefaa9\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone2/goto/98b2a7409db1\",\"task_type\":\"goto\",\"opened_ns\":1791368138691000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.057 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-701cac681590\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone1/goto/475d2801ca44\",\"task_type\":\"goto\",\"opened_ns\":1791368138187000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.077 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-9ef4d420f31f\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone0/goto/65d8effa5255\",\"task_type\":\"goto\",\"opened_ns\":1791368138082000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.081 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-fa8cf829e83c\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone2/goto/2cb509dc204c\",\"task_type\":\"goto\",\"opened_ns\":1791368135782000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.072 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-2cbf8c7d5c3d\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone1/goto/1027ccaf999b\",\"task_type\":\"goto\",\"opened_ns\":1791368135676000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.071 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-5115f8f9f4fe\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone0/goto/2281ff68629a\",\"task_type\":\"goto\",\"opened_ns\":1791368135175000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.9 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.064 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-d8e6e8227b43\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone2/goto/600bf6dd334a\",\"task_type\":\"goto\",\"opened_ns\":1791368132878000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.2 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.069 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-8f7f75913824\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone1/goto/7645daa3c674\",\"task_type\":\"goto\",\"opened_ns\":1791368132768000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.1 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: below the bound by at least 0.086 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"},{\"incident_id\":\"INC-606160a200d2\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone0/goto/2cf9f23a50f1\",\"task_type\":\"goto\",\"opened_ns\":1791368132671000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.8 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.058 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-3e6ba1bb8701\",\"robot\":\"crazyflie/drone2\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone2/goto/effe6c0dc647\",\"task_type\":\"goto\",\"opened_ns\":1791368130373000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.054 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-1713e43d74c2\",\"robot\":\"crazyflie/drone1\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone1/goto/97dcad5efdb6\",\"task_type\":\"goto\",\"opened_ns\":1791368130251000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 1.7 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), x within 0.20 m of the waypoint: above the bound by at least 0.053 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dx\"},{\"incident_id\":\"INC-a95147231bad\",\"robot\":\"crazyflie/drone0\",\"site\":\"coresense-testbed\",\"task_id\":\"condition-no_failure/no_failure/drone0/goto/03920b2837b5\",\"task_type\":\"goto\",\"opened_ns\":1791368129662000000,\"triggers\":[\"reported_verified_disagree\"],\"fingerprint\":\"goto/reported_verified_disagree/succeeded\",\"reported\":\"succeeded\",\"verified\":\"violated\",\"manifest\":\"sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d\",\"release\":\"condition-no_failure\",\"members\":3,\"status\":\"open\",\"owner\":null,\"headline\":\"first at 2.0 s (100 % of the task): unnamed goal verified violated (1 of 1 verified goals), y within 0.20 m of the waypoint: above the bound by at least 0.057 m; violated goals: (unspecified) 1 of 1\",\"signature\":\"goto/verified_violated/-/goto-arrived-at-waypoint:dy\"}]\n",
+      "raw_sha256": "sha256:6f905ca6a21d4e6150218cdca9397b32d950774fc01775b229d8438137090d94"
+    },
+    "ingest": {
+      "raw": "{\"ingested\": {\"accepted\": 224}, \"rebuild\": {\"incidents\": 66, \"members\": 198, \"rollout_conflicts\": 0, \"rollouts\": 0, \"rules_version\": \"corr-1\", \"task_attempts\": 74}, \"rejected\": []}",
+      "raw_sha256": "sha256:5c862a540160d8f34f989a77b70437338a3466e178479ec158a02b92f2e4b226"
+    },
+    "validation": {
+      "raw": "{\"artifacts\": [{\"artifact\": \"sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144\", \"episodes\": 35, \"name\": \"no_failure.csv\", \"rejected\": 0, \"rejections\": [], \"rejections_truncated\": 0, \"release\": \"condition-no_failure\", \"rows\": 35, \"unavailable\": {}}, {\"artifact\": \"sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0\", \"episodes\": 39, \"name\": \"panel_failure.csv\", \"rejected\": 0, \"rejections\": [], \"rejections_truncated\": 0, \"release\": \"condition-panel_failure\", \"rows\": 39, \"unavailable\": {}}]}",
+      "raw_sha256": "sha256:8c9d5818afa36a7223e12a5a0f2ddd9532eca78326d86b2a70a5fe34c70f05ba"
+    }
+  },
+  "episodes": [
+    {
+      "ended_at": "2026-10-07T10:15:04.378000Z",
+      "episode_key": "no_failure/drone0/goto/339c3f3e2f51",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_0",
+      "site": "coresense-testbed",
+      "source_row": 1,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:08.167000Z",
+      "episode_key": "no_failure/drone1/goto/d2f34cdbaa67",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_3",
+      "site": "coresense-testbed",
+      "source_row": 13,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:12.348000Z",
+      "episode_key": "no_failure/drone0/goto/71ab7c41f7c2",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_1",
+      "site": "coresense-testbed",
+      "source_row": 2,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:13.014000Z",
+      "episode_key": "no_failure/drone2/goto/da4013c028e9",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_12",
+      "site": "coresense-testbed",
+      "source_row": 24,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:15.374000Z",
+      "episode_key": "no_failure/drone2/goto/45ea7782fe40",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_22",
+      "site": "coresense-testbed",
+      "source_row": 25,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:15.646000Z",
+      "episode_key": "no_failure/drone1/goto/cf8797a742c3",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_4",
+      "site": "coresense-testbed",
+      "source_row": 14,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:15.867000Z",
+      "episode_key": "no_failure/drone0/goto/a2a20807a925",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_2",
+      "site": "coresense-testbed",
+      "source_row": 3,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:17.883000Z",
+      "episode_key": "no_failure/drone2/goto/2070b1631396",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_17",
+      "site": "coresense-testbed",
+      "source_row": 26,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:18.450000Z",
+      "episode_key": "no_failure/drone1/goto/3c4c66a1cb0e",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_5",
+      "site": "coresense-testbed",
+      "source_row": 15,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:18.867000Z",
+      "episode_key": "no_failure/drone0/goto/04fbe00f080b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_7",
+      "site": "coresense-testbed",
+      "source_row": 4,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:20.984000Z",
+      "episode_key": "no_failure/drone2/goto/d539b8e65f68",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_31",
+      "site": "coresense-testbed",
+      "source_row": 27,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:21.457000Z",
+      "episode_key": "no_failure/drone1/goto/eac71deb615b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_6",
+      "site": "coresense-testbed",
+      "source_row": 16,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:23.753000Z",
+      "episode_key": "no_failure/drone0/goto/e7e1bb16afe0",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_8",
+      "site": "coresense-testbed",
+      "source_row": 5,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:23.894000Z",
+      "episode_key": "no_failure/drone2/goto/23c7138889fe",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_32",
+      "site": "coresense-testbed",
+      "source_row": 28,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:25.990000Z",
+      "episode_key": "no_failure/drone1/goto/c1ccf4b7f60a",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_13",
+      "site": "coresense-testbed",
+      "source_row": 17,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:26.453000Z",
+      "episode_key": "no_failure/drone0/goto/8c01257a8e29",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_9",
+      "site": "coresense-testbed",
+      "source_row": 6,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:26.662000Z",
+      "episode_key": "no_failure/drone2/goto/07dc73b6e245",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_33",
+      "site": "coresense-testbed",
+      "source_row": 29,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:28.956000Z",
+      "episode_key": "no_failure/drone0/goto/3d81d96e20b3",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_10",
+      "site": "coresense-testbed",
+      "source_row": 7,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:29.303000Z",
+      "episode_key": "no_failure/drone1/goto/10b9ac8cdb8b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_14",
+      "site": "coresense-testbed",
+      "source_row": 18,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:29.621000Z",
+      "episode_key": "no_failure/drone2/goto/10a83957c45b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_34",
+      "site": "coresense-testbed",
+      "source_row": 30,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:31.678000Z",
+      "episode_key": "no_failure/drone0/goto/03920b2837b5",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_11",
+      "site": "coresense-testbed",
+      "source_row": 8,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:31.964000Z",
+      "episode_key": "no_failure/drone1/goto/97dcad5efdb6",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_20",
+      "site": "coresense-testbed",
+      "source_row": 19,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:32.087000Z",
+      "episode_key": "no_failure/drone2/goto/effe6c0dc647",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_25",
+      "site": "coresense-testbed",
+      "source_row": 31,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:34.487000Z",
+      "episode_key": "no_failure/drone0/goto/2cf9f23a50f1",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_23",
+      "site": "coresense-testbed",
+      "source_row": 9,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:34.886000Z",
+      "episode_key": "no_failure/drone1/goto/7645daa3c674",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_21",
+      "site": "coresense-testbed",
+      "source_row": 20,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:35.096000Z",
+      "episode_key": "no_failure/drone2/goto/600bf6dd334a",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_26",
+      "site": "coresense-testbed",
+      "source_row": 32,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:37.091000Z",
+      "episode_key": "no_failure/drone0/goto/2281ff68629a",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_24",
+      "site": "coresense-testbed",
+      "source_row": 10,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:37.390000Z",
+      "episode_key": "no_failure/drone1/goto/1027ccaf999b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_18",
+      "site": "coresense-testbed",
+      "source_row": 21,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:37.900000Z",
+      "episode_key": "no_failure/drone2/goto/2cb509dc204c",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_27",
+      "site": "coresense-testbed",
+      "source_row": 33,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:39.797000Z",
+      "episode_key": "no_failure/drone0/goto/65d8effa5255",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_15",
+      "site": "coresense-testbed",
+      "source_row": 11,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:40.305000Z",
+      "episode_key": "no_failure/drone1/goto/475d2801ca44",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_19",
+      "site": "coresense-testbed",
+      "source_row": 22,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:40.809000Z",
+      "episode_key": "no_failure/drone2/goto/98b2a7409db1",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_28",
+      "site": "coresense-testbed",
+      "source_row": 34,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:42.604000Z",
+      "episode_key": "no_failure/drone0/goto/d4f429803145",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_16",
+      "site": "coresense-testbed",
+      "source_row": 12,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:43.067000Z",
+      "episode_key": "no_failure/drone1/goto/4a593c2785d3",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_30",
+      "site": "coresense-testbed",
+      "source_row": 23,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T10:15:45.546000Z",
+      "episode_key": "no_failure/drone2/goto/9b4c6c687c32",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-no_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_29",
+      "site": "coresense-testbed",
+      "source_row": 35,
+      "source_sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:17.960000Z",
+      "episode_key": "panel_failure/drone0/goto/95aeaa3c7db2",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_0",
+      "site": "coresense-testbed",
+      "source_row": 1,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:21.447000Z",
+      "episode_key": "panel_failure/drone2/goto/350f8370a9bd",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_12",
+      "site": "coresense-testbed",
+      "source_row": 27,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:23.707000Z",
+      "episode_key": "panel_failure/drone2/goto/6f8e256e396f",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_22",
+      "site": "coresense-testbed",
+      "source_row": 28,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:23.803000Z",
+      "episode_key": "panel_failure/drone0/goto/1254cb82b264",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_1",
+      "site": "coresense-testbed",
+      "source_row": 2,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:25.151000Z",
+      "episode_key": "panel_failure/drone1/goto/78d0c28943c4",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_3",
+      "site": "coresense-testbed",
+      "source_row": 14,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:26.405000Z",
+      "episode_key": "panel_failure/drone2/goto/a4046036bd78",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_17",
+      "site": "coresense-testbed",
+      "source_row": 29,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:27.521000Z",
+      "episode_key": "panel_failure/drone0/goto/359a3396c6da",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_2",
+      "site": "coresense-testbed",
+      "source_row": 3,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:29.410000Z",
+      "episode_key": "panel_failure/drone2/goto/4f73e7ccda68",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_31",
+      "site": "coresense-testbed",
+      "source_row": 30,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:30.081000Z",
+      "episode_key": "panel_failure/drone1/goto/07563ad6740b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_4",
+      "site": "coresense-testbed",
+      "source_row": 15,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:32.221000Z",
+      "episode_key": "panel_failure/drone2/goto/e4ac4945f4d1",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_32",
+      "site": "coresense-testbed",
+      "source_row": 31,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:32.246000Z",
+      "episode_key": "panel_failure/drone0/goto/9761010573b9",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_7",
+      "site": "coresense-testbed",
+      "source_row": 4,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:32.581000Z",
+      "episode_key": "panel_failure/drone1/goto/383543568c45",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_5",
+      "site": "coresense-testbed",
+      "source_row": 16,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:34.928000Z",
+      "episode_key": "panel_failure/drone2/goto/51e3be3951d0",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_33",
+      "site": "coresense-testbed",
+      "source_row": 32,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:35.355000Z",
+      "episode_key": "panel_failure/drone0/goto/c90615192b3e",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_8",
+      "site": "coresense-testbed",
+      "source_row": 5,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:37.767000Z",
+      "episode_key": "panel_failure/drone1/goto/1ae6eef0f6a3",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_6",
+      "site": "coresense-testbed",
+      "source_row": 17,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:37.851000Z",
+      "episode_key": "panel_failure/drone2/goto/a6742e1c5be8",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_34",
+      "site": "coresense-testbed",
+      "source_row": 33,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:38.119000Z",
+      "episode_key": "panel_failure/drone0/goto/198660ad019c",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_9",
+      "site": "coresense-testbed",
+      "source_row": 6,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:39.691000Z",
+      "episode_key": "panel_failure/drone2/goto/c5011955e508",
+      "outcome_class": "verified_failure",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "canceled",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_25",
+      "site": "coresense-testbed",
+      "source_row": 34,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:40.997000Z",
+      "episode_key": "panel_failure/drone0/goto/eae25d84e0df",
+      "outcome_class": "verified_success",
+      "reasons": [],
+      "release": "condition-panel_failure",
+      "reported": "canceled",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_10",
+      "site": "coresense-testbed",
+      "source_row": 7,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:41.022000Z",
+      "episode_key": "panel_failure/drone1/goto/cd3c8570c2fb",
+      "outcome_class": "verified_success",
+      "reasons": [],
+      "release": "condition-panel_failure",
+      "reported": "canceled",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_13",
+      "site": "coresense-testbed",
+      "source_row": 18,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:41.476000Z",
+      "episode_key": "panel_failure/drone2/goto/0f62ec2f5ad9",
+      "outcome_class": "supported_success",
+      "reasons": [],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_25",
+      "site": "coresense-testbed",
+      "source_row": 35,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "satisfied"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:41.827000Z",
+      "episode_key": "panel_failure/drone0/goto/209b1b39ec16",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_10",
+      "site": "coresense-testbed",
+      "source_row": 8,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:44.064000Z",
+      "episode_key": "panel_failure/drone1/goto/eb1eca9526be",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_12",
+      "site": "coresense-testbed",
+      "source_row": 19,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:44.129000Z",
+      "episode_key": "panel_failure/drone2/goto/6256d7d8b58e",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_26",
+      "site": "coresense-testbed",
+      "source_row": 36,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:46.506000Z",
+      "episode_key": "panel_failure/drone0/goto/20b7e0907af7",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_11",
+      "site": "coresense-testbed",
+      "source_row": 9,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:47.048000Z",
+      "episode_key": "panel_failure/drone2/goto/bb48e3470e29",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_27",
+      "site": "coresense-testbed",
+      "source_row": 37,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:49.168000Z",
+      "episode_key": "panel_failure/drone1/goto/c09fdc9af187",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_13",
+      "site": "coresense-testbed",
+      "source_row": 20,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:49.958000Z",
+      "episode_key": "panel_failure/drone2/goto/ab8d16d608b1",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_28",
+      "site": "coresense-testbed",
+      "source_row": 38,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:51.341000Z",
+      "episode_key": "panel_failure/drone0/goto/e42f16806cfb",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_23",
+      "site": "coresense-testbed",
+      "source_row": 10,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:52.276000Z",
+      "episode_key": "panel_failure/drone1/goto/a4c42d97300c",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_14",
+      "site": "coresense-testbed",
+      "source_row": 21,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:52.757000Z",
+      "episode_key": "panel_failure/drone2/goto/a15f8a78da62",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone2",
+      "scenario": "wp_29",
+      "site": "coresense-testbed",
+      "source_row": 39,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:54.207000Z",
+      "episode_key": "panel_failure/drone0/goto/d1056d801b87",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_24",
+      "site": "coresense-testbed",
+      "source_row": 11,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:54.788000Z",
+      "episode_key": "panel_failure/drone1/goto/b604a1113b6d",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_20",
+      "site": "coresense-testbed",
+      "source_row": 22,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:56.862000Z",
+      "episode_key": "panel_failure/drone0/goto/5dc8688ad92a",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_15",
+      "site": "coresense-testbed",
+      "source_row": 12,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:57.694000Z",
+      "episode_key": "panel_failure/drone1/goto/822c94dc7089",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_21",
+      "site": "coresense-testbed",
+      "source_row": 23,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:09:59.568000Z",
+      "episode_key": "panel_failure/drone0/goto/82420ad49542",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone0",
+      "scenario": "wp_16",
+      "site": "coresense-testbed",
+      "source_row": 13,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:10:00.217000Z",
+      "episode_key": "panel_failure/drone1/goto/086ce7eee915",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_18",
+      "site": "coresense-testbed",
+      "source_row": 24,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:10:03.122000Z",
+      "episode_key": "panel_failure/drone1/goto/7f5fc4496b1b",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_19",
+      "site": "coresense-testbed",
+      "source_row": 25,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    },
+    {
+      "ended_at": "2026-10-07T12:10:05.685000Z",
+      "episode_key": "panel_failure/drone1/goto/5b805d922c8e",
+      "outcome_class": "contradiction",
+      "reasons": [
+        "condition.false"
+      ],
+      "release": "condition-panel_failure",
+      "reported": "succeeded",
+      "robot": "crazyflie/drone1",
+      "scenario": "wp_30",
+      "site": "coresense-testbed",
+      "source_row": 26,
+      "source_sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "task_type": "goto",
+      "verdict": "violated"
+    }
+  ],
+  "evaluation": {
+    "attempts": 1,
+    "config": {
+      "margin": 0.01,
+      "min_known": 30,
+      "paired": true,
+      "per_attempt": false,
+      "schema": "pap.evaluation-config/1",
+      "stratify_by_site": false,
+      "task_type": "goto"
+    },
+    "created_at": "2026-11-18T19:28:37.733485+00:00",
+    "finished_at": "2026-11-18T19:28:40.185014+00:00",
+    "id": "a624008f-64bd-4ba4-8e87-c18543f0c3a7",
+    "input_sha256": "sha256:b9eda3849af2c7001e3bd8b1576d446c1bff386b2f0f5e084f4324a03734bca4",
+    "organization": "coresense-1a1f021ebeb",
+    "project": "drones",
+    "state": "succeeded"
+  },
+  "evidence_class": [
+    "physical"
+  ],
+  "inputs": [
+    {
+      "artifact_id": "85d27f6e-1299-478a-b8e6-a06dedda0357",
+      "filename": "no_failure.csv",
+      "media_type": "text/csv",
+      "release": "condition-no_failure",
+      "sha256": "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144",
+      "size_bytes": 9582
+    },
+    {
+      "artifact_id": "241e8d8d-d47c-42f5-ba8c-51ceb31a266e",
+      "filename": "panel_failure.csv",
+      "media_type": "text/csv",
+      "release": "condition-panel_failure",
+      "sha256": "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0",
+      "size_bytes": 10889
+    }
+  ],
+  "mapping": {
+    "id": "32fef8e4-3304-460c-89bf-3ba294376645",
+    "name": "coresense-goto-mocap",
+    "spec_sha256": "sha256:366f31bc8e278e6ce5cbc6d62f57b6fdab6452778759c5b1290a482611820345",
+    "version": 1
+  },
+  "notice": "Every statistic and verdict in this report was computed by the OpenMHS engine identified under provenance. The platform stores and displays the engine's outputs; it computes no statistic of its own.",
+  "provenance": {
+    "bundle": {
+      "engine_store": "sha256:4e079c60b26fcb94125af8a1bd2a6114081beb1ae5583ba8058d9a894d766401",
+      "events": "sha256:384cf4116a0e1027c79cb14c27fa33447028b3bb5a994856abd771965ff437fc"
+    },
+    "engine": {
+      "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+      "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+      "engine": "openmhs",
+      "interfaces": {
+        "artifact_schema": "openmhs.artifact/0.1",
+        "deployment_schema": "openmhs.deployment/0.1",
+        "event_schema": "openmhs.event/0.1",
+        "ops_rules_version": "corr-1",
+        "outcome_contract_version": "0.1"
+      },
+      "version": "openmhs 0.1.0"
+    },
+    "evidence_class": [
+      "physical"
+    ],
+    "input_sha256": "sha256:b9eda3849af2c7001e3bd8b1576d446c1bff386b2f0f5e084f4324a03734bca4",
+    "inputs": {
+      "condition-no_failure": [
+        "sha256:cdc22bcc5f9b76c89b9feed06e263157547d224b0d52cad5908e3198905dc144"
+      ],
+      "condition-panel_failure": [
+        "sha256:2ef88be396da0247993153302ae29c388692becec06c6fdeedbe03f60648f7d0"
+      ]
+    },
+    "mapping": "coresense-goto-mocap@1 sha256:366f31bc8e278e6ce5cbc6d62f57b6fdab6452778759c5b1290a482611820345",
+    "rules_version": "corr-1"
+  },
+  "releases": {
+    "baseline": {
+      "id": "439e9acd-b2c6-46cd-8d27-03eb2cede14d",
+      "kind": "software",
+      "label": "condition-no_failure",
+      "manifest_digest": "sha256:493b87638a2e29052e8016c455e7fa09118de9c8162559aa0a3b99b20c97d19d"
+    },
+    "candidate": {
+      "id": "09889e60-ff1b-402e-87f2-73db7976dc3f",
+      "kind": "software",
+      "label": "condition-panel_failure",
+      "manifest_digest": "sha256:584dca803fc0d6fb145c405b084f05910aef77cc83c1871dfba73663dc068881"
+    }
+  },
+  "schema": "pap.report/1",
+  "summary": {
+    "classes": {
+      "condition-no_failure": {
+        "contradiction": 31,
+        "supported_success": 4
+      },
+      "condition-panel_failure": {
+        "contradiction": 34,
+        "supported_success": 2,
+        "verified_failure": 1,
+        "verified_success": 2
+      }
+    },
+    "episodes": 74,
+    "rejected_rows": 0,
+    "verdict_reported": "insufficient_evidence",
+    "verdict_verified": "insufficient_evidence"
+  }
+}
