@@ -54,20 +54,24 @@ test.afterAll(async () => {
 });
 
 /** Kill a process and its children without warning, then check it is gone. */
-function killHard(pid: number) {
+async function killHard(pid: number) {
   try {
     if (process.platform === "win32") execSync(`taskkill /T /F /PID ${pid}`, { stdio: "ignore" });
     else process.kill(pid, "SIGKILL");
   } catch {
     // taskkill /T exits non-zero when part of the tree has already gone; whether the worker is alive is checked below.
   }
-  let alive = true;
-  try {
-    process.kill(pid, 0);
-  } catch {
-    alive = false;
-  }
-  expect(alive, `worker ${pid} still running`).toBe(false);
+  // On Linux a killed process stays a zombie (still answering signal 0) until its parent reaps it; dev_stack
+  // polls every 0.5 s. Wait for it to disappear rather than checking at once (found on CI).
+  const gone = () => {
+    try {
+      process.kill(pid, 0);
+      return false;
+    } catch {
+      return true;
+    }
+  };
+  await expect.poll(gone, { timeout: 10_000, message: `worker ${pid} still running` }).toBe(true);
 }
 
 async function signIn(page: Page, user: string) {
@@ -161,7 +165,7 @@ test("a worker killed mid-job is replaced and the job finishes; resubmitting ret
   expect(state, "the job never started").toBe("running");
   const pid = KILL_CMD ? null : readFileSync(PID_FILE, "utf-8").trim();
   if (KILL_CMD) execSync(KILL_CMD, { stdio: "inherit", shell: "/bin/bash" });
-  else killHard(Number(pid));
+  else await killHard(Number(pid));
 
   // The stack starts a new worker; once the lease expires it takes the job over and runs it again from the start.
   await expect(page.getByText("succeeded", { exact: true })).toBeVisible({ timeout: 150_000 });
