@@ -1,0 +1,47 @@
+{
+  "schema": "pap.mapping/1",
+  "name": "warehouse-pick-csv",
+  "description": "SYNTHETIC demo: one CSV row per pick-and-place attempt; bin scale and overhead vision as independent evidence.",
+  "evidence_class": "synthetic",
+  "input": {"format": "csv"},
+  "episode_id": {"column": "episode_id"},
+  "robot": {"column": "robot_id"},
+  "task_type": {"const": "pick_place"},
+  "site": {"column": "site"},
+  "scenario": {"column": "scenario"},
+  "started_at": {"column": "start_time", "format": "rfc3339", "clock_domain": "cell-ntp", "uncertainty_ms": 20},
+  "ended_at": {"column": "end_time", "format": "rfc3339", "clock_domain": "cell-ntp", "uncertainty_ms": 20},
+  "reported_outcome": {
+    "column": "robot_status",
+    "values": {"success": "succeeded", "failure": "failed", "timeout": "timeout"},
+    "missing": "unknown"
+  },
+  "measurements": [
+    {
+      "name": "bin_mass", "column": "bin_mass_delta_g", "signal": "bin.mass_delta", "unit": "g",
+      "kind": "independent_sensor", "system": "bin-scale", "device": "scale-1", "quality_column": "bin_mass_quality",
+      "time": {"column": "bin_mass_time", "format": "rfc3339", "clock_domain": "cell-ntp", "uncertainty_ms": 20}
+    },
+    {
+      "name": "vision", "column": "vision_in_bin", "signal": "vision.item_in_bin", "value_type": "boolean",
+      "kind": "independent_sensor", "system": "overhead-camera", "device": "cam-1",
+      "time": {"column": "vision_time", "format": "rfc3339", "clock_domain": "cell-ntp", "uncertainty_ms": 20}
+    },
+    {
+      "name": "assist", "column": "operator_assist", "signal": "operator.assist", "value_type": "boolean",
+      "kind": "operator", "system": "operator-console",
+      "time": {"column": "end_time", "format": "rfc3339", "clock_domain": "cell-ntp", "uncertainty_ms": 20}
+    }
+  ],
+  "contract": {
+    "name": "item-placed-in-bin-unassisted",
+    "version": "0.1",
+    "window_ms": [0, 3000],
+    "max_clock_uncertainty_ms": 50,
+    "conditions": [
+      {"name": "bin gained at least 50 g", "evidence": "bin_mass", "op": "ge", "value": {"value": 50, "unit": "g"}},
+      {"name": "camera sees the item in the bin", "evidence": "vision", "op": "eq", "value": true},
+      {"name": "no operator assist", "evidence": "assist", "op": "eq", "value": false}
+    ]
+  }
+}

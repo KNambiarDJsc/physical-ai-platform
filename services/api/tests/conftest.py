@@ -71,3 +71,18 @@ def client(settings_env: None, database_url: str) -> Iterator[TestClient]:
 
 def engine_required() -> bool:
     return os.environ.get("PAP_REQUIRE_ENGINE") == "1"
+
+
+@pytest.fixture(scope="session")
+def omhs():  # type: ignore[no-untyped-def]
+    """The pinned OpenMHS engine; skipped when absent, a failure when PAP_REQUIRE_ENGINE=1."""
+    from openmhs_bridge import EngineError, engine_from_env
+
+    try:
+        e = engine_from_env(Path(__file__).resolve().parents[3] / "engine.lock.json")
+        e.check_binary()
+    except EngineError as err:
+        if engine_required():
+            pytest.fail(f"PAP_REQUIRE_ENGINE=1 but the engine is unavailable: {err}")
+        pytest.skip(f"engine unavailable: {err}")
+    return e

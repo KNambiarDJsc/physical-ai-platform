@@ -39,6 +39,8 @@ python_gates() {
   else
     absent "mypy (api)"
   fi
+  step "contract schemas up to date" bash -c "cd services/api && uv run python -m app.contracts.export --check"
+  step "demo dataset reproducible" uv run python examples/manipulation-demo/generate.py --check
   if [ "$MODE" = "quick" ]; then
     step "pytest" uv run pytest -q
   else

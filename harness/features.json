@@ -153,10 +153,15 @@
         "services/api/app/contracts/",
         "packages/contracts/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "Pydantic models in services/api/app/contracts (pap.mapping/1, pap.episode/1, pap.evaluation-config/1); JSON Schemas generated into packages/contracts/schema by python -m app.contracts.export",
+          "verify.sh step 'contract schemas up to date' (export --check) passes; test_contracts.py: committed schemas equal the models, each document's schema field is a const version string",
+          "test_episode_cannot_omit_context_or_provenance: organization, project, evaluation (config sha256), robot, task_type, release, site, scenario, started_at, ended_at, source (artifact sha256 + row), mapping, evidence_class all required; optional ones are Field_ markers whose value is present exactly when available (test_unavailable_marker_cannot_carry_a_value)",
+          "bash scripts/verify.sh: all gates passed (112 tests)"
+        ]
       },
       "limitations": []
     },
@@ -335,12 +340,17 @@
       "paths": [
         "services/api/app/ingestion/"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "test_mapping.py: rows in == episodes + rejections (demo files 123 = 120 + 3); unavailable fields counted, never invented; time without UTC offset rejected; duplicate, wrong cell count, bad number/boolean/quality rejected per row; non-UTF-8, NUL, empty, duplicate header, broken quoting, row limit reject the artifact; JSONL nested paths, unix_ms, invalid/deep/non-object lines rejected per row; invalid mappings refused",
+          "test_pipeline_real.py::test_engine_accepted_every_event: events from the demo dataset ingested by the real engine with 0 rejections and 0 duplicates"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Immutable stored mapping revisions (API + table) not built yet: criterion 1 open."
+      ]
     },
     {
       "id": "RI-002",
@@ -393,12 +403,16 @@
       "paths": [
         "services/api/app/evaluations/"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "test_pipeline_real.py (real engine): pipeline over the demo dataset runs outcome verify per episode, ops ingest, ops compare reported + verified + paired; reported verdict improvement (attempts 96/24 -> 111/9), verified insufficient_evidence (84/31/5 -> 77/34/9); compare raw output byte-identical to a direct CLI run on the same events file; two runs give identical events and outputs; same release, unknown task type and a non-UTF-8 artifact fail with structured errors"
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Runs as a function; running it inside a durable job (RI-002) is the remaining criterion."
+      ]
     },
     {
       "id": "RI-004",

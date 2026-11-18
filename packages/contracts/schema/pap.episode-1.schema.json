@@ -1,0 +1,187 @@
+{
+  "$defs": {
+    "Field_": {
+      "additionalProperties": false,
+      "description": "A value with its availability. ``value`` is None exactly when ``available`` is False.",
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "available"
+      ],
+      "title": "Field_",
+      "type": "object"
+    },
+    "SourceLocator": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_sha256": {
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "row": {
+          "description": "1-based data row (CSV header excluded) or JSONL line number",
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_sha256",
+        "row"
+      ],
+      "title": "SourceLocator",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.physical-ai-platform.dev/pap.episode/1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Everything known about one attempt, and what is explicitly not known.",
+  "properties": {
+    "clock_domain": {
+      "title": "Clock Domain",
+      "type": "string"
+    },
+    "ended_at": {
+      "title": "Ended At",
+      "type": "string"
+    },
+    "episode_key": {
+      "title": "Episode Key",
+      "type": "string"
+    },
+    "evaluation": {
+      "description": "sha256 of the canonical evaluation configuration this episode was read for",
+      "title": "Evaluation",
+      "type": "string"
+    },
+    "evidence_class": {
+      "enum": [
+        "synthetic",
+        "simulated",
+        "production"
+      ],
+      "title": "Evidence Class",
+      "type": "string"
+    },
+    "mapping": {
+      "description": "Mapping name@version sha256",
+      "title": "Mapping",
+      "type": "string"
+    },
+    "measurements": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "description": "Raw cell per measurement name; None = blank cell",
+      "title": "Measurements",
+      "type": "object"
+    },
+    "organization": {
+      "title": "Organization",
+      "type": "string"
+    },
+    "project": {
+      "title": "Project",
+      "type": "string"
+    },
+    "release": {
+      "title": "Release",
+      "type": "string"
+    },
+    "reported": {
+      "enum": [
+        "succeeded",
+        "failed",
+        "aborted",
+        "canceled",
+        "timeout",
+        "unknown"
+      ],
+      "title": "Reported",
+      "type": "string"
+    },
+    "reported_raw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reported Raw"
+    },
+    "robot": {
+      "title": "Robot",
+      "type": "string"
+    },
+    "scenario": {
+      "$ref": "#/$defs/Field_"
+    },
+    "schema": {
+      "const": "pap.episode/1",
+      "default": "pap.episode/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "site": {
+      "$ref": "#/$defs/Field_"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceLocator"
+    },
+    "started_at": {
+      "$ref": "#/$defs/Field_"
+    },
+    "task_type": {
+      "title": "Task Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "organization",
+    "project",
+    "evaluation",
+    "episode_key",
+    "release",
+    "robot",
+    "task_type",
+    "site",
+    "scenario",
+    "started_at",
+    "ended_at",
+    "clock_domain",
+    "reported",
+    "reported_raw",
+    "measurements",
+    "source",
+    "mapping",
+    "evidence_class"
+  ],
+  "title": "Episode",
+  "type": "object"
+}

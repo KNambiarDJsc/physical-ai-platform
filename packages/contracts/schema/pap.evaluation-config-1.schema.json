@@ -1,0 +1,54 @@
+{
+  "$id": "https://schemas.physical-ai-platform.dev/pap.evaluation-config/1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "What to compare and how; passed to ``ops compare`` unchanged.",
+  "properties": {
+    "margin": {
+      "default": 0.01,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Margin",
+      "type": "number"
+    },
+    "min_known": {
+      "default": 30,
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Min Known",
+      "type": "integer"
+    },
+    "paired": {
+      "default": false,
+      "title": "Paired",
+      "type": "boolean"
+    },
+    "per_attempt": {
+      "default": false,
+      "title": "Per Attempt",
+      "type": "boolean"
+    },
+    "schema": {
+      "const": "pap.evaluation-config/1",
+      "default": "pap.evaluation-config/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "stratify_by_site": {
+      "default": true,
+      "title": "Stratify By Site",
+      "type": "boolean"
+    },
+    "task_type": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Task Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_type"
+  ],
+  "title": "EvaluationConfig",
+  "type": "object"
+}

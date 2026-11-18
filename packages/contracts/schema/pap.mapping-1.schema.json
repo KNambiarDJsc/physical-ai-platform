@@ -1,0 +1,583 @@
+{
+  "$defs": {
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "max": {
+          "default": null,
+          "title": "Max"
+        },
+        "min": {
+          "default": null,
+          "title": "Min"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "enum": [
+            "eq",
+            "ne",
+            "lt",
+            "le",
+            "gt",
+            "ge",
+            "between",
+            "in"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "values": {
+          "anyOf": [
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Values"
+        }
+      },
+      "required": [
+        "name",
+        "evidence",
+        "op"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "ContractTemplate": {
+      "additionalProperties": false,
+      "description": "An RFC 0004 contract without its binding: the platform binds it to each episode and anchors it on the\nrobot's own end-of-task report, so ``window_ms`` is relative to that report.",
+      "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "minItems": 1,
+          "title": "Conditions",
+          "type": "array"
+        },
+        "max_clock_uncertainty_ms": {
+          "default": 50,
+          "exclusiveMinimum": 0,
+          "title": "Max Clock Uncertainty Ms",
+          "type": "number"
+        },
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,99}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "default": "0.1",
+          "title": "Version",
+          "type": "string"
+        },
+        "window_ms": {
+          "default": [
+            0,
+            2000
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Window Ms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "conditions"
+      ],
+      "title": "ContractTemplate",
+      "type": "object"
+    },
+    "InputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "delimiter": {
+          "default": ",",
+          "maxLength": 1,
+          "minLength": 1,
+          "title": "Delimiter",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "csv",
+            "jsonl"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "max_rows": {
+          "default": 200000,
+          "maximum": 2000000,
+          "minimum": 1,
+          "title": "Max Rows",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format"
+      ],
+      "title": "InputSpec",
+      "type": "object"
+    },
+    "Measurement": {
+      "additionalProperties": false,
+      "description": "An independent (or device) measurement column, turned into an RFC 0004 evidence record.",
+      "properties": {
+        "column": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "device": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device"
+        },
+        "kind": {
+          "default": "independent_sensor",
+          "enum": [
+            "independent_sensor",
+            "device_state",
+            "operator"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "description": "Evidence item name used by the contract",
+          "pattern": "^[a-z][a-z0-9_]{0,40}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "quality_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Column holding GOOD / UNCERTAIN / BAD",
+          "title": "Quality Column"
+        },
+        "signal": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Signal",
+          "type": "string"
+        },
+        "system": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "System",
+          "type": "string"
+        },
+        "time": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeSource"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "When it was measured. Without it the record has no time and the verifier says so."
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UCUM unit for numbers; omit for unitless",
+          "title": "Unit"
+        },
+        "value_type": {
+          "default": "number",
+          "enum": [
+            "number",
+            "string",
+            "boolean"
+          ],
+          "title": "Value Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "column",
+        "signal",
+        "system"
+      ],
+      "title": "Measurement",
+      "type": "object"
+    },
+    "MissingData": {
+      "additionalProperties": false,
+      "properties": {
+        "measurement": {
+          "default": "absent",
+          "description": "A blank measurement cell: leave the record out (verdict says why) or reject",
+          "enum": [
+            "absent",
+            "reject"
+          ],
+          "title": "Measurement",
+          "type": "string"
+        },
+        "scenario": {
+          "default": "unavailable",
+          "enum": [
+            "unavailable",
+            "reject"
+          ],
+          "title": "Scenario",
+          "type": "string"
+        },
+        "site": {
+          "default": "unavailable",
+          "enum": [
+            "unavailable",
+            "reject"
+          ],
+          "title": "Site",
+          "type": "string"
+        },
+        "started_at": {
+          "default": "unavailable",
+          "enum": [
+            "unavailable",
+            "reject"
+          ],
+          "title": "Started At",
+          "type": "string"
+        }
+      },
+      "title": "MissingData",
+      "type": "object"
+    },
+    "ReportedOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "missing": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "reject"
+          ],
+          "title": "Missing",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "enum": [
+              "succeeded",
+              "failed",
+              "aborted",
+              "canceled",
+              "timeout",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "description": "Source value -> RFC 0005 reported outcome. Unlisted values reject the row.",
+          "minProperties": 1,
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "column",
+        "values"
+      ],
+      "title": "ReportedOutcome",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "description": "Where a value comes from: a column (dotted path for JSONL objects) or a constant. Exactly one.",
+      "properties": {
+        "column": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "const": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Const"
+        }
+      },
+      "title": "Source",
+      "type": "object"
+    },
+    "TimeSource": {
+      "additionalProperties": false,
+      "properties": {
+        "clock_domain": {
+          "description": "Names the clock (RFC 0005 time.clock_domain)",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Clock Domain",
+          "type": "string"
+        },
+        "column": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "const": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Const"
+        },
+        "format": {
+          "default": "rfc3339",
+          "enum": [
+            "rfc3339",
+            "unix_s",
+            "unix_ms"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "uncertainty_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absent means unknown, not zero",
+          "title": "Uncertainty Ms"
+        }
+      },
+      "required": [
+        "clock_domain"
+      ],
+      "title": "TimeSource",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.physical-ai-platform.dev/pap.mapping/1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContractTemplate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "ended_at": {
+      "$ref": "#/$defs/TimeSource"
+    },
+    "episode_id": {
+      "$ref": "#/$defs/Source"
+    },
+    "evidence_class": {
+      "description": "Where the data comes from. Synthetic and simulated evidence is labelled as such everywhere.",
+      "enum": [
+        "synthetic",
+        "simulated",
+        "production"
+      ],
+      "title": "Evidence Class",
+      "type": "string"
+    },
+    "input": {
+      "$ref": "#/$defs/InputSpec"
+    },
+    "measurements": {
+      "items": {
+        "$ref": "#/$defs/Measurement"
+      },
+      "maxItems": 32,
+      "title": "Measurements",
+      "type": "array"
+    },
+    "missing_data": {
+      "$ref": "#/$defs/MissingData",
+      "default": {
+        "measurement": "absent",
+        "scenario": "unavailable",
+        "site": "unavailable",
+        "started_at": "unavailable"
+      }
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,99}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "reported_outcome": {
+      "$ref": "#/$defs/ReportedOutcome"
+    },
+    "robot": {
+      "$ref": "#/$defs/Source"
+    },
+    "scenario": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Source"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema": {
+      "const": "pap.mapping/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "site": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Source"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "started_at": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TimeSource"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "task_type": {
+      "$ref": "#/$defs/Source"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "evidence_class",
+    "input",
+    "episode_id",
+    "robot",
+    "task_type",
+    "ended_at",
+    "reported_outcome"
+  ],
+  "title": "MappingSpec",
+  "type": "object"
+}
