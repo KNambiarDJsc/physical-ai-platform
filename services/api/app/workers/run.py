@@ -51,20 +51,37 @@ class _Watch(threading.Thread):
         self.cancel = threading.Event()
         self.stop = threading.Event()
         self.reason: str | None = None
+        self._lock = threading.Lock()
+
+    def check(self) -> str | None:
+        """Renew the lease and look for a reason to stop. Called at once, on every interval, and once more before
+        results are saved: a job can finish inside one interval, and a cancellation or an exceeded deadline must
+        still win (found by CI, where the whole run fitted inside the first interval)."""
+        with self._lock:
+            if self.reason is None:
+                with session_factory()() as s:
+                    owner, cancel_requested = service.heartbeat(s, self.job_id, self.worker, self.lease_s)
+                if not owner:
+                    self.reason = "lease_lost"
+                elif cancel_requested:
+                    self.reason = "cancelled"
+                elif time.monotonic() > self.deadline:
+                    self.reason = "timeout"
+                if self.reason:
+                    self.cancel.set()
+            return self.reason
 
     def run(self) -> None:
         interval = max(1.0, self.lease_s / 3)
-        while not self.stop.wait(interval if self.reason is None else 3600):
-            with session_factory()() as s:
-                owner, cancel_requested = service.heartbeat(s, self.job_id, self.worker, self.lease_s)
-            if not owner:
-                self.reason = "lease_lost"
-            elif cancel_requested:
-                self.reason = "cancelled"
-            elif time.monotonic() > self.deadline:
-                self.reason = "timeout"
-            if self.reason:
-                self.cancel.set()
+        self.check()
+        while self.reason is None and not self.stop.wait(interval):
+            self.check()
+
+
+def service_cancel_requested(job_id: uuid.UUID) -> bool:
+    with session_factory()() as s:
+        job = s.get(EvaluationJob, job_id)
+        return bool(job and job.cancel_requested)
 
 
 def execute(job_id: uuid.UUID, worker: str) -> str:
@@ -112,9 +129,16 @@ def _execute(job_id: uuid.UUID, worker: str) -> str:
             assert job is not None
             inp = service.load_input(s, job, storage)
         out = run_pipeline(get_engine(), inp, workdir, cancel=watch.cancel)
+        if watch.check():  # cancelled, timed out or lost the lease while the last stage ran: do not save
+            raise PipelineError(f"job.{watch.reason}", f"stopped before the results were saved: {watch.reason}")
         with session_factory()() as s:
             ok = service.persist_success(s, job_id, worker, out, storage)
-        return "succeeded" if ok else "lease_lost"
+        if ok:
+            return "succeeded"
+        if watch.reason is None and service_cancel_requested(job_id):
+            watch.reason = "cancelled"  # requested between the last check and the save, which refused it
+            raise PipelineError("job.cancelled", "cancelled before the results were saved")
+        return "lease_lost"
     except (PipelineError, EngineError) as e:
         err: dict[str, Any] = e.to_dict()
         if watch.reason == "cancelled":

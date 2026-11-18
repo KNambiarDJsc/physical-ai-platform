@@ -128,11 +128,41 @@ def test_timeout_fails_after_bounded_attempts(client: TestClient, demo: dict[str
     with session_factory()() as s:
         row = s.get(EvaluationJob, job["id"])
         assert row is not None
-        row.timeout_s, row.max_attempts = 1, 1
+        # A limit already exceeded when the job starts: deterministic on any machine. (With 1 s the whole run
+        # finished inside the first heartbeat interval on CI and was saved as a success; that was a real bug.)
+        row.timeout_s, row.max_attempts = 0, 1
         s.commit()
     assert work_once() == "failed"
     j = ok(client.get(f"{P}/evaluations/{job['id']}", headers=as_user("alice")))
     assert j["state"] == "failed" and j["error"]["code"] == "job.timeout" and j["attempts"] == 1
+    assert j["summary"] is None
+
+
+def test_cancel_during_the_last_stage_is_not_saved_as_success(
+    client: TestClient, demo: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A cancellation that arrives after the last heartbeat, while the final stage runs, still wins."""
+    from app.db import session_factory
+    from app.evaluations.models import EvaluationJob
+    from app.workers import run as worker
+
+    job = submit(client, demo["body"])
+    real = worker.run_pipeline
+
+    def pipeline_then_cancel(*a: Any, **kw: Any) -> Any:
+        out = real(*a, **kw)
+        with session_factory()() as s:
+            row = s.get(EvaluationJob, job["id"])
+            assert row is not None
+            row.cancel_requested = True
+            s.commit()
+        return out
+
+    monkeypatch.setattr(worker, "run_pipeline", pipeline_then_cancel)
+    assert work_once() == "cancelled"
+    j = ok(client.get(f"{P}/evaluations/{job['id']}", headers=as_user("alice")))
+    assert j["state"] == "cancelled" and j["summary"] is None
+    assert client.get(f"{P}/evaluations/{job['id']}/comparison", headers=as_user("alice")).status_code == 409
 
 
 def test_transient_failure_is_retried_then_fails(

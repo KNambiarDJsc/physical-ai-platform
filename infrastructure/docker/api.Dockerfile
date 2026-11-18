@@ -10,7 +10,8 @@
 #   docker build -f infrastructure/docker/api.Dockerfile -t pap-api:local .
 
 ARG RUST_IMAGE=rust:1.89.0-slim-bookworm@sha256:d7fc7de78bb8c1469933aeecbf801314d30d7d6e9f0578bba4cfa285bfa37fe6
-ARG PYTHON_IMAGE=python:3.12.11-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
+# Runtime base: newest official rebuild (D-023): 3.12.11 carried 46 fixable HIGH/CRITICAL OS findings, 3.12.16 has 0.
+ARG PYTHON_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
 ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.7.11@sha256:d7e699d374d4e5cb52a37d5c8f0ee15e3c7572850325953bf9fa8d781cfa92fc
 
 # --- engine: the pinned OpenMHS commit, built with its own Cargo.lock ------------------------------------------

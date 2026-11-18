@@ -256,9 +256,10 @@ def _store_file(session: Session, storage: Storage, project_id: uuid.UUID, path:
 
 
 def persist_success(session: Session, job_id: uuid.UUID, worker: str, out: PipelineOutput, storage: Storage) -> bool:
-    """Write everything in one transaction, and only if this worker still holds the lease."""
+    """Write everything in one transaction, only if this worker still holds the lease and nobody cancelled the job
+    (the row is locked, so a cancellation cannot slip in between this check and the write)."""
     job = session.scalar(select(EvaluationJob).where(EvaluationJob.id == job_id).with_for_update())
-    if job is None or job.lease_owner != worker or job.state != "running":
+    if job is None or job.lease_owner != worker or job.state != "running" or job.cancel_requested:
         session.rollback()
         return False
     rel_ids = {

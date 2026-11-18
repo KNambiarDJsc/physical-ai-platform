@@ -146,3 +146,13 @@ optional and says to read the source before relying on an answer, and `.graphify
 engine build, evidence files (csv/jsonl/sqlite/mcap/db3), evaluation results and .env files. The graph
 (`graphify-out/`, gitignored) is built with `graphify update .` (AST only); no LLM API key is configured, so
 no code leaves the machine. Checked: no evidence fragment, local data path or secret in graph.json.
+
+## D-023 (2026-11-19) Runtime base images track the newest official rebuild; no package managers at run time
+Found by the first CI run: the Trivy image scan failed with 46 fixable HIGH/CRITICAL findings in the Debian
+packages of python:3.12.11-slim-bookworm. Scanning candidates straight from the registry (Trivy needs no Docker
+for that) gave 0 for python:3.12.16-slim-bookworm and 0 OS findings for node:22.23.5-bookworm-slim; the node
+image's remaining 10 were all inside its bundled npm, which the web server never runs, so the runtime stage
+deletes npm, npx, corepack and yarn. Official base images are an exception to "versions at least two weeks
+old": their rebuilds are the security fixes, so waiting keeps known vulnerabilities. They are still pinned by
+digest; bumping them is a reviewed change. Bookworm (not trixie) keeps the runtime on the same Debian release
+as the engine build stage (glibc).
