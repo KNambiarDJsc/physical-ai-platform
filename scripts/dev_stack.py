@@ -15,11 +15,13 @@ import argparse
 import json
 import os
 import signal
+import socket
 import subprocess
 import sys
 import time
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 API_DIR = ROOT / "services" / "api"
@@ -38,6 +40,38 @@ def wait(url: str, seconds: float = 90) -> None:
     raise TimeoutError(url)
 
 
+def port_free(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(("127.0.0.1", port))
+            return True
+        except OSError:
+            return False
+
+
+# On POSIX each component runs in its own process group and the whole group is stopped: npm does not pass SIGTERM
+# on to `next start`, which was left running and then answered the next stack's readiness check (found on CI).
+GROUP: dict[str, Any] = {} if sys.platform == "win32" else {"start_new_session": True}
+
+
+def stop_process(p: subprocess.Popen[bytes]) -> None:
+    if p.poll() is not None:
+        return
+    if sys.platform == "win32":
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True, check=False)
+        return
+    for sig, grace in ((signal.SIGTERM, 10.0), (signal.SIGKILL, 5.0)):
+        try:
+            os.killpg(p.pid, sig)
+        except ProcessLookupError:
+            return
+        try:
+            p.wait(timeout=grace)
+            return
+        except subprocess.TimeoutExpired:
+            continue
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--api-port", type=int, default=8000)
@@ -50,6 +84,10 @@ def main() -> int:
     stop = Path(ns.stop_file) if ns.stop_file else None
     if stop:
         stop.unlink(missing_ok=True)
+    busy = [port for port in (ns.api_port, ns.web_port) if not port_free(port)]
+    if busy:  # a leftover server would answer the readiness checks below in place of ours
+        print(f"port(s) {busy} already in use; stop whatever holds them first", file=sys.stderr)
+        return 2
 
     import pgserver
     import psycopg
@@ -86,23 +124,27 @@ def main() -> int:
     pid_file = run_dir / "worker.pid"
 
     def start_worker() -> subprocess.Popen[bytes]:
-        w = subprocess.Popen([sys.executable, "-m", "app.workers.run", "--poll", "0.5"], cwd=API_DIR, env=env)
+        w = subprocess.Popen([sys.executable, "-m", "app.workers.run", "--poll", "0.5"], cwd=API_DIR, env=env, **GROUP)
         pid_file.write_text(str(w.pid), encoding="utf-8")
         return w
 
     api_cmd = [sys.executable, "-m", "uvicorn", "app.main:create_app", "--factory", "--host", "127.0.0.1", "--port"]
     procs = [
-        subprocess.Popen([*api_cmd, str(ns.api_port)], cwd=API_DIR, env=env),
+        subprocess.Popen([*api_cmd, str(ns.api_port)], cwd=API_DIR, env=env, **GROUP),
         start_worker(),
         subprocess.Popen(
             ["npm", "--prefix", str(ROOT / "apps" / "web"), "run", "start", "--", "-p", str(ns.web_port)],
             env={**env, "PAP_API_URL": f"http://127.0.0.1:{ns.api_port}", "NEXT_TELEMETRY_DISABLED": "1"},
             shell=sys.platform == "win32",  # npm is a .cmd on Windows; the command is fixed, no user input
+            **GROUP,
         ),
     ]
     try:
         wait(f"http://127.0.0.1:{ns.api_port}/healthz")
         wait(f"http://127.0.0.1:{ns.web_port}/")
+        if any(p.poll() is not None for p in procs):
+            print("a component exited during start-up; stopping", file=sys.stderr)
+            return 1
         info = {
             "api": f"http://127.0.0.1:{ns.api_port}",
             "web": f"http://127.0.0.1:{ns.web_port}",
@@ -126,11 +168,7 @@ def main() -> int:
         return 0
     finally:
         for p in procs:
-            if p.poll() is None:
-                if sys.platform == "win32":
-                    subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
-                else:
-                    p.send_signal(signal.SIGTERM)
+            stop_process(p)
         pg.cleanup()
 
 
