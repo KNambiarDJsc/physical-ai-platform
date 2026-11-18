@@ -71,7 +71,7 @@ def main() -> int:
     env = {
         **os.environ,
         "PAP_ENV": "development",
-        "PAP_AUTH_MODE": "dev",
+        "PAP_AUTH_MODE": os.environ.get("PAP_AUTH_MODE", "dev"),  # oidc for the sign-in tests (smoke.sh --oidc)
         "PAP_DATABASE_URL": db,
         "PAP_STORAGE_PATH": str(VAR / "artifacts"),
         "PAP_WORK_PATH": str(VAR / "work"),

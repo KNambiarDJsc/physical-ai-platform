@@ -103,8 +103,13 @@ services:
       context: .
       dockerfile: infrastructure/docker/web.Dockerfile
     image: pap-web:local
+    # Browser sign-in (AUTH-002): with PAP_ENV=production the web server only offers OIDC sign-in; put
+    # PAP_WEB_AUTH=oidc, PAP_OIDC_ISSUER, PAP_OIDC_CLIENT_ID, PAP_OIDC_RESOURCE (the API audience), PAP_WEB_ORIGIN and
+    # PAP_SESSION_SECRET (32+ characters) in .env.pap.
+    env_file: *api-env-file
     environment:
       PAP_API_URL: http://api:8000
+      PAP_ENV: ${PAP_ENV:-development}
     ports: ["127.0.0.1:${PAP_WEB_PORT:-3000}:3000"]
     depends_on:
       api: { condition: service_healthy }

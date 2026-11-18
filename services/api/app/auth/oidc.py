@@ -8,6 +8,7 @@ refused by construction.
 from __future__ import annotations
 
 import json
+import urllib.parse
 import urllib.request
 from functools import lru_cache
 from typing import Any
@@ -22,9 +23,18 @@ class TokenInvalid(Exception):
     pass
 
 
+LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+
+
+def issuer_url_allowed(url: str) -> bool:
+    """https, or plain http to this machine only (a local test identity provider). Hostname compared exactly."""
+    u = urllib.parse.urlsplit(url)
+    return u.scheme == "https" or (u.scheme == "http" and (u.hostname or "") in LOOPBACK)
+
+
 def discover_jwks_url(issuer: str, timeout_s: float = 5.0) -> str:
     url = issuer.rstrip("/") + "/.well-known/openid-configuration"
-    if not url.startswith(("https://", "http://127.0.0.1", "http://localhost")):
+    if not issuer_url_allowed(url):
         raise TokenInvalid("issuer must use https")
     with urllib.request.urlopen(url, timeout=timeout_s) as r:  # noqa: S310 (scheme checked above)
         doc: dict[str, Any] = json.loads(r.read(1_000_000))

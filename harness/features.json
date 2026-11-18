@@ -290,12 +290,24 @@
       "paths": [
         "apps/web/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": "2026-11-18",
+        "evidence": [
+          "bash scripts/smoke.sh --oidc (exit 0): a real OpenID Provider (panva/oidc-provider 9.13.3, an OpenID-certified implementation, run locally with RS256 keys and resource indicators) + the stack with the API in PAP_AUTH_MODE=oidc validating its JWT access tokens (issuer, audience, JWKS via discovery) + the web server in PAP_WEB_AUTH=oidc; e2e/oidc.spec.ts 3/3 in Chromium.",
+          "oidc.spec.ts: before sign-in /api/v1/me is 401 through the proxy, also with a page-chosen 'Bearer dev:mallory' header; Sign in -> provider login and consent pages -> back to the app (authorization code + PKCE S256 + state + nonce through openid-client 6.8.9); pap_session cookie httpOnly, secure and sameSite Lax; the transaction cookie is cleared; document.cookie, localStorage, sessionStorage and /auth/session contain no JWT; /api/v1/me reports the provider's issuer and subject; a forged Authorization header from page script still yields the session user; the user creates an organization and project in the UI; Sign out clears the cookie and /api/v1/me is 401 again.",
+          "oidc.spec.ts: a forged session cookie gives 401 and no user; in OIDC mode the settings page offers only identity-provider sign-in (no development form).",
+          "Unit tests (src/lib/server/auth.test.ts, 7): sealed cookies (AES-256-GCM, HKDF keys) round-trip and hide the token, refuse tampering, another key, and a transaction cookie replayed as a session; expired sessions read as none; PAP_WEB_AUTH=dev refused with PAP_ENV=production and production defaults to OIDC; short secrets, plain-http non-loopback issuers (incl. localhost.evil.example) and http issuers in production refused; return paths limited to same-site relative paths.",
+          "Dev mode unaffected: bash scripts/smoke.sh --e2e 7 passed (the 3 OIDC tests skip).",
+          "Found while wiring this: the API's issuer check was a string-prefix match (http://localhost.evil.example passed); now an exact hostname check with a parametrized test (test_auth.py)."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Tested against oidc-provider, not against Keycloak, Entra ID, Okta or Auth0; any standards-conformant provider should work, but each customer IdP needs its configuration checked once.",
+        "No refresh tokens: the session ends when the access token expires (at most 8 h) and the user signs in again.",
+        "Sign-out clears the platform session only; it does not end the session at the identity provider (RP-initiated logout not implemented).",
+        "'Production' is decided at run time by PAP_ENV, not at build time: one web build serves both modes, and with PAP_ENV=production the development identity is refused by both the web server and the API."
+      ]
     },
     {
       "id": "RI-001",

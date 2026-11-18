@@ -32,8 +32,17 @@ images, Compose job with image scans). Ran the scanners locally at the CI versio
 Semgrep project rules clean and self-tested; Trivy found postcss 8.4.31 inside next (2 HIGH) -> npm override
 (D-017) -> clean. Web standalone server checked locally with a run-time API address.
 
+**Then AUTH-002 (verified):** browser sign-in through OIDC (D-019): `src/lib/server/auth.ts`, `/auth/login`,
+`/auth/callback`, `/auth/logout`, `/auth/session`, the proxy attaching the session's token. `bash scripts/smoke.sh
+--oidc` runs a real oidc-provider instance + the API in OIDC mode; 3/3 browser tests (PKCE flow, cookie flags,
+no token readable by the page, forged header ignored, sign-out, forged cookie refused, no dev sign-in in OIDC
+mode). Found and fixed: the API's issuer check was a string-prefix match (`http://localhost.evil.example`).
+
+**State now:** 19 of 23 verified. In progress: INF-003, SEC-001 (both wait only for containers to run). Blocked:
+DATA-004 (S3 server needs Docker). Unstarted: OBS-001 (depends on INF-003).
+
 **Next:** run `bash scripts/smoke.sh --compose --e2e` when Docker can be started (or CI after an approved
-push) to verify INF-003 and finish SEC-001 -> AUTH-002 (browser OIDC) -> OBS-001.
+push) to verify INF-003 and finish SEC-001 -> OBS-001 -> DATA-004.
 
 **Gotchas:** (1) Next 15.5 on this machine left the evaluation page out of its own client reference manifest
 ("Could not find the module ... in the React Client Manifest", 500) whenever the page imported a NEW

@@ -26,6 +26,7 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | psycopg 3 (+ psycopg-binary) | PostgreSQL driver | 3.3.9 | **LGPL-3.0-only** verified | Used unmodified via import: permitted in proprietary products; ship license text; binary wheel bundles libpq (PostgreSQL License) and OpenSSL (Apache-2.0) | Only maintained PG3 driver with SQLAlchemy 2 async/sync support; alternative asyncpg (Apache-2.0) if LGPL is rejected |
 | python-multipart | Streaming multipart uploads | 0.0.34 | Apache-2.0 verified | Permissive | Required by FastAPI `UploadFile` |
 | PyJWT [crypto] + cryptography | OIDC access-token validation (JWKS) | 2.15.1 / 50.0.2 | MIT / Apache-2.0 OR BSD-3 verified | Permissive | Decision D-007 (instead of Authlib) |
+| openid-client (panva/openid-client) + jose, oauth4webapi | Web sign-in: OIDC client (code + PKCE) in the Next.js server | 6.8.9 (jose 6.2.17) | MIT (npm metadata) | Permissive | AUTH-002, D-019. Same author as oidc-provider; server-side only, never bundled for the browser |
 | PostgreSQL (postgres.org) | Platform metadata store | image `postgres:16` (Compose) | PostgreSQL License (stated) | Permissive | Directive stack |
 | SQLite (sqlite.org) | Inside the engine only | bundled in OpenMHS (rusqlite) | Public domain (stated) | None | Engine's store |
 
@@ -34,6 +35,7 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | Project | Function | Version | License | Note |
 |---|---|---|---|---|
 | uv (astral-sh/uv) | Python env + lock | 0.7.11 | MIT OR Apache-2.0 (stated) | Lock file = Python SBOM |
+| oidc-provider (panva/node-oidc-provider) | A real OpenID Provider for the sign-in tests (`apps/web/e2e/support/oidc-provider.mjs`) | 9.13.3 (devDependency) | MIT (npm metadata) | Test only, never in an image; OpenID-certified implementation with development login pages. Used because Keycloak needs Docker (B-001); Keycloak stays the reference IdP for self-hosted installs |
 | Ruff | Lint + format | 0.12.12 | MIT verified (classifier) | |
 | mypy | Static types | 1.20.2 | MIT verified | strict on bridge and API |
 | pytest | Tests | 8.4.2 | MIT verified | |

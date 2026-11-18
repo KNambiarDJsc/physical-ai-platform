@@ -105,3 +105,14 @@ api.Dockerfile builds OpenMHS from engine.lock.json (fetch by commit, `git rev-p
 bit-identical across machines, so the commit pins behaviour and each platform has its own digest (D-002).
 The worker is the same image with another command, so the API's /healthz engine check covers the worker's
 binary too. Services run as non-root with read-only root filesystems; only /data is writable.
+
+## D-019 (2026-11-18) Browser sign-in: the web server is the OIDC client; tokens stay server-side
+The Next.js server runs authorization code + PKCE with openid-client (certified RP library) and keeps the
+access token in an AES-256-GCM sealed, HttpOnly, Secure, SameSite=Lax cookie (keys derived with HKDF from
+PAP_SESSION_SECRET; session and sign-in transaction cookies sealed for different purposes). The /api/v1 proxy
+attaches the token and discards any Authorization header the browser sends, so page scripts can neither read a
+token nor choose an identity; browser cookies are never forwarded to the API. Access tokens are requested for
+the API audience with a resource indicator (RFC 8707). No refresh tokens yet: the session ends with the access
+token (capped at 8 h). Tests use oidc-provider (certified OP implementation) because Keycloak needs Docker.
+Rejected: tokens in sessionStorage/localStorage (readable by any script on the page), NextAuth/Auth.js (another
+session layer and adapter for one provider type we already handle in ~150 lines with a certified library).

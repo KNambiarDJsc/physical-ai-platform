@@ -233,3 +233,22 @@ def test_decisions_are_audited(client: TestClient) -> None:
     assert outsider and outsider[0].organization_id is None  # nothing about acme is attached to mallory's attempt
     log = ok(client.get("/api/v1/orgs/acme/audit-events", headers=as_user("alice")))
     assert all(e["decision"] in ("allow", "deny") for e in log)
+
+
+@pytest.mark.parametrize(
+    ("url", "allowed"),
+    [
+        ("https://idp.example/realms/pap", True),
+        ("http://127.0.0.1:9000/oidc", True),
+        ("http://localhost:9000", True),
+        ("http://[::1]:9000", True),
+        ("http://idp.example", False),
+        ("http://localhost.evil.example", False),
+        ("http://127.0.0.1.evil.example/oidc", False),
+        ("ftp://127.0.0.1/oidc", False),
+    ],
+)
+def test_issuer_scheme_and_host_checked_exactly(url: str, allowed: bool) -> None:
+    from app.auth.oidc import issuer_url_allowed
+
+    assert issuer_url_allowed(url) is allowed
