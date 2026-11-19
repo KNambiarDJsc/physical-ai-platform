@@ -1,5 +1,5 @@
-import { NotAvailable } from "@/components/NotAvailable";
+import { EvidenceView } from "@/components/Modules";
 
 export default function Page() {
-  return <NotAvailable title="Evidence" plan="Search across all stored evidence and episodes. Episodes of an evaluation are already browsable from its comparison page." />;
+  return <EvidenceView />;
 }

@@ -18,11 +18,11 @@ import type { ReactNode } from "react";
 const NAV = [
   { href: "/", label: "Overview", icon: LayoutDashboard, ready: true },
   { href: "/releases", label: "Releases", icon: GitCompareArrows, ready: true },
-  { href: "/fleet", label: "Fleet", icon: Boxes, ready: false },
-  { href: "/incidents", label: "Incidents", icon: AlertTriangle, ready: false },
-  { href: "/verification", label: "Verification", icon: ShieldCheck, ready: false },
-  { href: "/evidence", label: "Evidence", icon: Activity, ready: false },
-  { href: "/integrations", label: "Integrations", icon: Plug, ready: false },
+  { href: "/fleet", label: "Fleet", icon: Boxes, ready: true },
+  { href: "/incidents", label: "Incidents", icon: AlertTriangle, ready: true },
+  { href: "/verification", label: "Verification", icon: ShieldCheck, ready: true },
+  { href: "/evidence", label: "Evidence", icon: Activity, ready: true },
+  { href: "/integrations", label: "Integrations", icon: Plug, ready: true },
   { href: "/settings", label: "Settings", icon: Settings, ready: true },
 ] as const;
 
