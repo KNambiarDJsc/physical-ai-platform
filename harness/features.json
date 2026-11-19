@@ -706,9 +706,9 @@
         "services/api/",
         "infrastructure/docker/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-19",
         "evidence": [
           "test_isolation.py: every organization-scoped (method, path) in the OpenAPI document (25+) called by an outsider user and an outsider service credential, on the victim's path and on the attacker's own path with the victim's ids (IDOR); all 404 where a victim id is involved, no victim data in any response, victim data unchanged. It found and fixed a 500 on long denied URLs (audit field length).",
           "test_mapping.py: malformed CSV/JSONL, oversized lines, deeply nested JSON, NUL bytes and non-UTF-8 produce row or artifact rejections, not crashes",
@@ -716,12 +716,14 @@
           "gitleaks 8.30.1 (release checksum verified): `gitleaks git` on the full history (9 commits) found no leaks; `gitleaks dir` findings (434) are all in gitignored build directories (.engine source export, .venv, var, web build), 0 in tracked files.",
           "Trivy 0.76.1 (release checksum verified) fs scan of a clean export of tracked files, HIGH/CRITICAL, fixed only: found postcss 8.4.31 (CVE-2026-45623, CVE-2026-73646) pinned inside next; fixed with an npm override to the postcss 8.5.33 already in the tree (npm ci, unit tests and build pass); re-scan: 0 vulnerabilities in package-lock.json and uv.lock, 0 misconfigurations in both Dockerfiles.",
           "Images written: infrastructure/docker/api.Dockerfile (runs as uid 10001, code and engine root-owned and read-only, only /data writable; engine built from engine.lock.json inside the build) and web.Dockerfile (runs as node). docker-compose.yml: every service read_only with tmpfs, cap_drop ALL, no-new-privileges; worker cpus 2, mem 2g (no swap), pids 256; time limits via PAP_ENGINE_TIMEOUT_S, the job timeout and the lease. `docker compose config` validates.",
-          ".github/workflows/ci.yml: gitleaks (history), Semgrep (project rules + rule self-test), Trivy fs and image scans, all as container images pinned by digest; actions pinned to commit SHAs; contents: read."
+          ".github/workflows/ci.yml: gitleaks (history), Semgrep (project rules + rule self-test), Trivy fs and image scans, all as container images pinned by digest; actions pinned to commit SHAs; contents: read.",
+          "CI run 44393338284 on c53f3a4 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44393338284): job 'secret, code and dependency scans' green (gitleaks over the full history, Semgrep project rules plus the rule self-test, Trivy fs on lockfiles and Dockerfiles); job 'Docker Compose stack' green including Trivy image scans of pap-api and pap-web (HIGH/CRITICAL, fixed only) and the container checks: api and worker run as uid 10001, web as uid 1000; worker memory 2 GiB, 2 CPUs, pids 256, read-only root (docker inspect).",
+          "Worker time limits enforced and tested: per engine call (bridge timeout), per job (test_timeout_fails_after_bounded_attempts, deterministic since 01add47), lease expiry recovery (test_worker_recovery, killed-worker browser test)."
         ]
       },
       "limitations": [
-        "Not verified until containers actually run: non-root users and worker limits are written and config-validated, and scripts/smoke.sh --compose checks them (id -u per service, docker inspect of the worker), but no Docker engine ran here (B-001).",
-        "The CI workflow has not run (nothing is pushed). The same scanner versions were run locally instead; Trivy image scans have not run anywhere yet."
+        "Trivy image scanning passes for the base images pinned on 2026-11-19; new advisories will need base-image bumps (D-023).",
+        "Semgrep runs project rules only (no registry packs, by licence choice)."
       ]
     },
     {
@@ -745,18 +747,19 @@
         "docker-compose.yml",
         "infrastructure/docker/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-19",
         "evidence": [
-          "docker-compose.yml: postgres 16.10 (digest-pinned, healthcheck), one-shot migrate (alembic upgrade head), api (healthcheck = /healthz, which is 503 unless the image's engine passes the digest check), worker (restart policy, limits), web (standalone server, healthcheck). One command: PAP_DB_PASSWORD=... docker compose up -d --build --wait. `docker compose config` validates.",
-          "The engine is built inside api.Dockerfile from engine.lock.json (repository + commit fetched by SHA, verified with git rev-parse, cargo build --locked) and its digest written to /app/.engine/build.json; nothing is copied from a developer machine.",
-          "Web image: the standalone server was run locally with PAP_API_URL set only at run time; it serves the app (200) and its proxy answers 502 when that API is down, i.e. the API address is not baked into the build (D-013).",
-          "scripts/smoke.sh --compose (builds, waits for health, checks non-root/limits/engine/proxy, runs the API smoke and optionally both browser suites) and the CI `compose` job exist but have not run."
+          "CI run 44393338284 on commit c53f3a495589fe1e70478b6d6a2452065fbf5a20 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44393338284), job 'Docker Compose stack', fully green on a clean ubuntu-24.04 runner: `docker compose up -d --build --wait` (one command; postgres, migrate, api, worker, web; health checks pass), then scripts/smoke.sh --compose --e2e.",
+          "The engine is compiled inside api.Dockerfile from engine.lock.json (repository + commit, checked with git rev-parse); /healthz inside the container reports commit e9ef873b and the digest of the binary that build produced (linux digest differs from the Windows one, as D-002 expects).",
+          "In the same job: API smoke (real evaluation, reproducible report, outsider 404) and 7/7 browser tests against the containers, including a worker killed from the host and restarted by the restart policy.",
+          "Also green earlier on 44380508835 (01add47) for the Compose job."
         ]
       },
       "limitations": [
-        "Needs a Docker engine or a CI runner to verify (B-001); Docker Desktop is installed here but not started (RAM)."
+        "Data persisting across `docker compose down` / `up` (named volumes) is not tested; each run starts from empty volumes.",
+        "Verified on GitHub's Linux runner only; Docker Desktop on Windows/macOS not run."
       ]
     },
     {
@@ -932,6 +935,44 @@
         "Simulation of one idealised task; the self-report rule is written for the experiment.",
         "D was chosen on the pilot (B was declared beforehand).",
         "Only failure rates are compared (G-7); 'no change' cannot be established with a near-perfect baseline (G-8)."
+      ]
+    },
+    {
+      "id": "TRIAL-001",
+      "title": "Self-hosted trial pack for an independent robotics engineer",
+      "priority": 2,
+      "depends_on": [
+        "INF-003",
+        "EVID-001",
+        "EVAL-001"
+      ],
+      "description": "Milestone D: a documented installation, a 30-minute exercise with an answer key, a conventional-script baseline, an evaluation form, known limitations and a pilot brief, so an engineer who has never seen the repository can attempt the evaluation and give feedback.",
+      "acceptance": [
+        "One command installs a self-hosted trial with no credentials of ours; the exercise's tasks have objectively checkable answers.",
+        "A plain-Python baseline computes the same answers from the same raw data, checked against the engine by a test.",
+        "The install and the exercise are run once from a clean environment with no hidden manual steps, and the result is recorded honestly, including where the script is faster or simpler.",
+        "No feedback or reactions of an external user are invented."
+      ],
+      "tests": [
+        "bash trial/dry_run.sh",
+        "uv run pytest services/api/tests/test_trial_baseline.py"
+      ],
+      "paths": [
+        "trial/"
+      ],
+      "status": "in_progress",
+      "verification": {
+        "verified_at": null,
+        "evidence": [
+          "Local dry run (Windows local stack, 2026-11-19): the exercise as written, driven through the UI, matched every answer in trial/expected.json (verdicts, 32 verified failures, 118 and 31 contradictions, the PHYSICAL EVIDENCE label, identical report hashes).",
+          "test_trial_baseline.py: 14 cases; the baseline script reproduces the engine's counts, Wilson intervals, difference intervals, verdicts and McNemar results on all five shipped comparisons.",
+          "Baseline script: 0.07-0.08 s per comparison against 7-18 s on the platform; recorded in trial/DRY_RUN.md as the places where the script is faster."
+        ]
+      },
+      "limitations": [
+        "The clean-environment Docker install (trial/start.sh) is verified only once the CI job `trial` is green.",
+        "No external engineer has done the exercise; the dry run is a script and measures no human time or confusion.",
+        "The repository is private: the owner must grant access or send an archive."
       ]
     }
   ]

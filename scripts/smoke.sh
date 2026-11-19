@@ -8,6 +8,7 @@
 #   bash scripts/smoke.sh --compose        # Docker Compose stack instead (builds the images; INF-003, SEC-001)
 #   bash scripts/smoke.sh --compose --e2e
 #   bash scripts/smoke.sh --oidc           # local stack signing in through a real OIDC provider (AUTH-002)
+#   bash scripts/smoke.sh --compose --trial  # plus the trial exercise (trial/EXERCISE.md) done through the UI
 #
 # --compose also checks that every service runs as a non-root user, that the worker has its CPU, memory, process
 # and read-only limits, and that the web image reaches the API through its runtime proxy.
@@ -17,11 +18,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 E2E=0
+TRIAL=0
 COMPOSE=0
 OIDC=0
 for a in "$@"; do
   case "$a" in
     --e2e) E2E=1 ;;
+    --trial) TRIAL=1 ;;
     --compose) COMPOSE=1 ;;
     --oidc) OIDC=1 ;;
     *) echo "unknown argument: $a" >&2; exit 2 ;;
@@ -70,6 +73,10 @@ if [ "$COMPOSE" = 1 ]; then
     # Kill the worker's main process from the host (as a crash would); the restart policy starts it again.
     kill_cmd="sudo kill -9 \$(docker inspect -f '{{.State.Pid}}' \$(docker compose -p $PROJECT ps -q worker))"
     PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_WORKER_KILL_CMD="$kill_cmd" npm --prefix apps/web run e2e
+  fi
+  if [ "$TRIAL" = 1 ]; then
+    echo "== trial exercise dry run (trial/EXERCISE.md, through the UI)"
+    PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_E2E_TRIAL=1 npm --prefix apps/web run e2e -- e2e/trial-exercise.spec.ts
   fi
   echo "== smoke passed (compose)"
   exit 0
@@ -143,5 +150,9 @@ if [ "$E2E" = 1 ]; then
   echo "== browser suites"
   PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_WORKER_PID_FILE="$(pwd)/$RUN/worker.pid" \
     npm --prefix apps/web run e2e
+fi
+if [ "$TRIAL" = 1 ]; then
+  echo "== trial exercise dry run (trial/EXERCISE.md, through the UI)"
+  PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_E2E_TRIAL=1 npm --prefix apps/web run e2e -- e2e/trial-exercise.spec.ts
 fi
 echo "== smoke passed"

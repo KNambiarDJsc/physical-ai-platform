@@ -1,0 +1,28 @@
+{
+  "_note": "Answers the trial exercise should produce. Every value comes from the platform's own committed results (examples/*/results). Used by the automated dry run (apps/web/e2e/trial-exercise.spec.ts) and by the evaluator to score completion.",
+  "T2": {
+    "verdicts": {"reported": "Regression", "verified": "Regression"},
+    "verified_failures_baseline": 0,
+    "verified_failures_candidate": 32,
+    "contradictions_candidate": 118,
+    "verified_failure_rate_candidate": "32/150 = 21.3 %"
+  },
+  "T3": {
+    "why_text": "Valid independent evidence shows a condition did not hold, and the robot did not claim success.",
+    "condition": "fingertip within 0.02 m of the target",
+    "threshold_m": 0.02,
+    "robot_reported": "timeout"
+  },
+  "T4": {
+    "verdicts": {"reported": "Insufficient evidence", "verified": "Insufficient evidence"},
+    "reason": "fewer than 5 failures in both arms together"
+  },
+  "T5": {
+    "verdicts": {"reported": "Insufficient evidence", "verified": "Insufficient evidence"},
+    "evidence_label": "PHYSICAL EVIDENCE",
+    "reported_failures": "0 of 35 waypoints in both conditions",
+    "verified_failures": "31 of 35 (no failure) and 31 of 32 known (panel failure)",
+    "contradictions_baseline": 31
+  },
+  "T6": {"two_downloads_identical": true}
+}

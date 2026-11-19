@@ -132,3 +132,26 @@ jobs:
             var/smoke/dev-stack/compose.log
             apps/web/test-results/
           retention-days: 7
+
+  trial:
+    name: trial dry run (clean checkout, bash trial/start.sh, the exercise as written)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Only the UI driver (Playwright) is test tooling; the installation itself is `bash trial/start.sh`, with no
+      # credentials, no repository secrets and nothing from this workflow's environment.
+      - name: Dry run
+        run: bash trial/dry_run.sh
+      - name: Keep the dry-run record
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: trial-dry-run
+          path: |
+            var/trial-dry-run/
+            apps/web/test-results/
+          retention-days: 30
