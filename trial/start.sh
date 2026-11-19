@@ -29,7 +29,9 @@ docker info >/dev/null 2>&1 || { echo "The Docker engine is not running. Start D
 mkdir -p "$STATE"
 if [ ! -s "$STATE/db-password" ]; then
   # The database volume keeps the password it was created with, so the password is generated once and reused.
-  (umask 077; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 >"$STATE/db-password")
+  # head exits after exactly 24 bytes and od reads to its end: no reader closes early, so `pipefail` is not tripped
+  # (the earlier `tr ... | head -c 32` died of SIGPIPE; found by the clean-runner dry run).
+  (umask 077; head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n' >"$STATE/db-password")
 fi
 PAP_DB_PASSWORD="$(cat "$STATE/db-password")"
 export PAP_DB_PASSWORD PAP_WEB_PORT="$WEB_PORT" PAP_API_PORT="$API_PORT" PAP_ENV=development PAP_AUTH_MODE=dev
