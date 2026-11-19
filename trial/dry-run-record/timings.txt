@@ -1,0 +1,4 @@
+install_seconds=512
+script_seconds[mujoco_A_D]=0.03
+script_seconds[mujoco_A_C]=0.03
+script_seconds[coresense_no_failure_panel_failure]=0.03

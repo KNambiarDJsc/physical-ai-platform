@@ -2,6 +2,23 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-19 — Session 4: Milestone D, trial pack for an independent engineer
+
+**State now:** 26 of 27 features verified (adds INF-003, SEC-001 on CI run 44393338284; EVAL-001; TRIAL-001). Open:
+OBS-002 (collector and dashboards, unstarted; not needed for the trial).
+
+**trial/**: one-command Docker install (`bash trial/start.sh`, no credentials of ours), a 6-task exercise with an
+answer key, the same questions answered by a plain-Python script checked against the engine (14 cases), an
+evaluation form, LIMITATIONS (G-7, G-8 first), a pilot brief, and our own dry run. Clean GitHub runner: install to
+Ready in 512 s, exercise matched every answer, reset left nothing. The script answers in 0.03 s where the platform
+needs 4-18 s: recorded as where the script is faster. First clean run failed on a SIGPIPE bug in start.sh (fixed).
+
+**Not done, and not claimable:** no external engineer has tried it, so there is no feedback of any kind; the
+pilot brief's contact line is blank; Docker Desktop on Windows/macOS is untested; the repo is private.
+
+**Next:** hand the trial to a real engineer (owner grants repo access); then act on what they report. Milestone D's
+competitive baseline stays open until an engineer has done both workflows.
+
 ## 2026-11-19 — Session 3: deployment validation on CI, first real robot evidence
 
 **Pushed** to the private repo KNambiarDJsc/physical-ai-platform (user approved). CI findings, all real:

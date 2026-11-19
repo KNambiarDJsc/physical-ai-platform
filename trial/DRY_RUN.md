@@ -27,7 +27,21 @@ answer key, not `start.sh`.
 
 ## Run 2: clean GitHub runner, Docker, `bash trial/start.sh`
 
-*(CI job `trial`; filled in below from its recorded artifact.)*
+CI run [44458202782](https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44458202782), commit
+36d60e7, job `trial`, fresh `ubuntu-24.04` machine, no secrets in the job. Record in `dry-run-record/`.
+
+| | Result |
+|---|---|
+| `bash trial/start.sh` from a clean checkout to "Ready" | **512 s** (engine compiled inside the image build, images pulled) |
+| Exercise T1-T6 through the UI, every answer compared with `expected.json` | all matched; 12.5 s of automation |
+| Part B, three script runs | 0.03 s each |
+| `bash trial/start.sh reset` | removed the containers, the database volume and the network |
+
+No steps were done by hand between those lines: the job is `bash trial/dry_run.sh` and nothing else. The only
+extra tooling is the browser driver (Node and Playwright), which stands in for the engineer's mouse. The first
+attempt at this run **failed**: `start.sh` generated its database password with `tr ... | head -c 32`, which dies
+of SIGPIPE under `set -o pipefail`, so the script stopped before starting Docker. Nobody had run `start.sh` before
+(Docker is off on the development machine), so only the clean run could find it. Fixed in 36d60e7.
 
 ## Where the plain script is faster or simpler
 
@@ -35,7 +49,7 @@ Measured on the same machine as Run 1:
 
 | | Platform | Script |
 |---|---|---|
-| Setup | `start.sh`, about 8 minutes first time (engine compiled in the image) | none (Python 3.10+, standard library) |
+| Setup | `start.sh`, 512 s on a clean GitHub runner (engine compiled in the image) | none (Python 3.10+, standard library) |
 | Time to the T2 answer | 18 s of automation: create releases, upload three files, paste the mapping, fill the evaluation form, wait for the engine | 0.07 s |
 | Time to the T4 answer | 13 s | 0.08 s |
 | Time to the T5 answer | 7 s | 0.08 s |
@@ -61,4 +75,5 @@ difference above is exactly what the form asks an engineer.
 ## Not exercised
 
 Human timing, confusion, and the form. Whether the instructions are clear to someone who has never seen the
-repository. Windows and macOS Docker Desktop. A source-archive install without GitHub access.
+repository. Windows and macOS Docker Desktop (the Windows run used the local stack, not Docker). A source-archive
+install without GitHub access. Reaching the web page from a browser on a different machine.

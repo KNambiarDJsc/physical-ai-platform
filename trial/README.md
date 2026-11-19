@@ -18,7 +18,7 @@ you would write yourself, and where it does not.
 ## What you need
 
 - Docker with the Compose plugin, git, a POSIX shell (Git Bash or WSL on Windows), Python 3.10+ for Part B.
-- About 8 minutes for the first build (the engine is compiled inside the image) and a few GB of disk.
+- About 9 minutes for the first build (512 s on a GitHub runner; the engine is compiled inside the image). We have not measured disk use.
 - Read access to the repository. It is private: the owner will give you access or send you a source archive.
   Nothing else of ours is needed: no credentials, keys or private services.
 

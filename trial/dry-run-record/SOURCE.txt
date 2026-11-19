@@ -1,0 +1,3 @@
+CI run 44458202782, commit 36d60e7001a6dfe12ec31fa96c89715c309de635, job "trial dry run", ubuntu-24.04.
+https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44458202782
+Recorded by trial/dry_run.sh. Script-driven, not a human: see ../DRY_RUN.md.

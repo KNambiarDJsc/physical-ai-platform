@@ -6,7 +6,7 @@
 #   bash trial/start.sh reset      # stop and DELETE all trial data (database, uploaded files)
 #   bash trial/start.sh status
 #
-# Needs: Docker with the Compose plugin (v2.20+), git, and about 8 minutes the first time (the engine is compiled
+# Needs: Docker with the Compose plugin (v2.20+), git, and about 9 minutes the first time (the engine is compiled
 # from source inside the image build). Works in Git Bash or WSL on Windows, and in any POSIX shell.
 #
 # What it starts: PostgreSQL, the API, the evaluation worker (with the pinned OpenMHS engine), and the web app, on
@@ -45,7 +45,7 @@ case "$CMD" in
         exit 1
       fi
     done
-    echo "Building and starting (first time: about 8 minutes, mostly compiling the engine)..."
+    echo "Building and starting (first time: about 9 minutes, mostly compiling the engine)..."
     dc up -d --build --wait --wait-timeout 900
     echo
     echo "Ready:  http://127.0.0.1:$WEB_PORT"

@@ -1,0 +1,31 @@
+$ python trial/baseline/analysis.py mujoco A D
+Reported by the robot: regression
+  A: 5/150 scenarios failed = 0.033  95% CI [0.014, 0.076]
+  D: 150/150 scenarios failed = 1.000  95% CI [0.975, 1.000]
+  difference +0.967  95% CI [+0.918, +0.986]  paired: 150 pairs, 145 only candidate failed, 0 only baseline failed, McNemar p 4.48e-44
+Independently verified: regression
+  A: 0/150 scenarios failed = 0.000  95% CI [0.000, 0.025]
+  D: 32/150 scenarios failed = 0.213  95% CI [0.155, 0.286]
+  difference +0.213  95% CI [+0.150, +0.286]  paired: 150 pairs, 32 only candidate failed, 0 only baseline failed, McNemar p 4.66e-10
+Candidate episodes where report and measurement disagree: 118 of 150
+
+$ python trial/baseline/analysis.py mujoco A C
+Reported by the robot: insufficient_evidence
+  A: 5/150 scenarios failed = 0.033  95% CI [0.014, 0.076]
+  C: 7/150 scenarios failed = 0.047  95% CI [0.023, 0.093]
+  difference +0.013  95% CI [-0.035, +0.064]  paired: 0 pairs, 0 only candidate failed, 0 only baseline failed, McNemar p 1
+Independently verified: insufficient_evidence  (fewer than 5 failures in both arms together)
+  A: 0/150 scenarios failed = 0.000  95% CI [0.000, 0.025]
+  C: 0/150 scenarios failed = 0.000  95% CI [0.000, 0.025]
+Candidate episodes where report and measurement disagree: 7 of 150
+
+$ python trial/baseline/analysis.py coresense no_failure panel_failure
+Reported by the robot: insufficient_evidence  (fewer than 5 failures in both arms together)
+  no_failure: 0/35 scenarios failed = 0.000  95% CI [0.000, 0.099]
+  panel_failure: 0/35 scenarios failed = 0.000  95% CI [0.000, 0.099]
+Independently verified: insufficient_evidence
+  no_failure: 31/35 scenarios failed = 0.886  95% CI [0.740, 0.955]
+  panel_failure: 31/32 scenarios failed = 0.969  95% CI [0.843, 0.994]
+  difference +0.083  95% CI [-0.061, +0.231]  paired: 32 pairs, 3 only candidate failed, 0 only baseline failed, McNemar p 0.25
+Candidate episodes where report and measurement disagree: 34 of 39
+

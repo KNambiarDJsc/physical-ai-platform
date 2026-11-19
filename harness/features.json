@@ -960,19 +960,21 @@
       "paths": [
         "trial/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-19",
         "evidence": [
           "Local dry run (Windows local stack, 2026-11-19): the exercise as written, driven through the UI, matched every answer in trial/expected.json (verdicts, 32 verified failures, 118 and 31 contradictions, the PHYSICAL EVIDENCE label, identical report hashes).",
           "test_trial_baseline.py: 14 cases; the baseline script reproduces the engine's counts, Wilson intervals, difference intervals, verdicts and McNemar results on all five shipped comparisons.",
-          "Baseline script: 0.07-0.08 s per comparison against 7-18 s on the platform; recorded in trial/DRY_RUN.md as the places where the script is faster."
+          "Baseline script: 0.07-0.08 s per comparison against 7-18 s on the platform; recorded in trial/DRY_RUN.md as the places where the script is faster.",
+          "CI run 44458202782 on 36d60e7 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44458202782), job 'trial dry run', clean ubuntu-24.04 runner, no secrets: `bash trial/start.sh` from a clean checkout to Ready in 512 s; the exercise T1-T6 through the UI matched every answer in expected.json; Part B scripts 0.03 s; `bash trial/start.sh reset` removed containers, volume and network. All four CI jobs green on that commit. Record kept in trial/dry-run-record/.",
+          "The first clean run failed: start.sh's password generation died of SIGPIPE under pipefail. Found only by the clean run; fixed in 36d60e7 (recorded in trial/DRY_RUN.md)."
         ]
       },
       "limitations": [
-        "The clean-environment Docker install (trial/start.sh) is verified only once the CI job `trial` is green.",
-        "No external engineer has done the exercise; the dry run is a script and measures no human time or confusion.",
-        "The repository is private: the owner must grant access or send an archive."
+        "No external engineer has done the exercise: the dry run is a script and measures no human time, confusion or feedback. The registry entry is verified against its written acceptance criteria, not against the objective that an outsider can use it unaided.",
+        "Docker Desktop on Windows/macOS and archive installs without GitHub access are untested.",
+        "The repository is private: the owner must grant access or send an archive. The pilot brief's contact line is blank for the owner to fill in."
       ]
     }
   ]
