@@ -78,6 +78,30 @@ def engine_required() -> bool:
 
 
 @pytest.fixture(scope="session")
+def virtual_lab() -> Iterator[str]:
+    """The real LabThings virtual laboratory (runtimes/virtual-lab), started once per session. No mocks."""
+    from pap_device_sdk.testing import run_virtual_lab
+
+    with run_virtual_lab(Path(__file__).resolve().parents[3]) as url:
+        yield url
+
+
+@pytest.fixture
+def with_lab(settings_env: None, virtual_lab: str, monkeypatch: pytest.MonkeyPatch) -> str:
+    """The operator catalog: the virtual lab as a simulated environment, and the same endpoint configured as a
+    *physical* environment, which must allow discovery and reads but never a command (D-026)."""
+    from app.config import get_settings
+
+    catalog = [
+        {"key": "virtual-lab", "name": "Virtual laboratory", "kind": "simulated", "endpoint": virtual_lab},
+        {"key": "plant-floor", "name": "Plant floor (physical)", "kind": "physical", "endpoint": virtual_lab},
+    ]
+    monkeypatch.setenv("PAP_ENVIRONMENTS", json.dumps(catalog))
+    get_settings.cache_clear()
+    return virtual_lab
+
+
+@pytest.fixture(scope="session")
 def omhs():  # type: ignore[no-untyped-def]
     """The pinned OpenMHS engine; skipped when absent, a failure when PAP_REQUIRE_ENGINE=1."""
     from openmhs_bridge import EngineError, engine_from_env

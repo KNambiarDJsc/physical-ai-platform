@@ -38,6 +38,8 @@ from ..observability import (
     job_id_var,
     tracer,
 )
+from ..workflows import service as wf_service
+from ..workflows.executor import execute_run
 
 log = logging.getLogger("pap.worker")
 
@@ -182,13 +184,21 @@ def run(once: bool = False, poll_s: float = 1.0) -> None:
     while True:
         if time.monotonic() - last_recovery > settings.worker_lease_s / 2:
             with session_factory()() as s:
-                n = service.recover_expired(s)
+                n = service.recover_expired(s) + wf_service.recover_expired(s)
             if n:
                 log.warning("recovered %d job(s) whose worker stopped", n)
             last_recovery = time.monotonic()
         with session_factory()() as s:
             job_id = service.claim(s, worker, settings.worker_lease_s)
         if job_id is None:
+            with session_factory()() as s:
+                run_id = wf_service.claim(s, worker, settings.worker_lease_s)
+            if run_id is not None:
+                log.info("workflow run %s claimed by %s", run_id, worker)
+                execute_run(run_id, worker)
+                if once:
+                    return
+                continue
             if once:
                 return
             time.sleep(poll_s)

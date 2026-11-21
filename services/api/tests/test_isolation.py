@@ -19,7 +19,10 @@ from fastapi.testclient import TestClient
 from helpers import as_user, bearer, make_org, ok
 
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
-ID_PARAMS = {"user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id"}
+ID_PARAMS = {
+    "user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id",
+    "device_id", "run_id",
+}  # fmt: skip
 pytestmark = pytest.mark.engine
 
 
@@ -37,6 +40,17 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
         },
         ("POST", f"{p}/artifacts"): {"files": {"file": ("planted.csv", b"a\n1\n")}},
         ("POST", f"{p}/mappings"): {"json": dict(spec, name="planted")},
+        ("POST", f"{o}/environments"): {"json": {"config_key": "virtual-lab", "slug": "planted"}},
+        ("POST", f"{o}/environments/{{env_slug}}/discover"): {},
+        ("POST", f"{o}/workflows"): {
+            "json": {
+                "slug": "planted",
+                "name": "planted",
+                "environment": "virtual-lab",
+                "template": "dispense-and-verify",
+            }
+        },
+        ("POST", f"{o}/workflows/{{workflow_slug}}/runs"): {},
         ("POST", f"{p}/evaluations"): {
             "json": {
                 "baseline_release_id": v["baseline"],
@@ -87,7 +101,7 @@ def test_every_route_with_a_body_has_one_here() -> None:
 
 
 @pytest.fixture
-def world(client: TestClient, omhs: Any) -> dict[str, Any]:
+def world(client: TestClient, omhs: Any, with_lab: str) -> dict[str, Any]:
     from test_jobs import P, work_once
 
     h = as_user("alice")
@@ -129,11 +143,27 @@ def world(client: TestClient, omhs: Any) -> dict[str, Any]:
     assert work_once() == "succeeded"
     v["job_id"] = job["id"]
     v["episode_id"] = ok(client.get(f"{P}/evaluations/{job['id']}/episodes?limit=1", headers=h))["items"][0]["id"]
+    # Hardware Hub: the victim's environment and its discovered devices.
+    ok(client.post("/api/v1/orgs/acme/environments", json={"config_key": "virtual-lab"}, headers=h), 201)
+    found = ok(client.post("/api/v1/orgs/acme/environments/virtual-lab/discover", headers=h))["devices"]
+    v["env_slug"], v["name"] = "virtual-lab", "simulated"
+    v["device_id"] = next(d["id"] for d in found if d["key"] == "pump")
+    # Workflows: the victim's workflow and one queued run.
+    wf = {
+        "slug": "dispense",
+        "name": "victim-workflow",
+        "environment": "virtual-lab",
+        "template": "dispense-and-verify",
+    }
+    ok(client.post("/api/v1/orgs/acme/workflows", json=wf, headers=h), 201)
+    v["workflow_slug"] = "dispense"
+    v["run_id"] = ok(client.post("/api/v1/orgs/acme/workflows/dispense/runs", headers=h), 201)["id"]
     secrets = {
         v[k]
         for k in ("user_id", "credential_id", "baseline", "candidate", "baseline_art", "candidate_art", "mapping_id",
-                  "job_id", "episode_id")
-    } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate"}  # fmt: skip
+                  "job_id", "episode_id", "device_id", "run_id")
+    } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate",
+         "victim-workflow"}  # fmt: skip
     make_org(client, "mallory", "mallory-co", "mallory-proj")
     mcred = ok(
         client.post("/api/v1/orgs/mallory-co/service-credentials", json={"name": "m", "role": "admin"},
