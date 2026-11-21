@@ -33,3 +33,8 @@ Thumbs.db
 .tools/
 .claude/settings.local.json
 trial/.state/
+
+# Third-party design skills, installed pinned by scripts/install-design-skills.sh (D-025)
+.claude/skills/impeccable/
+.claude/skills/design-taste-frontend/
+.claude/skills/.design-skills-pins

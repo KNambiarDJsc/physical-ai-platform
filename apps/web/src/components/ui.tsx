@@ -1,6 +1,16 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { CLASS_LABEL, VERDICT_LABEL } from "@/lib/format";
+import { CLASS_LABEL, timestamp, VERDICT_LABEL } from "@/lib/format";
+
+/** A stored instant, shown in the one timestamp format; the exact ISO value is in the tooltip. */
+export function Time({ iso }: { iso: string | null | undefined }) {
+  if (!iso) return <span className="text-faint">—</span>;
+  return (
+    <time dateTime={iso} title={iso} className="num text-muted">
+      {timestamp(iso)}
+    </time>
+  );
+}
 
 export function Badge({ tone, children }: { tone: "ok" | "bad" | "warn" | "unknown" | "neutral" | "accent"; children: ReactNode }) {
   const cls = {

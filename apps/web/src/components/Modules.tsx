@@ -12,7 +12,7 @@ import { api, projectPath, type Artifact, type Evaluation, type EpisodePage, typ
 import { shortDigest } from "@/lib/format";
 import { Notice, PageHeader, Panel } from "./AppShell";
 import { RequireIdentity, useAuth, useMe } from "./Identity";
-import { Badge, ClassBadge, StateBadge, Table, Td, VerdictBadge } from "./ui";
+import { Badge, ClassBadge, StateBadge, Table, Td, Time, VerdictBadge } from "./ui";
 
 type Workspace = {
   org: string;
@@ -76,7 +76,6 @@ function Body({ children }: { children: (w: ReturnType<typeof useWorkspace>) => 
   return <div className="space-y-4">{children(w)}</div>;
 }
 
-const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString() : "—");
 const kib = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MiB` : `${(n / 1024).toFixed(1)} KiB`);
 const evalHref = (w: Workspace, e: Evaluation) => `/o/${w.org}/p/${w.project.slug}/e/${e.id}`;
 const summary = (e: Evaluation) =>
@@ -125,7 +124,9 @@ export function VerificationView() {
                         <Td num>{done ? (s.episodes ?? "—") : "—"}</Td>
                         <Td num>{done ? contradictions : "—"}</Td>
                         <Td>{done ? evidenceClass(e).join(", ") || "—" : "—"}</Td>
-                        <Td>{new Date(e.created_at).toLocaleDateString()}</Td>
+                        <Td>
+                          <Time iso={e.created_at} />
+                        </Td>
                       </tr>
                     );
                   })}
@@ -168,7 +169,7 @@ export function EvidenceView() {
                         <Td num>{kib(a.size_bytes)}</Td>
                         <Td className="num" >{shortDigest(a.sha256)}</Td>
                         <Td num>{used(a.id) ? `${used(a.id)} evaluation${used(a.id) === 1 ? "" : "s"}` : "—"}</Td>
-                        <Td>{when(a.created_at)}</Td>
+                        <Td><Time iso={a.created_at} /></Td>
                         <Td>{a.created_by === "worker" ? "worker" : "you"}</Td>
                       </tr>
                     ))}
@@ -402,8 +403,8 @@ function Integrations({ items, orgs }: { items: Workspace[]; orgs: { slug: strin
                       <Td className="font-medium">{c.name}</Td>
                       <Td>{c.role}</Td>
                       <Td className="num">{c.token_prefix}…</Td>
-                      <Td>{when(c.created_at)}</Td>
-                      <Td>{when(c.last_used_at)}</Td>
+                      <Td><Time iso={c.created_at} /></Td>
+                      <Td><Time iso={c.last_used_at} /></Td>
                       <Td>{c.revoked_at ? <Badge tone="neutral">revoked</Badge> : <Badge tone="ok">active</Badge>}</Td>
                     </tr>
                   ))}

@@ -113,6 +113,8 @@ visitors see the sign-in prompt, never data.
 
 - Plain, specific, engineering register. Say what the system measured, not what it "thinks".
 - Numbers carry their basis: "32 of 150 episodes", "95 % interval".
+- Timestamps: one format, `YYYY-MM-DD HH:mm` in local time (`<Time>` in `ui.tsx`), the exact ISO instant in the
+  tooltip. Never `toLocaleString`, whose output changes with the browser locale.
 - No marketing language inside the application. No exclamation marks.
 - Name things consistently: release, evidence, mapping, evaluation, episode, verdict, incident.
 
@@ -126,7 +128,10 @@ shimmer. Respect `prefers-reduced-motion`.
 - Keyboard reachable everything; visible focus ring in `accent`.
 - Landmarks: `nav[aria-label=Main]`, one `main`, one `h1` per page.
 - Colour is never the only signal: badges carry text.
-- Tested with Playwright in the browser e2e suite; axe-core checks are a planned addition.
+- Gate: `e2e/a11y.spec.ts` runs axe-core (WCAG 2.0/2.1/2.2 A and AA) on every page in both themes against real
+  data, and checks the command palette by keyboard. A new page is added to that list in the same change.
+- Visible text is part of every accessible name (WCAG 2.5.3): no `aria-label` that replaces a visible label.
+- Dialogs keep focus inside while open and return it to the opener on close.
 
 ## 12. Anti-patterns (reject in review)
 

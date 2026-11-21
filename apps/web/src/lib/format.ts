@@ -37,6 +37,18 @@ export const CLASS_LABEL: Record<string, string> = {
   insufficient_evidence: "Insufficient evidence",
 };
 
+/**
+ * One timestamp format everywhere (DESIGN.md §9): local time as YYYY-MM-DD HH:mm, unambiguous in every locale.
+ * The full ISO instant goes in the title and the dateTime attribute.
+ */
+export function timestamp(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 export function shortDigest(d: string | null | undefined): string {
   if (!d) return "—";
   return d.replace(/^sha256:/, "").slice(0, 12);

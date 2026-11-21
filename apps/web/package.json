@@ -25,6 +25,7 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/eslintrc": "3.3.7",
     "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.5",

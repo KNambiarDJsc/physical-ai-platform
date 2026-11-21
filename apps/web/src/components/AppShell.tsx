@@ -171,7 +171,7 @@ function TopBar({ path, onPalette }: { path: string; onPalette: () => void }) {
           })}
         </ol>
       </nav>
-      <button type="button" onClick={onPalette} className="btn hidden h-7 text-muted sm:inline-flex" aria-label="Open command palette">
+      <button type="button" onClick={onPalette} className="btn hidden h-7 text-muted sm:inline-flex" aria-haspopup="dialog" title="Open the command palette">
         <Search size={13} aria-hidden />
         <span className="font-normal">Go to…</span>
         <span className="kbd">Ctrl K</span>
@@ -236,7 +236,12 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
     const s = q.trim().toLowerCase();
     return s ? ALL.filter((i) => i.label.toLowerCase().includes(s) || i.hint.toLowerCase().includes(s)) : ALL;
   }, [q]);
-  useEffect(() => input.current?.focus(), []);
+  // Focus moves into the palette and returns to wherever it was when the palette closes.
+  useEffect(() => {
+    const before = document.activeElement as HTMLElement | null;
+    input.current?.focus();
+    return () => before?.focus?.();
+  }, []);
   useEffect(() => setSel(0), [q]);
   const go = (i: NavItem | undefined) => {
     if (!i) return;
@@ -260,6 +265,7 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") onClose();
+              else if (e.key === "Tab") e.preventDefault(); // the input is the dialog's only stop: Tab must not reach the page behind
               else if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setSel((s) => Math.min(s + 1, results.length - 1));
@@ -271,19 +277,23 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
             role="combobox"
             aria-expanded="true"
             aria-controls="palette-list"
-            aria-activedescendant={results[sel] ? `palette-${results[sel].href}` : undefined}
+            aria-activedescendant={results[sel] ? `palette-option-${sel}` : undefined}
             aria-label="Go to page"
             placeholder="Go to page…"
             className="h-11 flex-1 bg-transparent text-[14px] outline-none placeholder:text-faint"
           />
           <span className="kbd">Esc</span>
         </div>
-        <ul id="palette-list" role="listbox" aria-label="Pages" className="max-h-80 overflow-y-auto p-1.5">
-          {results.length === 0 && <li className="px-2 py-3 text-[13px] text-muted">No page matches “{q}”.</li>}
+        {results.length === 0 && (
+          <p role="status" className="px-3.5 py-3 text-[13px] text-muted">
+            No page matches “{q}”.
+          </p>
+        )}
+        <ul id="palette-list" role="listbox" aria-label="Pages" className={clsx("max-h-80 overflow-y-auto p-1.5", results.length === 0 && "hidden")}>
           {results.map((i, n) => (
             <li
               key={i.href}
-              id={`palette-${i.href}`}
+              id={`palette-option-${n}`}
               role="option"
               aria-selected={n === sel}
               onMouseEnter={() => setSel(n)}

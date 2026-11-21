@@ -2,6 +2,25 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-21 — Session 6: design-system checkpoint closed; infrastructure started
+
+**Checkpoint gates (all on this machine):** `verify.sh` full: 183 pytest passed (4 skipped), engine audit 11/11,
+typecheck, lint, 15 unit, build. `smoke.sh --e2e` on a fresh stack: 17 browser tests passed (release flow, failure
+paths incl. a killed worker, module pages, accessibility in both themes, palette keyboard); 4 skipped (3 OIDC-only,
+1 clean-install trial). `smoke.sh --oidc`: 3/3 through a real OIDC provider. The clean-install trial needs Docker,
+which is not running here (B-001): it runs on CI's clean runner after the push (job `trial`).
+The first OIDC run failed: the new top bar also shows the user's name, so the test's `getByText` matched twice. The
+assertion is now scoped to the settings panel and also checks the top bar (stronger, not weaker).
+
+**Design skills (D-025):** Impeccable and Taste Skill reviewed in throwaway clones; installed pinned by
+`scripts/install-design-skills.sh`, skill text only, no hooks, no downloaded binary.
+**Impeccable audit** (docs/design-audit-2026-11-21.md): 14/20 found, 16/20 after fixes. Fixed: WCAG 2.5.3 label-in-name
+on every page (found by the new axe gate), palette focus escape and focus return, listbox child, three timestamp
+formats (one `<Time>` now). Open: skip link, Fleet counting in the browser, unused echarts, a repeated title.
+
+**Next:** the infrastructure track (D-026..D-028): environments and Hardware Hub, adapter SDK with the LabThings
+virtual laboratory, durable simulated workflows verified by the engine, the Workbench, onboarding.
+
 ## 2026-11-21 — Session 5: module pages, design system and application shell
 
 **Module pages** (commit 06f037b, pushed with approval): Fleet, Incidents, Verification, Evidence and Integrations

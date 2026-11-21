@@ -69,7 +69,8 @@ test("sign in with the identity provider; tokens stay out of the page; sign out"
 
   // Sign out clears the session.
   await page.goto("/settings");
-  await expect(page.getByText(`Test user ${user}`)).toBeVisible();
+  await expect(page.getByRole("main").getByText(`Test user ${user}`)).toBeVisible();
+  await expect(page.getByRole("banner").getByText(`Test user ${user}`)).toBeVisible(); // the top bar names the user too
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
   expect((await context.cookies()).find((c) => c.name === "pap_session" && c.value)).toBeUndefined();

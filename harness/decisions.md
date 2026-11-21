@@ -166,3 +166,43 @@ and the brief's tertiary grey was raised to pass AA on the sunken surface. Hones
 modules that are not built are not in the navigation, and concept imagery never appears in the application.
 Fonts come from the `geist` package so builds and air-gapped installs do not fetch from Google.
 
+## D-025 (2026-11-21) Design skills: reviewed, installed pinned, without their hooks or binaries
+Reviewed both repositories in throwaway clones (D:/openmhs-tmp/review). Impeccable (pbakaus/impeccable,
+b49177d, Apache-2.0): useful audit and critique playbooks, but `npx impeccable install` registers SessionStart,
+PostToolUse(Edit|Write) and Stop hooks that run its launcher on every edit outside model approval, and the
+launcher downloads a native engine on first use (checksum-verified against a manifest, but not reviewable here).
+Taste Skill (Leonxlnx/taste-skill, f6b7657, MIT): a marketing-website skill (hero entrances, photographs,
+shader effects) of 38 MB whose SKILL.md registers a Stop hook running `node scripts/gate.mjs` for up to 600 s.
+Decision: `scripts/install-design-skills.sh` fetches exactly those commits and copies skill files into
+`.claude/skills/` (gitignored): Impeccable's SKILL.md and reference playbooks only (no launcher, so the skill takes
+its documented "launcher unavailable" path and reads PRODUCT.md/DESIGN.md directly); Taste Skill whole, for a
+future public website only. No installer runs, no hook is registered, nothing is downloaded at use. DESIGN.md
+stays the authority: Impeccable's `document`/`init` commands, which write DESIGN.md/PRODUCT.md, are not used.
+The measurable part of the audit is axe-core in the browser suite (`e2e/a11y.spec.ts`).
+
+## D-026 (2026-11-21) Execution scope: commands only to simulated devices, enforced in code
+The owner directs the platform to execute workflows ("no physical hardware writes"). The invariant "observation
+only" becomes: the platform may invoke actions only on devices in an environment the operator configured as
+`simulated` AND whose own description declares it simulated; for every other device it may discover and read,
+never write. Both checks run in the executor immediately before each dispatch and are covered by tests; a
+mismatch fails the step without sending anything. The API never talks to an arbitrary URL: environments are
+chosen from an operator-configured list (`PAP_ENVIRONMENTS`), which closes the server-side request forgery a
+user-supplied endpoint would open. Nothing sits in a real-time control path.
+
+## D-027 (2026-11-21) Devices are described by W3C WoT Thing Descriptions; first adapter is LabThings
+Device and capability discovery uses the W3C Web of Things Thing Description, the format LabThings-FastAPI
+serves (`/thing_descriptions/`, one TD per Thing; actions are POSTed and return an invocation resource that is
+polled). The virtual laboratory is built with labthings-fastapi 0.3.0 (MIT, 2026-08-17) in its own uv project
+(`runtimes/virtual-lab`, own lock), so its FastAPI/pydantic pins never constrain the platform. The adapter SDK
+(`packages/device-sdk`) defines the platform side (discover, read, invoke) so ROS 2, OPC UA or SiLA adapters can
+be added behind the same interface later.
+
+## D-028 (2026-11-21) Workflow durability: journal before dispatch, at-most-once unless the action is idempotent
+Workflow runs use the same PostgreSQL lease pattern as evaluation jobs. Each step is journalled as `dispatching`
+with a request id before the HTTP call and as `completed`/`failed` after. On resume after a crash, a step left in
+`dispatching` is re-sent only when the action accepts a `request_id` (the instrument deduplicates it, so the effect
+happens once); otherwise the step and run stop as `outcome_unknown` for a human to decide, because re-sending a
+non-idempotent command to an instrument could repeat a physical effect. The run's verified result comes from
+`openmhs outcome verify` on an RFC 0004 contract and the independent instrument's evidence, never from the
+platform's own comparison.
+

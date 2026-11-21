@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { use, useState, type FormEvent } from "react";
 import { Notice, PageHeader, Panel } from "@/components/AppShell";
 import { RequireIdentity } from "@/components/Identity";
-import { StateBadge, Table, Td, VerdictBadge } from "@/components/ui";
+import { StateBadge, Table, Td, Time, VerdictBadge } from "@/components/ui";
 import { api, projectPath, type Artifact, type Evaluation, type Mapping, type Release } from "@/lib/api/client";
 import { shortDigest } from "@/lib/format";
 
@@ -59,7 +59,9 @@ function Workspace({ org, project }: Params) {
                   <Td>{e.summary?.verdict_reported ? <VerdictBadge verdict={String(e.summary.verdict_reported)} /> : "—"}</Td>
                   <Td>{e.summary?.verdict_verified ? <VerdictBadge verdict={String(e.summary.verdict_verified)} /> : "—"}</Td>
                   <Td num>{e.summary ? String(e.summary.episodes) : "—"}</Td>
-                  <Td className="text-muted">{new Date(e.created_at).toLocaleString()}</Td>
+                  <Td>
+                    <Time iso={e.created_at} />
+                  </Td>
                 </tr>
               ))}
             </Table>
