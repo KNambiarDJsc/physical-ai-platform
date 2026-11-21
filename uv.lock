@@ -6,6 +6,7 @@ requires-python = "==3.12.*"
 members = [
     "openmhs-bridge",
     "pap-api",
+    "pap-device-sdk",
     "physical-ai-platform",
 ]
 
@@ -668,6 +669,7 @@ dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-sdk" },
+    { name = "pap-device-sdk" },
     { name = "prometheus-client" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
@@ -693,6 +695,7 @@ requires-dist = [
     { name = "opentelemetry-api", specifier = ">=1.45.2,<1.46" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.45.2,<1.46" },
     { name = "opentelemetry-sdk", specifier = ">=1.45.2,<1.46" },
+    { name = "pap-device-sdk", editable = "packages/device-sdk" },
     { name = "prometheus-client", specifier = ">=0.26.0,<0.27" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2,<4" },
     { name = "pydantic", specifier = ">=2.11,<3" },
@@ -705,6 +708,21 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [{ name = "httpx", specifier = ">=0.28,<1" }]
+
+[[package]]
+name = "pap-device-sdk"
+version = "0.1.0"
+source = { editable = "packages/device-sdk" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "pydantic", specifier = ">=2.11,<3" },
+]
 
 [[package]]
 name = "pathspec"

@@ -19,6 +19,7 @@ cd "$(dirname "$0")/.."
 PROJECT=pap-trial
 WEB_PORT="${PAP_WEB_PORT:-3000}"
 API_PORT="${PAP_API_PORT:-8000}"
+LAB_PORT="${PAP_LAB_PORT:-8100}"
 STATE=trial/.state
 CMD="${1:-start}"
 
@@ -34,14 +35,14 @@ if [ ! -s "$STATE/db-password" ]; then
   (umask 077; head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n' >"$STATE/db-password")
 fi
 PAP_DB_PASSWORD="$(cat "$STATE/db-password")"
-export PAP_DB_PASSWORD PAP_WEB_PORT="$WEB_PORT" PAP_API_PORT="$API_PORT" PAP_ENV=development PAP_AUTH_MODE=dev
+export PAP_DB_PASSWORD PAP_WEB_PORT="$WEB_PORT" PAP_API_PORT="$API_PORT" PAP_LAB_PORT="$LAB_PORT" PAP_ENV=development PAP_AUTH_MODE=dev
 dc() { docker compose -p "$PROJECT" "$@"; }
 
 case "$CMD" in
   start)
-    for port in "$WEB_PORT" "$API_PORT"; do
+    for port in "$WEB_PORT" "$API_PORT" "$LAB_PORT"; do
       if (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; then
-        echo "Port $port is already in use. Free it, or run: PAP_WEB_PORT=3100 PAP_API_PORT=8100 bash trial/start.sh" >&2
+        echo "Port $port is already in use. Free it, or run: PAP_WEB_PORT=3100 PAP_API_PORT=8200 PAP_LAB_PORT=8300 bash trial/start.sh" >&2
         exit 1
       fi
     done

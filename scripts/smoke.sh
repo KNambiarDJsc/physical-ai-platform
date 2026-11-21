@@ -44,13 +44,14 @@ if [ "$COMPOSE" = 1 ]; then
   PROJECT=pap-smoke
   export PAP_DB_PASSWORD="${PAP_DB_PASSWORD:-smoke-$RANDOM$RANDOM}"
   export PAP_API_PORT="$API_PORT" PAP_WEB_PORT="$WEB_PORT" PAP_WORKER_LEASE_S="${PAP_WORKER_LEASE_S:-10}"
+  export PAP_LAB_PORT="${PAP_SMOKE_LAB_PORT:-8865}"
   dc() { docker compose -p "$PROJECT" "$@"; }
   trap 'dc logs --no-color >"$RUN/compose.log" 2>&1 || true; dc down -v --remove-orphans >/dev/null 2>&1 || true' EXIT
   echo "== building and starting the Compose stack"
   dc up -d --build --wait --wait-timeout 600
 
   echo "== container checks"
-  for s in api worker web; do
+  for s in api worker web virtual-lab; do
     uid="$(dc exec -T "$s" id -u | tr -d '\r')"
     [ "$uid" != 0 ] || { echo "FAIL $s runs as root" >&2; exit 1; }
     echo "ok   $s runs as uid $uid"
@@ -72,7 +73,8 @@ if [ "$COMPOSE" = 1 ]; then
     echo "== browser suites"
     # Kill the worker's main process from the host (as a crash would); the restart policy starts it again.
     kill_cmd="sudo kill -9 \$(docker inspect -f '{{.State.Pid}}' \$(docker compose -p $PROJECT ps -q worker))"
-    PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_WORKER_KILL_CMD="$kill_cmd" npm --prefix apps/web run e2e
+    PAP_WEB_URL="http://127.0.0.1:$WEB_PORT" PAP_LAB_URL="http://127.0.0.1:$PAP_LAB_PORT" PAP_WORKER_KILL_CMD="$kill_cmd" \
+      npm --prefix apps/web run e2e
   fi
   if [ "$TRIAL" = 1 ]; then
     echo "== trial exercise dry run (trial/EXERCISE.md, through the UI)"
@@ -114,7 +116,7 @@ fi
 
 echo "== starting stack (log: $LOG)"
 uv run python scripts/dev_stack.py --api-port "$API_PORT" --web-port "$WEB_PORT" \
-  --state-dir "$STATE" --ready-file "$READY" --stop-file "$STOP" >"$LOG" 2>&1 &
+  --lab-port "${PAP_SMOKE_LAB_PORT:-8865}" --state-dir "$STATE" --ready-file "$READY" --stop-file "$STOP" >"$LOG" 2>&1 &
 STACK=$!
 
 stop_stack() {

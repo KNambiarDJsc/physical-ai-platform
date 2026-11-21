@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import signal
 import socket
 import subprocess
@@ -84,12 +85,13 @@ def main() -> int:
     ap.add_argument("--ready-file")
     ap.add_argument("--state-dir", default=str(ROOT / "var"), help="database, artifacts and work files go here")
     ap.add_argument("--stop-file", help="stop cleanly (database included) when this file appears")
+    ap.add_argument("--lab-port", type=int, default=8100, help="virtual laboratory (LabThings); 0 = do not start it")
     ns = ap.parse_args()
     VAR = Path(ns.state_dir).resolve()
     stop = Path(ns.stop_file) if ns.stop_file else None
     if stop:
         stop.unlink(missing_ok=True)
-    busy = [port for port in (ns.api_port, ns.web_port) if not port_free(port)]
+    busy = [port for port in (ns.api_port, ns.web_port, ns.lab_port) if port and not port_free(port)]
     if busy:  # a leftover server would answer the readiness checks below in place of ours
         print(f"port(s) {busy} already in use; stop whatever holds them first", file=sys.stderr)
         return 2
@@ -124,6 +126,13 @@ def main() -> int:
         "PAP_WORKER_LEASE_S": "10",
         "PYTHONPATH": str(API_DIR),
     }
+    lab_url = f"http://127.0.0.1:{ns.lab_port}" if ns.lab_port else None
+    if lab_url and "PAP_ENVIRONMENTS" not in os.environ:
+        # The operator catalog of this local install: the simulated virtual laboratory only (D-026).
+        env["PAP_ENVIRONMENTS"] = json.dumps(
+            [{"key": "virtual-lab", "name": "Virtual laboratory", "kind": "simulated", "endpoint": lab_url,
+              "description": "Simulated syringe pump and analytical balance (LabThings). No hardware."}]
+        )  # fmt: skip
     run_dir = VAR / "dev-stack"
     run_dir.mkdir(parents=True, exist_ok=True)
     pid_file = run_dir / "worker.pid"
@@ -144,8 +153,15 @@ def main() -> int:
             **GROUP,
         ),
     ]
+    if lab_url:
+        uv = shutil.which("uv") or "uv"
+        lab_cmd = [uv, "run", "--quiet", "--project", str(ROOT / "runtimes" / "virtual-lab"), "python", "-m",
+                   "pap_virtual_lab.server", "--port", str(ns.lab_port)]  # fmt: skip
+        procs.append(subprocess.Popen(lab_cmd, env=env, **GROUP))
     try:
         wait(f"http://127.0.0.1:{ns.api_port}/healthz")
+        if lab_url:
+            wait(f"{lab_url}/thing_descriptions/", 180)
         wait(f"http://127.0.0.1:{ns.web_port}/")
         if any(p.poll() is not None for p in procs):
             print("a component exited during start-up; stopping", file=sys.stderr)
@@ -155,6 +171,7 @@ def main() -> int:
             "web": f"http://127.0.0.1:{ns.web_port}",
             "database": db,
             "worker_pid_file": str(pid_file),
+            "lab": lab_url,
         }
         print(json.dumps(info), flush=True)
         if ns.ready_file:

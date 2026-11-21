@@ -49,6 +49,7 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never UV_PROJECT
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY packages/openmhs-bridge packages/openmhs-bridge
+COPY packages/device-sdk packages/device-sdk
 COPY services/api services/api
 RUN uv sync --frozen --no-dev --package pap-api
 

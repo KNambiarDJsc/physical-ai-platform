@@ -5,6 +5,7 @@ description = "Physical AI Reliability Platform: API service and evaluation work
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "openmhs-bridge",
+  "pap-device-sdk",
   "fastapi>=0.115,<1",
   "uvicorn>=0.32,<1",
   "pydantic>=2.11,<3",

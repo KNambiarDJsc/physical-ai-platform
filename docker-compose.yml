@@ -34,6 +34,9 @@ x-api-env: &api-env
   OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
   # /metrics on the API needs this bearer token when PAP_ENV=production (otherwise it is not served there).
   PAP_METRICS_TOKEN: ${PAP_METRICS_TOKEN:-}
+  # Execution environments the workspaces may connect (D-026): here only the bundled virtual laboratory. To offer
+  # others, override this in a docker-compose.override.yml. The API never contacts a URL a user typed.
+  PAP_ENVIRONMENTS: '[{"key": "virtual-lab", "name": "Virtual laboratory", "kind": "simulated", "endpoint": "http://virtual-lab:8100", "description": "Simulated syringe pump and analytical balance (LabThings). No hardware."}]'
 
 services:
   postgres:
@@ -130,6 +133,21 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: ["ALL"]
     tmpfs: ["/tmp:size=64m,mode=1777", "/web/.next/cache:size=64m,uid=1000,gid=1000"]
+
+  # Simulated instruments (LabThings). Published on 127.0.0.1 only, for tests that inject faults from the host.
+  virtual-lab:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/virtual-lab.Dockerfile
+    image: pap-virtual-lab:local
+    ports: ["127.0.0.1:${PAP_LAB_PORT:-8100}:8100"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8100/thing_descriptions/', timeout=3).status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+    <<: *hardening
 
 volumes:
   pgdata:
