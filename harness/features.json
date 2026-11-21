@@ -976,6 +976,217 @@
         "Docker Desktop on Windows/macOS and archive installs without GitHub access are untested.",
         "The repository is private: the owner must grant access or send an archive. The pilot brief's contact line is blank for the owner to fill in."
       ]
+    },
+    {
+      "id": "SDK-001",
+      "title": "Adapter SDK with W3C WoT / LabThings discovery",
+      "priority": 3,
+      "depends_on": [
+        "INF-002"
+      ],
+      "description": "packages/device-sdk: one adapter interface (discover, read a property, invoke an action) and its first implementation for W3C Web of Things Thing Descriptions over HTTP, the protocol LabThings-FastAPI serves (D-027).",
+      "acceptance": [
+        "Discovery, property reads and action invocation are tested against a real LabThings-FastAPI server, not a mock.",
+        "A link in a description that leaves the operator-configured endpoint is refused before any request is made.",
+        "An action the device refuses (invalid input) is reported as refused before it started, distinct from a failure during execution.",
+        "An action whose input carries a request id is marked idempotent in its capability description."
+      ],
+      "tests": [
+        "uv run pytest packages/device-sdk/tests"
+      ],
+      "paths": [
+        "packages/device-sdk/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "uv run pytest packages/device-sdk/tests: 5 passed against a real labthings-fastapi 0.3.0 server in a subprocess (discovery, live read, invocation with LabThings invocation polling, idempotency key detected, input refused before start = accepted:false).",
+          "test_links_outside_the_configured_endpoint_are_refused: a description pointing at 169.254.169.254 raises AdapterError and the transport asserts no other host is contacted (the only test with a fake transport: it tests the SDK's own rule).",
+          "uv run mypy packages/device-sdk/src: clean (strict); Semgrep project rules: 0 findings."
+        ]
+      },
+      "limitations": [
+        "One adapter (W3C WoT over HTTP, as LabThings serves it). ROS 2, OPC UA, SiLA 2 adapters are not written.",
+        "WoT Discovery (.well-known/wot, directories) is not implemented; the LabThings /thing_descriptions/ listing and a single TD at the endpoint are."
+      ]
+    },
+    {
+      "id": "LAB-001",
+      "title": "LabThings virtual laboratory: simulated pump and balance",
+      "priority": 3,
+      "depends_on": [
+        "SDK-001"
+      ],
+      "description": "runtimes/virtual-lab: a syringe pump, an analytical balance and a simulation control served by labthings-fastapi 0.3.0 in its own uv project. The pump reports what it was commanded; the balance measures what physically happened; injected faults change the physics, never the report.",
+      "acceptance": [
+        "Every Thing declares itself simulated, in its description and in a readable property.",
+        "Dispensing is idempotent per request id: a repeated id has no second physical effect, shown by the balance.",
+        "A fault (e.g. partial blockage) leaves the pump's report unchanged while the balance reading shows the shortfall.",
+        "The lab starts with the local stack (scripts/dev_stack.py) so the platform can be tried without hardware."
+      ],
+      "tests": [
+        "uv run pytest packages/device-sdk/tests"
+      ],
+      "paths": [
+        "runtimes/virtual-lab/",
+        "scripts/dev_stack.py"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "Same SDK tests: every Thing has a read-only simulated=true property; a repeated request id leaves the balance reading unchanged (noise only); partial_blockage leaves the pump's report at 100 µL while the balance reads 0.055-0.070 g.",
+          "smoke.sh --e2e (2026-11-21): dev_stack.py started the lab on its own port and the browser suite (21 passed) used it, including the fault-injection test.",
+          "pip-audit on runtimes/virtual-lab/uv.lock: no known vulnerabilities. Docker Compose service and image added (non-root uid 10002, read-only root, settings in /tmp); not yet built on CI (local Docker is not running, B-001)."
+        ]
+      },
+      "limitations": [
+        "Simulation only: a pump and a balance with a simple physical model (0.4 % pump CV, 0.1 mg balance noise). Not a calibrated instrument model.",
+        "The Compose service has not been built yet; CI's compose job will build it on the next approved push."
+      ]
+    },
+    {
+      "id": "HUB-001",
+      "title": "Hardware Hub: environments, devices and capabilities registry",
+      "priority": 3,
+      "depends_on": [
+        "AUTH-001",
+        "SDK-001"
+      ],
+      "description": "A workspace connects environments chosen from the operator's catalog (PAP_ENVIRONMENTS); discovery records each device, its description digest and its capabilities; properties can be read live. Observation only for physical environments (D-026).",
+      "acceptance": [
+        "Workspaces can connect only environments the operator configured; the API never contacts a URL a user supplied.",
+        "Discovery against the real virtual laboratory records every device with its capabilities, input/output schemas and description digest; re-discovery marks vanished devices missing instead of deleting them.",
+        "A property is read live from the device through the API.",
+        "Another organization's environments and devices are 404; connecting needs admin, discovery needs engineer."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_hardware.py"
+      ],
+      "paths": [
+        "services/api/app/hardware/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "uv run pytest services/api/tests/test_hardware.py: 6 passed against the real lab: catalog-only connection (a URL in the body is ignored), discovery of 3 devices with schemas and 64-hex digests, unchanged re-discovery (3,0,0,0), a vanished device kept and marked missing, live reads, roles (viewer/engineer/admin), a withdrawn environment answers 409.",
+          "test_isolation.py: 4 passed; the victim now has an environment, discovered devices, a workflow and a run; every org route (enumerated from OpenAPI) is attacked by an outsider user and an outsider service credential, including IDOR with the attacker's own org; all 404, nothing leaked.",
+          "verify.sh full: 201 pytest passed (engine required), migrations 0004/0005 without drift (test_scaffold)."
+        ]
+      },
+      "limitations": [
+        "Physical environments are discovery and read only by design (D-026).",
+        "Operator catalog changes need a restart (settings are read at start)."
+      ]
+    },
+    {
+      "id": "WF-001",
+      "title": "Durable simulated workflow execution with an engine-verified result",
+      "priority": 3,
+      "depends_on": [
+        "HUB-001",
+        "LAB-001",
+        "RI-003"
+      ],
+      "description": "Workflows are ordered device actions plus a verification contract. Runs execute in the worker with a PostgreSQL lease, a step journal written before each dispatch, and the verified result from openmhs outcome verify (D-028).",
+      "acceptance": [
+        "A run executes its steps in order in the worker, each journalled before and after dispatch; the API never dispatches.",
+        "Before every command the executor checks that the environment is configured simulated and that the device reports simulated=true; otherwise the step fails and nothing is sent.",
+        "A worker killed mid-run is replaced and the run finishes; a repeated idempotent step has one physical effect; a non-idempotent step left in flight stops as outcome_unknown instead of being re-sent.",
+        "The verified result comes from the real pinned engine (outcome verify) on an RFC 0004 contract with the balance reading as independent evidence; with an injected fault the pump reports success and the engine returns VIOLATED.",
+        "Reported and verified outcomes are stored and shown separately."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_workflows.py"
+      ],
+      "paths": [
+        "services/api/app/workflows/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "uv run pytest services/api/tests/test_workflows.py (PAP_REQUIRE_ENGINE=1): 7 passed with the real pinned engine and the real lab.",
+          "API only queues (all steps pending after POST); healthy run: reported succeeded, engine SATISFIED, supported_success, provenance carries the engine commit from engine.lock.json.",
+          "Injected partial_blockage: pump reports success, engine VIOLATED, outcome class contradiction.",
+          "Environment configured physical: step refused before any dispatch (dispatches 0); the lab's own invocation list shows no tare was received.",
+          "Crash simulations: a non-idempotent step left in flight ends outcome_unknown and is not re-sent (invocation count unchanged); an idempotent step is re-sent with the same request id and takes effect once (one 200 µL dose on the balance, verdict SATISFIED).",
+          "A real worker process is hard-killed mid-run (after tare and two of eight doses); a new worker resumes after the 5 s lease; attempts 2; the balance shows 8 x 20 µL within 2 % (a repeated dose would add 12.5 %); verdict SATISFIED."
+        ]
+      },
+      "limitations": [
+        "One template (dispense-and-verify); custom definitions are accepted as JSON, there is no editor canvas.",
+        "Run cancellation is not implemented.",
+        "Timestamps in the evidence are the worker's clock at the device's answer (50 ms uncertainty declared), not the instrument's own clock."
+      ]
+    },
+    {
+      "id": "WB-001",
+      "title": "Physical AI Workbench",
+      "priority": 3,
+      "depends_on": [
+        "WF-001",
+        "WEB-001"
+      ],
+      "description": "The signature workspace: devices on the left, the run and live instrument state in the centre, an inspector (step input/output, evidence, verdict, provenance) on the right, the run timeline below; resizable; from real backend data only.",
+      "acceptance": [
+        "Starting a workflow, following its steps and reading its reported and verified result all happen on one page, from the API.",
+        "Selecting a step shows its request, the device's answer, timing and, for the verification, the engine's conditions and observed values.",
+        "Panels resize by pointer and keyboard; the page passes the axe gate in both themes."
+      ],
+      "tests": [
+        "npm --prefix apps/web run e2e -- e2e/workbench.spec.ts"
+      ],
+      "paths": [
+        "apps/web/src/app/workbench/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "e2e/lab.spec.ts (smoke.sh --e2e, 2026-11-21): a run started from the Workbench button is executed by the worker and shown live to Supported success with the step timeline; an injected blockage shows reported succeeded with reported_dispensed_ul = 100 beside the engine's violated verdict; the inspector separator resizes by keyboard (340 -> 356 -> Home 260).",
+          "e2e/a11y.spec.ts: the Workbench (with a finished run), Hardware Hub, Workflows and Get started pages pass axe-core WCAG 2.0/2.1/2.2 A/AA in the dark and the light theme with zero violations."
+        ]
+      },
+      "limitations": [
+        "No 3D viewport, no telemetry plots, no engineering assistant: not built and not shown.",
+        "Live instrument values are polled every 1.5 s through the API, not streamed."
+      ]
+    },
+    {
+      "id": "ONB-001",
+      "title": "First-run onboarding: workspace, environment, discovery, first verified run",
+      "priority": 3,
+      "depends_on": [
+        "HUB-001",
+        "WB-001"
+      ],
+      "description": "Milestone: a new user registers a simulated instrument, discovers its capabilities, executes a workflow and receives a verified result entirely through the interface.",
+      "acceptance": [
+        "A signed-in user without a workspace is led to create one, choose an environment from the catalog and discover its devices; progress is derived from server data, not browser storage.",
+        "A browser test does the whole path as a new user: sign in, create workspace, connect the virtual laboratory, discover, run the dispense-and-verify workflow, read the engine-verified result.",
+        "No step of the path needs the API, a terminal or the repository."
+      ],
+      "tests": [
+        "npm --prefix apps/web run e2e -- e2e/onboarding.spec.ts"
+      ],
+      "paths": [
+        "apps/web/src/app/onboarding/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-21",
+        "evidence": [
+          "e2e/lab.spec.ts 'a new user goes from sign-in to an engine-verified result through the interface only' (32.5 s): sign in, create workspace, connect the virtual laboratory from the catalog, discover, create the workflow from a form generated from the template's schema, run, read reported succeeded / engine satisfied / Supported success, open the run in the Workbench (engine version, commit and binary digest shown), inspect the dispense step, read a live property in the Hardware Hub. The test makes no API call itself.",
+          "Onboarding progress is derived from server data (workspaces, environments, devices, workflows, runs); nothing is kept in browser storage."
+        ]
+      },
+      "limitations": [
+        "Run on this machine's local stack; the Docker trial path has the lab service but has not been exercised end to end on CI yet.",
+        "No external user has done this; that is the separate external-adoption milestone."
+      ]
     }
   ]
 }

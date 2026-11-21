@@ -53,6 +53,18 @@ test.beforeAll(async ({ playwright, baseURL }) => {
   }
   expect(job.state).toBe("succeeded");
   evaluation = job.id;
+  // Lab automation: an environment, its devices, a workflow and one finished run.
+  const O = `/api/v1/orgs/${org}`;
+  await ok(api.post(`${O}/environments`, { data: { config_key: "virtual-lab" } }));
+  await ok(api.post(`${O}/environments/virtual-lab/discover`), 200);
+  const wf = { slug: "dispense", name: "Dispense and verify", environment: "virtual-lab", template: "dispense-and-verify", parameters: {} };
+  await ok(api.post(`${O}/workflows`, { data: wf }));
+  let r = await ok(api.post(`${O}/workflows/dispense/runs`));
+  for (let i = 0; i < 240 && ["queued", "running"].includes(r.state); i++) {
+    await new Promise((res) => setTimeout(res, 500));
+    r = await (await api.get(`${O}/workflow-runs/${r.id}`)).json();
+  }
+  expect(r.state).toBe("succeeded");
 });
 
 async function signIn(page: Page, theme: "dark" | "light") {
@@ -75,6 +87,10 @@ const pages = () => [
   [`/o/${org}/p/reach`, "New evaluation"],
   [`/o/${org}/p/reach/e/${evaluation}`, "Independently verified"],
   [`/o/${org}/p/reach/e/${evaluation}/episodes`, "Episodes"],
+  [`/onboarding?org=${org}`, "Every step is done"],
+  [`/workbench?org=${org}`, "Independently verified (OpenMHS engine)"],
+  [`/hardware?org=${org}`, "Discover devices"],
+  [`/workflows?org=${org}`, "Recent runs"],
 ];
 
 for (const theme of ["dark", "light"] as const) {

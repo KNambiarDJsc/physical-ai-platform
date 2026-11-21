@@ -4,7 +4,7 @@ Modular monolith (FastAPI) + a separately executed evaluation worker + a Next.js
 binary, pinned by commit and SHA-256, is the only evaluation implementation.
 
 ```
-customer evidence (CSV / JSONL / OpenMHS events)                       never: commands to robots
+customer evidence (CSV / JSONL / OpenMHS events)        commands: only to simulated devices (D-026)
         │ upload (streamed, size-limited, sha256-addressed, immutable)
         ▼
  ┌────────────── API (FastAPI) ──────────────┐        ┌───────────── worker (same codebase, own process) ─────────────┐
@@ -32,6 +32,10 @@ customer evidence (CSV / JSONL / OpenMHS events)                       never: co
 | `services/api/migrations` | Alembic. Every schema change is a migration; tests run upgrade → downgrade → upgrade. |
 | `packages/contracts` | Generated: JSON Schemas of mapping configs, episodes and reports; OpenAPI document; TypeScript client. Source of truth is the Pydantic models in the API. |
 | `apps/web` | Next.js App Router UI. Reads only the API. Computes no statistics. |
+| `packages/device-sdk` | Adapter SDK (D-027): discover devices, read properties, invoke actions behind one interface. First adapter: W3C WoT Thing Descriptions over HTTP (LabThings). Refuses any link outside the configured endpoint. |
+| `runtimes/virtual-lab` | Simulated instruments (syringe pump, analytical balance, simulation control) served by labthings-fastapi in their own uv project and lock. Simulation only. |
+| `services/api/app/hardware` | Environments (from the operator catalog), discovery, devices and capabilities, live property reads. |
+| `services/api/app/workflows` | Workflow definitions (`pap.workflow/1`, templates), runs on the PostgreSQL lease queue, the step journal, the executor (worker only) with the simulated-only check before every dispatch, verification by `openmhs outcome verify` (D-026, D-028). |
 
 ## The engine boundary (versioned)
 

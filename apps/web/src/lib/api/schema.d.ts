@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/environment-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Environment Catalog
+         * @description The environments this installation's operator allows workspaces to connect.
+         */
+        get: operations["environment_catalog_api_v1_environment_catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -66,6 +86,98 @@ export interface paths {
         get: operations["list_audit_api_v1_orgs__org_slug__audit_events_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Devices */
+        get: operations["list_devices_api_v1_orgs__org_slug__devices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/devices/{device_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Device */
+        get: operations["get_device_api_v1_orgs__org_slug__devices__device_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/devices/{device_id}/properties/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Property
+         * @description Read one property live. Observation: allowed for every environment kind.
+         */
+        get: operations["read_property_api_v1_orgs__org_slug__devices__device_id__properties__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/environments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Environments */
+        get: operations["list_environments_api_v1_orgs__org_slug__environments_get"];
+        put?: never;
+        /** Connect Environment */
+        post: operations["connect_environment_api_v1_orgs__org_slug__environments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/environments/{env_slug}/discover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Discover
+         * @description Ask the environment what devices it has and what each can do. Reads descriptions only.
+         */
+        post: operations["discover_api_v1_orgs__org_slug__environments__env_slug__discover_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -465,6 +577,112 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/workflow-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Runs */
+        get: operations["list_runs_api_v1_orgs__org_slug__workflow_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflow-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run */
+        get: operations["get_run_api_v1_orgs__org_slug__workflow_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflow-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Templates */
+        get: operations["list_templates_api_v1_orgs__org_slug__workflow_templates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Workflows */
+        get: operations["list_workflows_api_v1_orgs__org_slug__workflows_get"];
+        put?: never;
+        /** Create Workflow */
+        post: operations["create_workflow_api_v1_orgs__org_slug__workflows_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflows/{workflow_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workflow */
+        get: operations["get_workflow_api_v1_orgs__org_slug__workflows__workflow_slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflows/{workflow_slug}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Run
+         * @description Queue a run. The worker executes it; poll the run for progress.
+         */
+        post: operations["start_run_api_v1_orgs__org_slug__workflows__workflow_slug__runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -629,6 +847,48 @@ export interface components {
         Body_upload_api_v1_orgs__org_slug__projects__project_slug__artifacts_post: {
             /** File */
             file: string;
+        };
+        /** CapabilityOut */
+        CapabilityOut: {
+            /** Data Schema */
+            data_schema: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description: string;
+            /** Idempotency Key */
+            idempotency_key: string | null;
+            /** Input Schema */
+            input_schema: {
+                [key: string]: unknown;
+            } | null;
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /** Output Schema */
+            output_schema: {
+                [key: string]: unknown;
+            } | null;
+            /** Read Only */
+            read_only: boolean;
+            /** Title */
+            title: string;
+        };
+        /** CatalogEntryOut */
+        CatalogEntryOut: {
+            /** Adapter */
+            adapter: string;
+            /** Description */
+            description: string;
+            /** Endpoint */
+            endpoint: string;
+            /** Key */
+            key: string;
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
         };
         /** Comparison */
         Comparison: {
@@ -819,6 +1079,91 @@ export interface components {
             /** Token Prefix */
             token_prefix: string;
         };
+        /** DeviceDetailOut */
+        DeviceDetailOut: {
+            /** Capabilities */
+            capabilities: components["schemas"]["CapabilityOut"][];
+            /** Declares Simulated */
+            declares_simulated: boolean;
+            /** Description */
+            description: string;
+            /** Description Document */
+            description_document: {
+                [key: string]: unknown;
+            };
+            /** Environment */
+            environment: string;
+            /** Environment Kind */
+            environment_kind: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Present */
+            present: boolean;
+            /** Protocol */
+            protocol: string;
+            /** Td Sha256 */
+            td_sha256: string;
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DeviceOut */
+        DeviceOut: {
+            /** Capabilities */
+            capabilities: components["schemas"]["CapabilityOut"][];
+            /** Declares Simulated */
+            declares_simulated: boolean;
+            /** Description */
+            description: string;
+            /** Environment */
+            environment: string;
+            /** Environment Kind */
+            environment_kind: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Present */
+            present: boolean;
+            /** Protocol */
+            protocol: string;
+            /** Td Sha256 */
+            td_sha256: string;
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DiscoveryOut */
+        DiscoveryOut: {
+            /** Changed */
+            changed: number;
+            /** Devices */
+            devices: components["schemas"]["DeviceOut"][];
+            /** Environment */
+            environment: string;
+            /** Found */
+            found: number;
+            /** Missing */
+            missing: number;
+            /** New */
+            new: number;
+        };
         /**
          * EngineComparison
          * @description One ``ops compare`` output: parsed (``result``) and byte for byte (``raw``), with the digest of ``raw``.
@@ -829,6 +1174,46 @@ export interface components {
             /** Raw Sha256 */
             raw_sha256: string;
             result: components["schemas"]["Comparison"];
+        };
+        /** EnvironmentIn */
+        EnvironmentIn: {
+            /** Config Key */
+            config_key: string;
+            /** Name */
+            name?: string | null;
+            /** Slug */
+            slug?: string | null;
+        };
+        /** EnvironmentOut */
+        EnvironmentOut: {
+            /** Adapter */
+            adapter: string;
+            /** Available */
+            available: boolean;
+            /** Config Key */
+            config_key: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Devices */
+            devices: number;
+            /** Endpoint */
+            endpoint: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Last Discovered At */
+            last_discovered_at: string | null;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
         };
         /** EpisodeDetail */
         EpisodeDetail: {
@@ -1322,6 +1707,20 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** PropertyReadOut */
+        PropertyReadOut: {
+            /** Device */
+            device: string;
+            /** Name */
+            name: string;
+            /**
+             * Read At
+             * Format: date-time
+             */
+            read_at: string;
+            /** Value */
+            value: unknown;
+        };
         /** ReleaseIn */
         ReleaseIn: {
             /** Components */
@@ -1379,6 +1778,102 @@ export interface components {
                 [key: string]: "succeeded" | "failed" | "aborted" | "canceled" | "timeout" | "unknown";
             };
         };
+        /** RunDetailOut */
+        RunDetailOut: {
+            /** Attempts */
+            attempts: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Definition */
+            definition: {
+                [key: string]: unknown;
+            };
+            /** Environment */
+            environment: string;
+            /** Error */
+            error: {
+                [key: string]: unknown;
+            } | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Outcome Class */
+            outcome_class: string | null;
+            /** Provenance */
+            provenance: {
+                [key: string]: unknown;
+            } | null;
+            /** Reported */
+            reported: {
+                [key: string]: unknown;
+            } | null;
+            /** Started At */
+            started_at: string | null;
+            /** State */
+            state: string;
+            /** Steps */
+            steps: components["schemas"]["StepOut"][];
+            /** Submitted By */
+            submitted_by: string;
+            /** Verdict */
+            verdict: string | null;
+            /** Verification */
+            verification: {
+                [key: string]: unknown;
+            } | null;
+            /** Workflow */
+            workflow: string;
+            /** Workflow Name */
+            workflow_name: string;
+        };
+        /** RunOut */
+        RunOut: {
+            /** Attempts */
+            attempts: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Environment */
+            environment: string;
+            /** Error */
+            error: {
+                [key: string]: unknown;
+            } | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Outcome Class */
+            outcome_class: string | null;
+            /** Reported */
+            reported: {
+                [key: string]: unknown;
+            } | null;
+            /** Started At */
+            started_at: string | null;
+            /** State */
+            state: string;
+            /** Submitted By */
+            submitted_by: string;
+            /** Verdict */
+            verdict: string | null;
+            /** Workflow */
+            workflow: string;
+            /** Workflow Name */
+            workflow_name: string;
+        };
         /**
          * Source
          * @description Where a value comes from: a column (dotted path for JSONL objects) or a constant. Exactly one.
@@ -1388,6 +1883,41 @@ export interface components {
             column?: string | null;
             /** Const */
             const?: string | null;
+        };
+        /** StepOut */
+        StepOut: {
+            /** Action */
+            action: string;
+            /** Device */
+            device: string;
+            /** Device Id */
+            device_id: string | null;
+            /** Dispatches */
+            dispatches: number;
+            /** Error */
+            error: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Idempotent */
+            idempotent: boolean;
+            /** Input */
+            input: {
+                [key: string]: unknown;
+            };
+            /** Invocation Id */
+            invocation_id: string | null;
+            /** Key */
+            key: string;
+            /** Output */
+            output: unknown;
+            /** Position */
+            position: number;
+            /** Request Id */
+            request_id: string;
+            /** Started At */
+            started_at: string | null;
+            /** State */
+            state: string;
         };
         /** Stratum */
         Stratum: {
@@ -1411,6 +1941,19 @@ export interface components {
             site: string;
         } & {
             [key: string]: unknown;
+        };
+        /** TemplateOut */
+        TemplateOut: {
+            /** Description */
+            description: string;
+            /** Key */
+            key: string;
+            /** Parameters */
+            parameters: {
+                [key: string]: unknown;
+            };
+            /** Title */
+            title: string;
         };
         /** TimeSource */
         TimeSource: {
@@ -1448,6 +1991,63 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** WorkflowIn */
+        WorkflowIn: {
+            /** Definition */
+            definition?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Environment */
+            environment: string;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            };
+            /** Slug */
+            slug: string;
+            /** Template */
+            template?: string | null;
+        };
+        /** WorkflowOut */
+        WorkflowOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Definition */
+            definition: {
+                [key: string]: unknown;
+            };
+            /** Definition Sha256 */
+            definition_sha256: string;
+            /** Description */
+            description: string;
+            /** Environment */
+            environment: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters: {
+                [key: string]: unknown;
+            };
+            /** Slug */
+            slug: string;
+            /** Template */
+            template: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -1457,6 +2057,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    environment_catalog_api_v1_environment_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogEntryOut"][];
+                };
+            };
+        };
+    };
     me_api_v1_me_get: {
         parameters: {
             query?: never;
@@ -1563,6 +2183,200 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_devices_api_v1_orgs__org_slug__devices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_device_api_v1_orgs__org_slug__devices__device_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                device_id: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_property_api_v1_orgs__org_slug__devices__device_id__properties__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                device_id: string;
+                name: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyReadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_environments_api_v1_orgs__org_slug__environments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvironmentOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    connect_environment_api_v1_orgs__org_slug__environments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnvironmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvironmentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    discover_api_v1_orgs__org_slug__environments__env_slug__discover_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                env_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryOut"];
                 };
             };
             /** @description Validation Error */
@@ -2564,6 +3378,232 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_runs_api_v1_orgs__org_slug__workflow_runs_get: {
+        parameters: {
+            query?: {
+                workflow?: string | null;
+            };
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_api_v1_orgs__org_slug__workflow_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_templates_api_v1_orgs__org_slug__workflow_templates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_workflows_api_v1_orgs__org_slug__workflows_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_workflow_api_v1_orgs__org_slug__workflows_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_workflow_api_v1_orgs__org_slug__workflows__workflow_slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_run_api_v1_orgs__org_slug__workflows__workflow_slug__runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetailOut"];
+                };
             };
             /** @description Validation Error */
             422: {

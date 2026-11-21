@@ -12,6 +12,19 @@ export type Mapping = Schemas["MappingOut"];
 export type Project = Schemas["ProjectOut"];
 export type EpisodePage = Schemas["EpisodePage"];
 export type EpisodeDetail = Schemas["EpisodeDetail"];
+export type CatalogEntry = Schemas["CatalogEntryOut"];
+export type Environment = Schemas["EnvironmentOut"];
+export type Device = Schemas["DeviceOut"];
+export type DeviceDetail = Schemas["DeviceDetailOut"];
+export type Capability = Schemas["CapabilityOut"];
+export type Discovery = Schemas["DiscoveryOut"];
+export type PropertyRead = Schemas["PropertyReadOut"];
+export type WorkflowTemplate = Schemas["TemplateOut"];
+export type Workflow = Schemas["WorkflowOut"];
+export type WorkflowRun = Schemas["RunOut"];
+export type WorkflowRunDetail = Schemas["RunDetailOut"];
+export type WorkflowStep = Schemas["StepOut"];
+export const orgPath = (org: string) => `/api/v1/orgs/${org}`;
 
 export class ApiError extends Error {
   constructor(

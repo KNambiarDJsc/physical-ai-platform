@@ -74,8 +74,8 @@ not carry a state.
 - **Command palette**: navigation to every page; later, entities (projects, evaluations). Keyboard first:
   arrow keys, Enter, Escape.
 
-The future Workbench (project navigation left, viewport centre, inspector or assistant right, timeline bottom,
-resizable) uses the same shell; it is not built yet and must not be suggested in the UI until it is.
+The Workbench (instruments left, the run centre, inspector right, timeline bottom, every pane resizable by pointer
+and keyboard) uses the same shell. Its 3D viewport and engineering assistant are not built and are not suggested.
 
 ## 6. Interaction model per module
 
@@ -89,9 +89,10 @@ Each module gets the pattern that fits its job, not a grid of cards.
 | Evidence | Content-addressed file list with usage | Built |
 | Fleet | Robot × release outcome counts | Built (from uploaded evidence, not live) |
 | Integrations | API surface, credentials, engine pin, what is not built | Built |
-| Devices | Device tree and capability inspector | Not built |
-| Workflows | Node canvas with properties inspector | Not built |
+| Hardware Hub (devices) | Device tree and capability inspector, live reads | Built (WoT/LabThings adapter) |
+| Workflows | Template form today; node canvas with properties inspector later | Built (templates and definitions; no canvas) |
 | Agents | Tool permissions, configuration, execution traces | Not built |
+| Workbench | Instruments, run, inspector, timeline; resizable | Built (no 3D viewport, no assistant) |
 | Experiments / simulation | Viewport, scenario controls, synchronized telemetry | Not built |
 | Datasets, policies, deployments | Episode browser, version history, approvals | Not built |
 

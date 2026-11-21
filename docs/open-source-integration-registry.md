@@ -28,6 +28,12 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | PyJWT [crypto] + cryptography | OIDC access-token validation (JWKS) | 2.15.1 / 50.0.2 | MIT / Apache-2.0 OR BSD-3 verified | Permissive | Decision D-007 (instead of Authlib) |
 | openid-client (panva/openid-client) + jose, oauth4webapi | Web sign-in: OIDC client (code + PKCE) in the Next.js server | 6.8.9 (jose 6.2.17) | MIT (npm metadata) | Permissive | AUTH-002, D-019. Same author as oidc-provider; server-side only, never bundled for the browser |
 | PostgreSQL (postgres.org) | Platform metadata store | image `postgres:16` (Compose) | PostgreSQL License (stated) | Permissive | Directive stack |
+| labthings-fastapi (github.com/labthings/labthings-fastapi) | Serves the virtual laboratory's simulated instruments as W3C WoT Things | 0.3.0 (own lock: runtimes/virtual-lab/uv.lock) | MIT verified (LICENSE at v0.3.0, ec1df49) | Permissive | D-027: the LabThings protocol is the first device adapter; isolated project so its FastAPI/pydantic pins never constrain the platform |
+| httpx | Device SDK HTTP client | locked in uv.lock | BSD-3-Clause (stated) | Permissive | Already a dependency of the test client |
+| Geist Sans / Geist Mono (`geist` npm) | Interface fonts, bundled (no fetch at run time) | 1.7.2 | SIL Open Font License 1.1 (npm metadata) | Permissive for fonts; ship the licence | D-024 |
+| @axe-core/playwright + axe-core | Accessibility gate in the browser suite | 4.14.0 | MPL-2.0 (npm metadata) | Dev-only, unmodified | D-025; dev-only |
+| Impeccable (github.com/pbakaus/impeccable) | Design audit playbooks (skill text only) | commit b49177d | Apache-2.0 (LICENSE) | Dev tool, not shipped | D-025: installed without hooks or binary |
+| Taste Skill (github.com/Leonxlnx/taste-skill) | Marketing-site design skill (future public site only) | commit f6b7657 | MIT (LICENSE) | Dev tool, not shipped | D-025 |
 | SQLite (sqlite.org) | Inside the engine only | bundled in OpenMHS (rusqlite) | Public domain (stated) | None | Engine's store |
 
 ## Dev-only (never shipped)

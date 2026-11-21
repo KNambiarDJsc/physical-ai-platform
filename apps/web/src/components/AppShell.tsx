@@ -6,15 +6,19 @@ import {
   AlertTriangle,
   Boxes,
   ChevronRight,
+  Cpu,
   GitCompareArrows,
   LayoutDashboard,
   Monitor,
   Moon,
+  PanelsTopLeft,
   Plug,
+  Rocket,
   Search,
   Settings,
   ShieldCheck,
   Sun,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +32,15 @@ type NavItem = { href: string; label: string; icon: LucideIcon; hint: string };
 
 /** Only pages that exist. A module that is not built is not listed (DESIGN.md §1). */
 const GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Lab automation",
+    items: [
+      { href: "/onboarding", label: "Get started", icon: Rocket, hint: "Workspace, environment, first verified run" },
+      { href: "/workbench", label: "Workbench", icon: PanelsTopLeft, hint: "Run workflows, watch instruments, read verdicts" },
+      { href: "/hardware", label: "Hardware Hub", icon: Cpu, hint: "Environments, devices and capabilities" },
+      { href: "/workflows", label: "Workflows", icon: Workflow, hint: "Device actions with a verification contract" },
+    ],
+  },
   {
     label: "Release intelligence",
     items: [

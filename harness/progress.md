@@ -2,6 +2,35 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-21 — Session 6b: lab automation, first milestone (simulated instrument to verified result)
+
+**State now:** 32 of 33 features verified (adds SDK-001, LAB-001, HUB-001, WF-001, WB-001, ONB-001). Open: OBS-002.
+Pushed: fb2bc54 (checkpoint) and 55cdcdc (Semgrep fix: theme preference in a cookie); CI on 55cdcdc green in all four
+jobs, including the clean-install trial. The infrastructure below is committed locally only (push not yet approved).
+
+**What exists:** an adapter SDK (W3C WoT/LabThings over HTTP, same-origin guard); a virtual laboratory built with
+labthings-fastapi 0.3.0 (pump that reports what it was told, balance that measures, fault injection), started by
+dev_stack.py and as a Compose service; the Hardware Hub (operator catalog `PAP_ENVIRONMENTS`, discovery, devices,
+capabilities, live reads); durable workflow runs in the worker (lease queue, journal before dispatch, simulated-only
+check before every command, at-most-once unless the action takes a request id, verdict from `openmhs outcome verify`);
+and four pages: Get started, Workbench (resizable instruments / run / inspector / timeline), Hardware Hub, Workflows.
+
+**Evidence:** verify.sh full: 201 pytest passed with the engine required (SDK 5, hardware 6, workflows 7 incl. a real
+worker process killed mid-run, isolation 4 now covering every new route), mypy strict on API and SDK, contracts, build.
+smoke.sh --e2e: 21 browser tests passed, among them the milestone path by a new user through the interface only and
+axe on the four new pages in both themes. Semgrep project rules: 0 findings on 172 files (now part of verify.sh).
+
+**Found and fixed on the way:** the API imported the SDK without declaring it (worked only because of
+`--all-packages`; the Docker image would have failed); the Workbench printed "openmhs openmhs 0.1.0" and raw JSON for
+observed values; Playwright ran the fault-injection test in parallel with the onboarding run against the one lab (now
+one serial spec file); LabThings writes ./settings, which a read-only container forbids (now a temp folder).
+
+**Not done:** the Compose lab image has not been built (no local Docker, B-001; CI will build it on push); no run
+cancellation; one workflow template and no canvas; no 3D viewport or assistant; no external user.
+
+**Next:** with approval, push so CI builds the lab image and runs the milestone on Compose and on the clean-install
+trial; then OpenAMRobot workspace (ROS state observation) and the agent infrastructure (stage 7).
+
 ## 2026-11-21 — Session 6: design-system checkpoint closed; infrastructure started
 
 **Checkpoint gates (all on this machine):** `verify.sh` full: 183 pytest passed (4 skipped), engine audit 11/11,

@@ -25,8 +25,10 @@ conversation, holds the state of the work.
 
 ## Invariants (do not break, do not work around)
 
-- **Observation only.** Nothing in this repo sends commands to robots, PLCs or equipment, or sits in a
-  robot's real-time path.
+- **Commands only to simulated devices (D-026).** The workflow executor may invoke actions only on a device whose
+  environment the operator configured as `simulated` AND which itself reports `simulated=true`, checked before every
+  dispatch. Physical robots, PLCs and equipment are discovered and read, never commanded. Nothing sits in a real-time
+  path. The API never contacts a URL a user supplied: environments come from the operator's `PAP_ENVIRONMENTS`.
 - **OpenMHS is the evaluation engine.** Verdicts come from `openmhs outcome verify`; statistics from
   `openmhs ops compare`. Never reimplement them in Python or TypeScript, never compute a new statistic
   in the API or the frontend. A missing capability goes into `docs/engine-contract-gaps.md`.
