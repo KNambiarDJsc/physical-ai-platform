@@ -21,7 +21,7 @@ from helpers import as_user, bearer, make_org, ok
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
 ID_PARAMS = {
     "user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id",
-    "device_id", "run_id",
+    "device_id", "run_id", "proposal_id",
 }  # fmt: skip
 pytestmark = pytest.mark.engine
 
@@ -51,6 +51,9 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
             }
         },
         ("POST", f"{o}/workflows/{{workflow_slug}}/runs"): {},
+        ("POST", f"{o}/experiment-proposals"): {"json": {"workflow": "dispense", "rationale": "planted proposal text"}},
+        ("POST", f"{o}/experiment-proposals/{{proposal_id}}/approve"): {},
+        ("POST", f"{o}/experiment-proposals/{{proposal_id}}/reject"): {"json": {"note": "planted"}},
         ("POST", f"{p}/evaluations"): {
             "json": {
                 "baseline_release_id": v["baseline"],
@@ -158,11 +161,14 @@ def world(client: TestClient, omhs: Any, with_lab: str) -> dict[str, Any]:
     ok(client.post("/api/v1/orgs/acme/workflows", json=wf, headers=h), 201)
     v["workflow_slug"] = "dispense"
     v["run_id"] = ok(client.post("/api/v1/orgs/acme/workflows/dispense/runs", headers=h), 201)["id"]
+    prop = {"workflow": "dispense", "rationale": "victim-proposal-rationale", "evidence_ids": ["run:victim"]}
+    v["proposal_id"] = ok(client.post("/api/v1/orgs/acme/experiment-proposals", json=prop, headers=h), 201)["id"]
     secrets = {
         v[k]
         for k in ("user_id", "credential_id", "baseline", "candidate", "baseline_art", "candidate_art", "mapping_id",
-                  "job_id", "episode_id", "device_id", "run_id")
+                  "job_id", "episode_id", "device_id", "run_id", "proposal_id")
     } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate",
+         "victim-proposal-rationale",
          "victim-workflow"}  # fmt: skip
     make_org(client, "mallory", "mallory-co", "mallory-proj")
     mcred = ok(

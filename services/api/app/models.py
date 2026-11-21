@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .agent.models import ExperimentProposal
 from .audit import AuditEvent
 from .auth.models import User
 from .db import Base
@@ -24,6 +25,7 @@ __all__ = [
     "EpisodeRecord",
     "EvaluationJob",
     "EvaluationResult",
+    "ExperimentProposal",
     "JobArtifact",
     "MappingRevision",
     "Membership",

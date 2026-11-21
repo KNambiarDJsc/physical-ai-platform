@@ -65,6 +65,8 @@ test.beforeAll(async ({ playwright, baseURL }) => {
     r = await (await api.get(`${O}/workflow-runs/${r.id}`)).json();
   }
   expect(r.state).toBe("succeeded");
+  // A proposal, so the proposals table is audited with content.
+  await ok(api.post(`${O}/experiment-proposals`, { data: { workflow: "dispense", rationale: "Repeat the run to confirm the result.", evidence_ids: [`run:${r.id}`] } }));
 });
 
 async function signIn(page: Page, theme: "dark" | "light") {

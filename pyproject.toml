@@ -9,13 +9,14 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["packages/openmhs-bridge", "packages/device-sdk", "services/api"]
+members = ["packages/openmhs-bridge", "packages/device-sdk", "packages/agent-tools", "services/api"]
 # Instrument runtimes are independent projects with their own locks (D-027): their pins never constrain the platform.
 exclude = ["runtimes/*"]
 
 [tool.uv.sources]
 openmhs-bridge = { workspace = true }
 pap-device-sdk = { workspace = true }
+pap-agent-tools = { workspace = true }
 pap-api = { workspace = true }
 
 [dependency-groups]
@@ -42,6 +43,9 @@ ignore = ["S101", "S603", "RUF001", "RUF002", "RUF003"]
 "scripts/**" = ["S607", "T201"]
 "examples/**" = ["S311"]  # seeded generator for synthetic demo data, not cryptography
 "runtimes/**" = ["S311"]  # seeded noise of simulated instruments, not cryptography
+# The real-ROS harness shells out to ros2/bash by name inside WSL (no PATH games) and prints long CLI lines.
+"runtimes/ros-observer/tests_ros/**" = ["S603", "S607", "E501"]
+"scripts/dev_stack.py" = ["E501"]  # catalog descriptions are single human-readable strings
 
 [tool.mypy]
 python_version = "3.12"
@@ -57,7 +61,13 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
-testpaths = ["packages/openmhs-bridge/tests", "packages/device-sdk/tests", "services/api/tests"]
+testpaths = [
+  "packages/openmhs-bridge/tests",
+  "packages/device-sdk/tests",
+  "packages/agent-tools/tests",
+  "runtimes/ros-observer/tests",
+  "services/api/tests",
+]
 markers = [
   "engine: runs the real pinned OpenMHS binary (OPENMHS_BIN); fails instead of skipping when PAP_REQUIRE_ENGINE=1",
 ]

@@ -151,3 +151,44 @@ test("panels resize by keyboard", async ({ page }) => {
   await page.keyboard.press("Home");
   await expect(sep).toHaveAttribute("aria-valuenow", "260");
 });
+
+test("an assistant's proposal waits for an engineer, who approves it in the interface; the run executes and is verified", async ({
+  page,
+  playwright,
+  baseURL,
+}) => {
+  test.setTimeout(150_000);
+  const admin = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Authorization: `Bearer dev:${user}` } });
+  const viewer = `viewer-${run}`;
+  expect((await admin.put(`${O}/members`, { data: { issuer: "dev", subject: viewer, role: "viewer" } })).status()).toBe(200);
+  // What the assistant tools do: a viewer credential and the agent-tools channel header. Viewers cannot approve.
+  const assistant = await playwright.request.newContext({
+    baseURL,
+    extraHTTPHeaders: { Authorization: `Bearer dev:${viewer}`, "X-PAP-Channel": "agent-tools" },
+  });
+  const made = await assistant.post(`${O}/experiment-proposals`, {
+    data: { workflow: "dispense", rationale: "Repeat the dispense to check whether the shortfall repeats.", evidence_ids: ["run:example"] },
+  });
+  expect(made.status()).toBe(201);
+  expect((await assistant.post(`${O}/experiment-proposals/${(await made.json()).id}/approve`, { data: {} })).status()).toBe(403);
+
+  const signAs = async (who: string) => {
+    await page.goto("/settings");
+    await page.getByLabel("Subject").fill(who);
+    await page.getByRole("button", { name: "Sign in" }).click();
+  };
+  await signAs(viewer);
+  await page.goto(`/workflows?org=${org}`);
+  const row = page.getByRole("row").filter({ hasText: "Repeat the dispense to check" });
+  await expect(row).toContainText("via assistant tools");
+  await expect(row).toContainText("awaiting an engineer");
+  await expect(row.getByRole("button", { name: /Approve/ })).toHaveCount(0);
+
+  await signAs(user);
+  await page.goto(`/workflows?org=${org}`);
+  await row.getByRole("button", { name: "Approve proposal for dispense" }).click();
+  await expect(row).toContainText("approved");
+  await row.getByRole("link", { name: "Open the run" }).click();
+  await expect(page.getByRole("heading", { name: "Independently verified (OpenMHS engine)" })).toBeVisible();
+  await expect(page.getByText("Supported success")).toBeVisible({ timeout: 90_000 });
+});

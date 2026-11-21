@@ -24,6 +24,7 @@ export type Workflow = Schemas["WorkflowOut"];
 export type WorkflowRun = Schemas["RunOut"];
 export type WorkflowRunDetail = Schemas["RunDetailOut"];
 export type WorkflowStep = Schemas["StepOut"];
+export type Proposal = Schemas["ProposalOut"];
 export const orgPath = (org: string) => `/api/v1/orgs/${org}`;
 
 export class ApiError extends Error {

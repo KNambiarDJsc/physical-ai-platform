@@ -3,10 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import { api, orgPath, type Workflow, type WorkflowTemplate } from "@/lib/api/client";
+import { api, orgPath, type Proposal, type Workflow, type WorkflowTemplate } from "@/lib/api/client";
 import { shortDigest } from "@/lib/format";
 import { Notice, PageHeader, Panel } from "./AppShell";
 import { RequireIdentity } from "./Identity";
+import { KindBadge } from "./Hardware";
 import { Badge, ClassBadge, Table, Td, Time } from "./ui";
 import { VerdictBadge } from "./Workbench";
 import { OrgSelect, RUN_STATE, useEnvironments, useOrg, useRuns, useWorkflows } from "./Workspace";
@@ -45,6 +46,7 @@ function Workflows() {
               </Table>
             )}
           </Panel>
+          <Proposals org={org} canDecide={role === "engineer" || role === "admin"} />
           {role !== "viewer" && <NewWorkflow org={org} />}
           <Panel title="Recent runs">
             {runs.data && runs.data.length === 0 && <p className="text-[13px] text-muted">No run yet.</p>}
@@ -200,6 +202,78 @@ function NewWorkflow({ org }: { org: string }) {
           </Link>
           .
         </p>
+      )}
+    </Panel>
+  );
+}
+
+const PROPOSAL_TONE = { proposed: "warn", approved: "ok", rejected: "neutral" } as const;
+
+/** Experiments someone (often an assistant) proposed. Only an engineer decides; an approval queues an ordinary run. */
+function Proposals({ org, canDecide }: { org: string; canDecide: boolean }) {
+  const qc = useQueryClient();
+  const proposals = useQuery({
+    queryKey: ["proposals", org],
+    queryFn: () => api<Proposal[]>(`${orgPath(org)}/experiment-proposals`),
+    refetchInterval: 4000,
+  });
+  const decide = useMutation({
+    mutationFn: ({ id, verb }: { id: string; verb: "approve" | "reject" }) =>
+      api<Proposal>(`${orgPath(org)}/experiment-proposals/${id}/${verb}`, { method: "POST", body: JSON.stringify({}) }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["proposals", org] });
+      void qc.invalidateQueries({ queryKey: ["runs", org] });
+    },
+  });
+  const list = proposals.data ?? [];
+  return (
+    <Panel title="Proposed experiments">
+      {proposals.error && <Notice tone="bad">{proposals.error.message}</Notice>}
+      {list.length === 0 && !proposals.error && (
+        <p className="text-[13px] text-muted">
+          None. Anyone in the workspace, or an assistant using the read-only tools, can propose running an existing workflow; an engineer decides.
+        </p>
+      )}
+      {decide.error && <Notice tone="bad">{decide.error.message}</Notice>}
+      {list.length > 0 && (
+        <Table head={["Proposed", "Workflow", "By", "Why", "Cited evidence", "State", ""]} caption="Proposed experiments">
+          {list.map((p) => (
+            <tr key={p.id}>
+              <Td>
+                <Time iso={p.created_at} />
+              </Td>
+              <Td className="whitespace-normal">
+                <span className="num">{p.workflow}</span> <KindBadge kind={p.environment_kind} />
+              </Td>
+              <Td className="whitespace-normal">
+                {p.proposed_by.replace(/^dev:/, "")} {p.channel === "agent-tools" && <Badge tone="accent">via assistant tools</Badge>}
+              </Td>
+              <Td className="max-w-md whitespace-normal">{p.rationale}</Td>
+              <Td className="num max-w-xs whitespace-normal text-muted">{p.evidence_ids.length ? p.evidence_ids.join(", ") : "—"}</Td>
+              <Td>
+                <Badge tone={PROPOSAL_TONE[p.state as keyof typeof PROPOSAL_TONE] ?? "neutral"}>{p.state}</Badge>
+              </Td>
+              <Td className="whitespace-normal">
+                {p.state === "proposed" && canDecide && (
+                  <span className="flex gap-2">
+                    <button className="btn btn-primary py-0.5" disabled={decide.isPending || p.environment_kind !== "simulated"} onClick={() => decide.mutate({ id: p.id, verb: "approve" })} aria-label={`Approve proposal for ${p.workflow}`} title={p.environment_kind !== "simulated" ? "Only simulated environments can be approved" : undefined}>
+                      Approve
+                    </button>
+                    <button className="btn py-0.5" disabled={decide.isPending} onClick={() => decide.mutate({ id: p.id, verb: "reject" })} aria-label={`Reject proposal for ${p.workflow}`}>
+                      Reject
+                    </button>
+                  </span>
+                )}
+                {p.state === "approved" && p.run_id && (
+                  <Link className="text-accent hover:underline" href={`/workbench?org=${org}&run=${p.run_id}`}>
+                    Open the run
+                  </Link>
+                )}
+                {p.state === "proposed" && !canDecide && <span className="text-faint">awaiting an engineer</span>}
+              </Td>
+            </tr>
+          ))}
+        </Table>
       )}
     </Panel>
   );
