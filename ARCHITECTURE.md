@@ -36,6 +36,11 @@ customer evidence (CSV / JSONL / OpenMHS events)        commands: only to simula
 | `runtimes/virtual-lab` | Simulated instruments (syringe pump, analytical balance, simulation control) served by labthings-fastapi in their own uv project and lock. Simulation only. |
 | `services/api/app/hardware` | Environments (from the operator catalog), discovery, devices and capabilities, live property reads. |
 | `services/api/app/workflows` | Workflow definitions (`pap.workflow/1`, templates), runs on the PostgreSQL lease queue, the step journal, the executor (worker only) with the simulated-only check before every dispatch, verification by `openmhs outcome verify` (D-026, D-028). |
+| `runtimes/ros-observer` | Read-only ROS 2 observer (runs where ROS is installed, e.g. WSL): graph, topic freshness and rates, expected topics, simulation clock, joints, TF, controllers, diagnostics, served as Thing Descriptions with no actions (D-029). Also summarises rosbag2/MCAP recordings deterministically, and replays a recorded snapshot (labelled `recorded_not_live`) for CI and demos. |
+| `services/api/app/agent` | Experiment proposals: anyone in a workspace may propose running an existing workflow; an engineer approves or rejects; approval queues an ordinary run, simulated environments only (D-031). |
+| `packages/agent-tools` | Typed tools over the platform API for assistants (MCP over stdio): 12 read-only tools and `propose_experiment`; runs with the caller's credential (D-031). |
+| `examples/openamr-cmd-timeout` | Recorded Gazebo runs of the openamr-platform-sw #79 / PR #177 scenario with run identities, the upstream threshold as the contract, and a scenario script that lives outside the services (D-030). |
+| `infrastructure/observability` | Optional Compose profile: OpenTelemetry Collector and Prometheus (D-032). |
 
 ## The engine boundary (versioned)
 

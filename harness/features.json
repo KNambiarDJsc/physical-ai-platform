@@ -855,12 +855,16 @@
         "infrastructure/observability/",
         "docker-compose.yml"
       ],
-      "status": "unstarted",
+      "status": "in_progress",
       "verification": {
-        "evidence": [],
-        "verified_at": null
+        "verified_at": null,
+        "evidence": [
+          "Written: Compose profile `observability` (OpenTelemetry Collector 0.164.0 and Prometheus v3.15.1, pinned by digest), configs, scripts/check_observability.py, smoke.sh --observability, and CI's Compose job now runs it."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Not exercised yet: Docker is not running on this machine (B-001). It is verified only when CI runs on an approved push."
+      ]
     },
     {
       "id": "EVID-001",
@@ -1188,6 +1192,188 @@
       "limitations": [
         "Exercised on this machine's local stack and on CI's Docker Compose stack.",
         "No external user has done this; that is the separate external-adoption milestone."
+      ]
+    },
+    {
+      "id": "ROS-001",
+      "title": "Read-only ROS 2 observer served as W3C WoT Things",
+      "priority": 3,
+      "depends_on": [
+        "SDK-001"
+      ],
+      "description": "runtimes/ros-observer: a ROS 2 node that only subscribes (plus one allowlisted read-only service query) and serves what it sees as Thing Descriptions with no actions: graph (nodes, topics with freshness and rate, expected topics present/missing/stale), simulation clock, joint states, TF frames, controller states, diagnostics, connectivity.",
+      "acceptance": [
+        "Against a real ROS 2 graph (the OpenAMRobot upperbody mock bringup: real ros2_control controllers on mock hardware), every property returns what the graph actually publishes: node and controller names and states, topic publisher counts and message rates, joint names and positions, TF frames.",
+        "The command surface is zero: no Thing Description declares an action, the node creates no publisher, action client or service server, and its one client is the controller_manager list_controllers query; a source-scan test enforces this.",
+        "Freshness is honest: a topic that stops publishing becomes stale after a documented threshold; a topic that has publishers but has never delivered is 'never'; an expected topic that is not in the graph is 'missing'; heavy types (images, point clouds, maps) are reported as 'not sampled', never as fresh.",
+        "The simulation clock is reported as present or absent and, when present, checked for monotonicity; ages are measured on a monotonic clock, never on the host wall clock."
+      ],
+      "tests": [
+        "uv run pytest runtimes/ros-observer/tests",
+        "wsl: python3 -m pytest runtimes/ros-observer/tests_ros"
+      ],
+      "paths": [
+        "runtimes/ros-observer/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "WSL, ROS 2 Jazzy, OpenAMRobot upperbody mock bringup (real ros2_control controllers on mock hardware), commit aefd2e4 of openamr-upperbody-sw: python3 -m pytest runtimes/ros-observer/tests_ros: 10 live-graph tests passed, three separate runs. Ground truth is ros2 CLI output: node list (11 nodes) and topic list with types equal the observer's; /joint_states publisher count equals `ros2 topic info -v`; joint names equal `ros2 topic echo`; the six controllers and their states equal a list_controllers call; /tf_static frames are a subset of the observer's frames; /diagnostics statuses equal the CLI's.",
+          "Real staleness: freezing ros2_control_node (SIGSTOP) made /joint_states stale after the documented threshold (about 2 s) and fresh again on SIGCONT; the summary listed it as a required problem only while frozen.",
+          "Command surface: `ros2 node info /pap_ros_observer` shows publishers only /parameter_events and /rosout (rclpy defaults), no action clients or servers, one service client (/controller_manager/list_controllers). Source-scan test fails on any publisher, action, parameter write or subprocess; a mutation (an injected create_publisher) was caught.",
+          "uv run pytest runtimes/ros-observer/tests: 22 passed (freshness rules, latched vs transient-local streaming, hidden names, NaN as null, Thing Descriptions with no actions, GET/HEAD only).",
+          "Found by these tests and fixed: rclpy Node already owns `clients` and `clock`; ros2_control streams /joint_states with transient-local QoS (not 'latched'); the CLI daemon's hidden node; NaN from mock hardware made invalid JSON.",
+          "verify.sh full (2026-11-22): 240 pytest passed with the engine required, Semgrep 0 findings and rule self-test, mypy strict on API, SDK and agent tools, contracts, 21 web unit tests, build."
+        ]
+      },
+      "limitations": [
+        "Verified against the mock bringup only, not Gazebo or a real robot; a live graph is not available in CI (CI uses the recorded snapshot)."
+      ]
+    },
+    {
+      "id": "ROS-002",
+      "title": "OpenAMRobot workspace on the existing Hardware Hub and Workbench",
+      "priority": 3,
+      "depends_on": [
+        "ROS-001",
+        "HUB-001",
+        "WB-001"
+      ],
+      "description": "The ROS environment is one more operator-catalog environment. Its devices are discovered through the existing adapter SDK and shown by the existing Hardware Hub and Workbench; no robotics-specific architecture.",
+      "acceptance": [
+        "The observer is registered as an environment from the operator catalog and discovered through the unchanged WoT adapter; its devices and capabilities appear in the Hardware Hub with live values from the real observer.",
+        "The interface shows stale, never-received and missing observations as such, with their age; nothing is filled in when the graph is silent.",
+        "A workflow cannot be defined against an observer device (it has no actions), and the executor's safety check would refuse it anyway; both are tested.",
+        "The pages pass the axe gate in both themes; the isolation test covers any new route."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_ros_workspace.py",
+        "npm --prefix apps/web run e2e"
+      ],
+      "paths": [
+        "apps/web/src/components/Hardware.tsx",
+        "apps/web/src/components/Workbench.tsx"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_ros_workspace.py: 5 passed (discovery through the unchanged WoT adapter: 2 devices, properties only, no actions, no simulated claim; reads pass through unchanged incl. stale/never/missing; replay labelled recorded_not_live; no workflow can name an observer device; the executor's safety check refuses it).",
+          "smoke.sh --e2e with PAP_SMOKE_ROS_OBSERVER (2026-11-22): 37 browser tests passed, including e2e/ros.spec.ts against BOTH the recorded replay and the live graph through the real observer in WSL: Hardware Hub lists devices with Actions (0); topics with fresh/latched/never/no publishers; /clock missing; 17 joints; six active controllers; auto-refresh; Workbench 'Observed robots' with no workflow; axe WCAG 2.2 A/AA in dark and light.",
+          "The e2e run found and fixed three UI defects: a table led with its age column, nested record arrays (joints, controllers) were hidden, and a wide table's scroll container was not keyboard-focusable (WCAG 2.1.1).",
+          "verify.sh full (2026-11-22): 240 pytest passed with the engine required, Semgrep 0 findings and rule self-test, mypy strict on API, SDK and agent tools, contracts, 21 web unit tests, build."
+        ]
+      },
+      "limitations": [
+        "The live part of ros.spec runs only where a live observer is offered (scripts/ros_stack.sh); CI runs the recorded replay."
+      ]
+    },
+    {
+      "id": "ROS-003",
+      "title": "Recorded ROS bags and MCAP as engineering evidence with run identity and provenance",
+      "priority": 3,
+      "depends_on": [
+        "ROS-001",
+        "RI-004"
+      ],
+      "description": "A bag reader (rosbag2_py, MCAP or SQLite3) summarises a recording per topic (count, time range, gaps, simulation clock); each run carries an identity (run id, software commits, configuration, ROS and RMW versions) so observations, bags and evaluation episodes can be correlated.",
+      "acceptance": [
+        "A real MCAP bag recorded from a real simulation run is summarised: per-topic message counts, first/last time, maximum gap and stale intervals, simulation-clock monotonicity.",
+        "The run identity (run id, git commits of the software under test, launch arguments and parameters, ROS distro, RMW, domain, host) is stored beside the bag and appears in the exported evidence and in the evaluation's release components.",
+        "Missing and stale observations in a bag are listed, not interpolated.",
+        "The summary is deterministic: the same bag gives byte-identical output."
+      ],
+      "tests": [
+        "wsl: python3 -m pytest runtimes/ros-observer/tests_ros/test_bag.py"
+      ],
+      "paths": [
+        "runtimes/ros-observer/src/pap_ros_observer/bag.py"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "WSL: runtimes/ros-observer/tests_ros/test_bag.py, 6 passed on a real MCAP recorded from the real mock graph: counts equal `ros2 bag info` per topic; a real 3.5 s freeze of ros2_control_node is exactly one listed stale interval (3.0-5.5 s); /clock absent is reported; the identity beside the bag is embedded; the summary is byte-identical for a copy at another path; reading changes no file.",
+          "A real Gazebo run of the #177 scenario on the committed fix 505d17a (clean tree), recorded to MCAP by examples/openamr-cmd-timeout/scenario/run_scenario.sh: 12,975 messages, 6 topics, /clock monotonic over 11.2 s of simulation time; bag, summary and identity committed; test_ros_regression checks the MCAP's sha256 against the summary and the identity against runs.json.",
+          "Found: SIGINT is ignored by background jobs of a non-interactive shell, so the recorder never closed the first two bags; the script now stops it with SIGTERM (checked on /tmp and on /mnt/d).",
+          "verify.sh full (2026-11-22): 240 pytest passed with the engine required, Semgrep 0 findings and rule self-test, mypy strict on API, SDK and agent tools, contracts, 21 web unit tests, build."
+        ]
+      },
+      "limitations": [
+        "Topics are counted and timed; message payloads other than /clock are not decoded."
+      ]
+    },
+    {
+      "id": "ROS-004",
+      "title": "Command-timeout regression (platform-sw #79 / PR #177) through the existing evidence engine",
+      "priority": 3,
+      "depends_on": [
+        "ROS-003",
+        "RI-003",
+        "RI-008"
+      ],
+      "description": "The recorded Gazebo runs of upstream's own scenario (base driven at 0.2 m/s, command publisher killed, travel measured from Gazebo ground truth) on main (69847ab) and on the fix (505d17a) are exported as episodes with upstream's own threshold and evaluated by the OpenMHS engine; the HTML and JSON reports are reproducible.",
+      "acceptance": [
+        "Every episode comes from a recorded run file with its sha256; nothing is simulated or interpolated; the threshold (0.15 m travel after the kill) is the one in the upstream test.",
+        "The evaluation runs on the real pinned engine and its verdict is reported as the engine gives it; with the number of recorded runs available the expected outcome is insufficient evidence, stated as such, not tuned to a verdict.",
+        "The reproducible HTML and JSON report is generated twice with identical bytes and states the evidence class (simulated) and the run identities.",
+        "The platform never publishes to a ROS topic or starts the scenario; the scenario scripts live outside the platform's services."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_ros_regression.py"
+      ],
+      "paths": [
+        "examples/openamr-cmd-timeout/",
+        "runtimes/ros-observer/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_ros_regression.py (PAP_REQUIRE_ENGINE=1): 5 passed. 11 recorded runs (4 main, 7 fix), each a hashed file; build.py build --check reproduces the episode CSVs; the contract is upstream's 0.15 m; the real engine classifies every run as expected from the files (4 verified failures on main, 7 verified successes on the fix) and the comparison is insufficient_evidence (fewer than 30 known outcomes per arm); report.json byte-identical twice; HTML says simulated; releases carry commits 69847ab and 505d17a.",
+          "Found and fixed: the HTML report crashed when a site (here a procedure) existed in only one arm (engine gap G-9).",
+          "verify.sh full (2026-11-22): 240 pytest passed with the engine required, Semgrep 0 findings and rule self-test, mypy strict on API, SDK and agent tools, contracts, 21 web unit tests, build."
+        ]
+      },
+      "limitations": [
+        "10 of 11 runs come from the user's own scripts of 2026-11-20; only 2 runs are exactly on the committed fix (software_exact). Procedures differ (publisher kill vs downstream node kill). Too few runs for a verdict."
+      ]
+    },
+    {
+      "id": "AGT-001",
+      "title": "Typed read-only diagnostics tools and approval-gated experiment proposals",
+      "priority": 3,
+      "depends_on": [
+        "HUB-001",
+        "WF-001",
+        "RI-005"
+      ],
+      "description": "A tool layer over the platform's own API (MCP, stdio): typed read-only diagnostics tools for environments, devices, observations, runs, evaluations and incidents, run as the caller; one write, propose_experiment, which only records a proposal. A person with the engineer role approves or rejects it; approval queues an existing workflow in a simulated environment through the unchanged executor.",
+      "acceptance": [
+        "Every tool has input and output JSON Schemas generated from typed models and calls the platform API with the caller's own credentials, so tenant isolation and roles apply unchanged.",
+        "No tool can send a command, create a workflow, or approve a proposal; a test enumerates the tool list against an allowlist.",
+        "propose_experiment stores a proposal (workflow, rationale, cited evidence ids) in state 'proposed'; only an engineer approving it through the API queues a run, and only in a simulated environment (the executor's checks apply).",
+        "An MCP client over stdio can list the tools and call them against the real API; a deterministic investigation of a contradiction run returns findings that cite stored evidence ids."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_agent_tools.py"
+      ],
+      "paths": [
+        "packages/agent-tools/",
+        "services/api/app/agent/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_agent_tools.py: 7 passed against the real API (uvicorn), the real virtual lab and the real engine, through a real MCP client over a subprocess's stdio: the tool list equals the 13-tool allowlist (12 read-only, propose_experiment) with typed schemas; a contradiction run is investigated with findings citing run, verification and contract ids that exist; a viewer proposes (state proposed, channel agent-tools, nothing queued) and is refused approve/reject by the platform (403); an engineer's approval queues a run the executor completes (SATISFIED); a physical-environment proposal is refused (409); another workspace is 404 through every tool; bad input and unknown tools are answered, not crashed.",
+          "test_isolation.py now also attacks the proposal routes (4 passed). e2e/lab.spec.ts: a viewer sees the assistant's proposal awaiting an engineer; the engineer approves in the UI; the run executes and is verified.",
+          "verify.sh full (2026-11-22): 240 pytest passed with the engine required, Semgrep 0 findings and rule self-test, mypy strict on API, SDK and agent tools, contracts, 21 web unit tests, build."
+        ]
+      },
+      "limitations": [
+        "No language model is integrated or was run; the investigation is rule-based and says so. MCP is a minimal hand-written stdio server (tools capability only), not the official SDK (D-031)."
       ]
     }
   ]

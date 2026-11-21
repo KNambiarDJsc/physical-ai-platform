@@ -1,0 +1,21 @@
+# OpenTelemetry Collector for the optional `observability` Compose profile (OBS-002).
+# It receives what OBS-001 emits (OTLP over HTTP from the API and the worker) and writes the spans it receives to its own
+# log through the debug exporter, which is what the smoke check reads. Swap the exporter for your backend (Tempo, Jaeger,
+# a vendor) in your own overlay; nothing in the product depends on which one.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+    timeout: 1s
+exporters:
+  debug:
+    verbosity: detailed
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]

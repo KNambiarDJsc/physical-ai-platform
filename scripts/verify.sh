@@ -35,6 +35,7 @@ python_gates() {
   step "ruff format" uv run ruff format --check .
   step "mypy (bridge)" uv run mypy packages/openmhs-bridge/src
   step "mypy (device sdk)" uv run mypy packages/device-sdk/src
+  step "mypy (agent tools)" uv run mypy packages/agent-tools/src
   # The same project rules CI runs (a finding there blocked the 2026-11-21 checkpoint; it now fails here first).
   # Semgrep scans files git tracks: stage new files (git add -N) before relying on this step.
   step "semgrep (project rules)" uvx --from semgrep==1.183.0 semgrep scan --config .semgrep/rules.yml --error \

@@ -89,12 +89,21 @@ Each module gets the pattern that fits its job, not a grid of cards.
 | Evidence | Content-addressed file list with usage | Built |
 | Fleet | Robot × release outcome counts | Built (from uploaded evidence, not live) |
 | Integrations | API surface, credentials, engine pin, what is not built | Built |
-| Hardware Hub (devices) | Device tree and capability inspector, live reads | Built (WoT/LabThings adapter) |
+| Hardware Hub (devices) | Device tree and capability inspector, live reads; structured values as tables with freshness badges | Built (WoT/LabThings adapter; ROS observer) |
 | Workflows | Template form today; node canvas with properties inspector later | Built (templates and definitions; no canvas) |
 | Agents | Tool permissions, configuration, execution traces | Not built |
-| Workbench | Instruments, run, inspector, timeline; resizable | Built (no 3D viewport, no assistant) |
+| Workbench | Instruments, observed robots, run, inspector, timeline; resizable | Built (no 3D viewport, no assistant panel) |
+| Proposed experiments | Table on the Workflows page; engineers approve or reject | Built (proposals come from people or the tool layer) |
 | Experiments / simulation | Viewport, scenario controls, synchronized telemetry | Not built |
 | Datasets, policies, deployments | Episode browser, version history, approvals | Not built |
+
+## 6a. Observations
+
+Observed values are shown as they were received: a state word (fresh, stale, never, missing, latched, not sampled)
+always as text in a badge, the age with its unit, and "—" for no value. A required topic that is missing or silent is a
+problem (red); the same word on an optional one is not. Identifying columns come first (name, topic, frame, service),
+then the state. Wide tables scroll inside a focusable, labelled region. A replayed snapshot says so in its environment
+name and in its connectivity record; nothing pretends to be live.
 
 ## 7. Data visualization
 

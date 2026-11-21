@@ -2,6 +2,33 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-22 — Session 7: robotics on the same platform (OpenAMRobot), agent tools, observability profile
+
+**State now:** 37 of 38 verified (adds ROS-001..004, AGT-001). OBS-002 in progress: written, needs Docker (CI on push).
+Pushed: d3bbb26 (with approval). Everything below is LOCAL; pushing needs approval.
+
+**What exists:** a read-only ROS 2 observer (no command surface, by construction and tested: D-029) served as W3C
+Things, discovered by the unchanged adapter and shown by the existing Hardware Hub and Workbench; a bag reader
+(rosbag2/MCAP, deterministic, gaps listed not interpolated); the #79 / PR #177 command-timeout regression from 11 recorded
+Gazebo runs with honest identities, through the existing engine (insufficient evidence at 4 vs 7 runs, as it should be);
+experiment proposals with an engineer approval gate; 13 typed tools over MCP/stdio (12 read-only, 1 proposal);
+an optional observability profile.
+
+**Evidence:** verify.sh full 240 pytest (engine required), Semgrep clean; WSL real-graph suite 16 (10 live + 6 bag) three
+times; browser 37 with the live graph and 30 without; ros.spec against replay and live; axe clean both themes.
+One new Gazebo run of the #177 scenario on 505d17a recorded to MCAP (travel 0.0765 m after the kill).
+
+**Found and fixed (real bugs):** HTML report crashed on a site present in one arm (G-9); NaN from mock hardware made
+invalid JSON; ros2_control's transient-local /joint_states misread as latched; rclpy Node attribute clashes; SIGINT
+ignored by background jobs so bags never closed (now SIGTERM); WSL ends background processes with their session;
+three viewer defects (column order, hidden nested tables, unfocusable scroll region).
+
+**Not done:** no Gazebo or real robot behind the live observer (mock bringup only); too few #177 runs for a verdict;
+no language model; MCP not via the official SDK; OBS-002 unexercised (no Docker); no OpenAMRobot upstream change.
+
+**Next:** with approval, push (CI verifies the Compose lab, the observability profile and the replayed ROS UI); more
+#177 runs per arm (about 30 each) would let the engine give a verdict.
+
 ## 2026-11-21 — Session 6b: lab automation, first milestone (simulated instrument to verified result)
 
 **State now:** 32 of 33 features verified (adds SDK-001, LAB-001, HUB-001, WF-001, WB-001, ONB-001). Open: OBS-002.

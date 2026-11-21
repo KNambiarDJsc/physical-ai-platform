@@ -7,6 +7,7 @@
 #   bash scripts/smoke.sh --e2e            # plus the browser suites
 #   bash scripts/smoke.sh --compose        # Docker Compose stack instead (builds the images; INF-003, SEC-001)
 #   bash scripts/smoke.sh --compose --e2e
+#   bash scripts/smoke.sh --compose --observability   # plus the OTel Collector and Prometheus profile (OBS-002)
 #   bash scripts/smoke.sh --oidc           # local stack signing in through a real OIDC provider (AUTH-002)
 #   bash scripts/smoke.sh --compose --trial  # plus the trial exercise (trial/EXERCISE.md) done through the UI
 #
@@ -21,12 +22,14 @@ E2E=0
 TRIAL=0
 COMPOSE=0
 OIDC=0
+OBS=0
 for a in "$@"; do
   case "$a" in
     --e2e) E2E=1 ;;
     --trial) TRIAL=1 ;;
     --compose) COMPOSE=1 ;;
     --oidc) OIDC=1 ;;
+    --observability) OBS=1 ;;
     *) echo "unknown argument: $a" >&2; exit 2 ;;
   esac
 done
@@ -45,6 +48,10 @@ if [ "$COMPOSE" = 1 ]; then
   export PAP_DB_PASSWORD="${PAP_DB_PASSWORD:-smoke-$RANDOM$RANDOM}"
   export PAP_API_PORT="$API_PORT" PAP_WEB_PORT="$WEB_PORT" PAP_WORKER_LEASE_S="${PAP_WORKER_LEASE_S:-10}"
   export PAP_LAB_PORT="${PAP_SMOKE_LAB_PORT:-8865}"
+  if [ "$OBS" = 1 ]; then
+    export COMPOSE_PROFILES=observability PAP_PROM_PORT="${PAP_SMOKE_PROM_PORT:-9765}"
+    export OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+  fi
   dc() { docker compose -p "$PROJECT" "$@"; }
   trap 'dc logs --no-color >"$RUN/compose.log" 2>&1 || true; dc down -v --remove-orphans >/dev/null 2>&1 || true' EXIT
   echo "== building and starting the Compose stack"
@@ -69,6 +76,12 @@ if [ "$COMPOSE" = 1 ]; then
 
   echo "== API smoke"
   uv run python scripts/smoke_api.py --api "http://127.0.0.1:$API_PORT"
+  if [ "$OBS" = 1 ]; then
+    echo "== observability: the collector receives traces and Prometheus scrapes the API and the worker"
+    uv run python scripts/check_observability.py --prometheus "http://127.0.0.1:$PAP_PROM_PORT" \
+      --collector-logs "docker compose -p $PROJECT logs --no-color otel-collector" \
+      || { dc logs --no-color otel-collector 2>&1 | tail -30 >&2; exit 1; }
+  fi
   if [ "$E2E" = 1 ]; then
     echo "== browser suites"
     # Kill the worker's main process from the host (as a crash would); the restart policy starts it again.
@@ -116,7 +129,9 @@ fi
 
 echo "== starting stack (log: $LOG)"
 uv run python scripts/dev_stack.py --api-port "$API_PORT" --web-port "$WEB_PORT" \
-  --lab-port "${PAP_SMOKE_LAB_PORT:-8865}" --state-dir "$STATE" --ready-file "$READY" --stop-file "$STOP" >"$LOG" 2>&1 &
+  --lab-port "${PAP_SMOKE_LAB_PORT:-8865}" --ros-replay runtimes/ros-observer/tests/fixtures/openamr-upperbody-mock.snapshot.json \
+  --ros-replay-port "${PAP_SMOKE_ROS_PORT:-8866}" ${PAP_SMOKE_ROS_OBSERVER:+--ros-observer "$PAP_SMOKE_ROS_OBSERVER"} \
+  --state-dir "$STATE" --ready-file "$READY" --stop-file "$STOP" >"$LOG" 2>&1 &
 STACK=$!
 
 stop_stack() {

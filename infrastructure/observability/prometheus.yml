@@ -1,0 +1,13 @@
+# Prometheus for the optional `observability` Compose profile (OBS-002): scrapes the API and the worker.
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+scrape_configs:
+  - job_name: pap-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]
+  - job_name: pap-worker
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["worker:9100"]

@@ -149,7 +149,30 @@ services:
     restart: unless-stopped
     <<: *hardening
 
+  # Optional (profile `observability`, OBS-002): unmodified upstream images, never bundled into a product image.
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector:0.164.0@sha256:28b6d41ac51bff6b41ba5e8fe503569ffb9d6a1ea90f7a78419e86f34e44f750
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes: ["./infrastructure/observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro"]
+    expose: ["4318"]
+    restart: unless-stopped
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=2d"]
+    volumes: ["./infrastructure/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro", "promdata:/prometheus"]
+    ports: ["127.0.0.1:${PAP_PROM_PORT:-9090}:9090"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+
 volumes:
+  promdata:
   pgdata:
   artifacts:
   work:

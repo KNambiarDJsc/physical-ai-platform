@@ -206,3 +206,39 @@ non-idempotent command to an instrument could repeat a physical effect. The run'
 `openmhs outcome verify` on an RFC 0004 contract and the independent instrument's evidence, never from the
 platform's own comparison.
 
+## D-029 (2026-11-22) The ROS observer has no command surface, by construction and by test
+The OpenAMRobot workspace is "observe, never drive": the observer (runtimes/ros-observer) is a node that only
+subscribes, plus one client for one service type (controller_manager ListControllers, a query). Its Thing Descriptions
+are built from a structure with no field for an action, so none can be declared; the HTTP server answers GET and HEAD
+only; a source-scan test fails if the code ever mentions a publisher, an action client or server, a parameter write or a
+subprocess; and the real-graph test reads `ros2 node info` to check that the node's publishers are rclpy's own defaults
+and its only client is list_controllers. An observer device also declares no `simulated` property, so the executor's
+safety check would refuse it even if a workflow could name it (it cannot: no action exists to name). Freshness is judged
+on a monotonic clock because the WSL wall clock steps back about a second every half minute. NaN and infinities become
+null because a mock sensor really did report NaN and a strict JSON parser rejects the whole response.
+
+## D-030 (2026-11-22) Recorded runs are evidence only as far as their provenance goes
+The platform does not run the #177 scenario (that would publish /cmd_vel and touch controller ownership); it ingests what
+the user's own scripts recorded. runs.json says, for every run, which arm it belongs to and WHY (script, run name, time),
+and whether the software state is exactly known: only two runs are on the committed fix 505d17a, the others ran on the
+fix branch's working tree minutes before the commit. The new scenario script writes its own identity (commit, dirty
+flag, configuration, ROS/RMW, host) beside an MCAP bag. With 4 vs 7 runs the engine's answer is insufficient evidence
+and the platform reports exactly that: min_known stays at its default of 30. The `site` field carries the procedure
+(publisher kill vs killing a downstream node) so mixed procedures are visible per stratum, not hidden in one rate.
+
+## D-031 (2026-11-22) Assistants get a viewer credential; the approval gate is the platform's roles, not the tool layer
+The tool layer (packages/agent-tools) has typed tools over the platform's own API, run with the caller's credential.
+Thirteen tools: twelve read-only, one write (propose_experiment) that only records a proposal. Approval needs the engineer
+role, so an assistant holding a viewer credential cannot approve however it behaves; the platform refuses with 403. The
+X-PAP-Channel header only labels a proposal as having come through the tools (shown in the UI); it is not a security
+control. Approval queues an ordinary run through the unchanged executor and is refused (409) unless the environment is
+simulated. The investigation is rule-based and says so in its output; no language model is integrated, none was run, and
+no paid service is called. MCP is implemented by hand for the tools capability only (initialize, ping, tools/list,
+tools/call over newline-delimited JSON-RPC on stdio): the official SDK is at 2.x, a major version newer than the API this
+work could verify, and the part needed here is small and tested over a real pipe.
+
+## D-032 (2026-11-22) Observability stays optional and uses unmodified images
+Compose profile `observability`: OpenTelemetry Collector 0.164.0 and Prometheus v3.15.1, pinned by version and digest
+(both older than two weeks), configs in infrastructure/observability. Grafana, Loki and Tempo (AGPL-3.0) are not
+included; they may only ever run as separate, unmodified services of the operator's own.
+

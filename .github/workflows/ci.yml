@@ -112,7 +112,7 @@ jobs:
           npm --prefix apps/web ci --no-audit --no-fund
           npx --prefix apps/web playwright install --with-deps chromium
       - name: Compose smoke and browser suites
-        run: bash scripts/smoke.sh --compose --e2e
+        run: bash scripts/smoke.sh --compose --e2e --observability
         env:
           COMPOSE_BAKE: "false"
       - name: Trivy (images)
