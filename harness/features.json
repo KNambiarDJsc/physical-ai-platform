@@ -1038,12 +1038,12 @@
         "evidence": [
           "Same SDK tests: every Thing has a read-only simulated=true property; a repeated request id leaves the balance reading unchanged (noise only); partial_blockage leaves the pump's report at 100 µL while the balance reads 0.055-0.070 g.",
           "smoke.sh --e2e (2026-11-21): dev_stack.py started the lab on its own port and the browser suite (21 passed) used it, including the fault-injection test.",
-          "pip-audit on runtimes/virtual-lab/uv.lock: no known vulnerabilities. Docker Compose service and image added (non-root uid 10002, read-only root, settings in /tmp); not yet built on CI (local Docker is not running, B-001)."
+          "pip-audit on runtimes/virtual-lab/uv.lock: no known vulnerabilities. Docker Compose service and image added (non-root uid 10002, read-only root, settings in /tmp); built and run on CI (see below).",
+          "CI run 44897097725 on e9dfdb3 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44897097725): all four jobs green. The Docker Compose job built the virtual-lab image, ran it non-root, and passed the browser suites against the Compose stack, including e2e/lab.spec.ts; the clean-install trial and the security scans (Semgrep, Trivy, gitleaks) passed."
         ]
       },
       "limitations": [
-        "Simulation only: a pump and a balance with a simple physical model (0.4 % pump CV, 0.1 mg balance noise). Not a calibrated instrument model.",
-        "The Compose service has not been built yet; CI's compose job will build it on the next approved push."
+        "Simulation only: a pump and a balance with a simple physical model (0.4 % pump CV, 0.1 mg balance noise). Not a calibrated instrument model."
       ]
     },
     {
@@ -1147,7 +1147,8 @@
         "verified_at": "2026-11-21",
         "evidence": [
           "e2e/lab.spec.ts (smoke.sh --e2e, 2026-11-21): a run started from the Workbench button is executed by the worker and shown live to Supported success with the step timeline; an injected blockage shows reported succeeded with reported_dispensed_ul = 100 beside the engine's violated verdict; the inspector separator resizes by keyboard (340 -> 356 -> Home 260).",
-          "e2e/a11y.spec.ts: the Workbench (with a finished run), Hardware Hub, Workflows and Get started pages pass axe-core WCAG 2.0/2.1/2.2 A/AA in the dark and the light theme with zero violations."
+          "e2e/a11y.spec.ts: the Workbench (with a finished run), Hardware Hub, Workflows and Get started pages pass axe-core WCAG 2.0/2.1/2.2 A/AA in the dark and the light theme with zero violations.",
+          "CI run 44897097725 on e9dfdb3 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44897097725): all four jobs green. The Docker Compose job built the virtual-lab image, ran it non-root, and passed the browser suites against the Compose stack, including e2e/lab.spec.ts; the clean-install trial and the security scans (Semgrep, Trivy, gitleaks) passed."
         ]
       },
       "limitations": [
@@ -1180,11 +1181,12 @@
         "verified_at": "2026-11-21",
         "evidence": [
           "e2e/lab.spec.ts 'a new user goes from sign-in to an engine-verified result through the interface only' (32.5 s): sign in, create workspace, connect the virtual laboratory from the catalog, discover, create the workflow from a form generated from the template's schema, run, read reported succeeded / engine satisfied / Supported success, open the run in the Workbench (engine version, commit and binary digest shown), inspect the dispense step, read a live property in the Hardware Hub. The test makes no API call itself.",
-          "Onboarding progress is derived from server data (workspaces, environments, devices, workflows, runs); nothing is kept in browser storage."
+          "Onboarding progress is derived from server data (workspaces, environments, devices, workflows, runs); nothing is kept in browser storage.",
+          "CI run 44897097725 on e9dfdb3 (https://github.com/KNambiarDJsc/physical-ai-platform/actions/runs/44897097725): all four jobs green. The Docker Compose job built the virtual-lab image, ran it non-root, and passed the browser suites against the Compose stack, including e2e/lab.spec.ts; the clean-install trial and the security scans (Semgrep, Trivy, gitleaks) passed."
         ]
       },
       "limitations": [
-        "Run on this machine's local stack; the Docker trial path has the lab service but has not been exercised end to end on CI yet.",
+        "Exercised on this machine's local stack and on CI's Docker Compose stack.",
         "No external user has done this; that is the separate external-adoption milestone."
       ]
     }
