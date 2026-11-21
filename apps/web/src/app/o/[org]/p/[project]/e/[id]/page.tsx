@@ -82,7 +82,7 @@ function ReportActions({ base, id }: { base: string; id: string }) {
       setBusy(null);
     }
   };
-  const btn = "rounded-md border border-line bg-panel px-2.5 py-1.5 text-[13px] hover:bg-sunken disabled:opacity-50";
+  const btn = "btn";
   return (
     <div className="flex items-center gap-2">
       <button className={btn} disabled={!!busy} onClick={() => get("html")}>

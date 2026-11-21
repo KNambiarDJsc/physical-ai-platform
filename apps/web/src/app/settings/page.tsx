@@ -39,13 +39,13 @@ function IdentityPanel() {
               <span className="num text-faint">({a.user.subject})</span>, through your identity provider.
             </p>
             <form method="post" action="/auth/logout" className="mt-3">
-              <button className="rounded-md border border-line px-3 py-1.5 text-[13px]" type="submit">
+              <button className="btn" type="submit">
                 Sign out
               </button>
             </form>
           </>
         ) : (
-          <a className="inline-block rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white" href={signInHref("/")}>
+          <a className="btn btn-primary" href={signInHref("/")}>
             Sign in
           </a>
         )}
@@ -86,14 +86,14 @@ function DevIdentity() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="subject, e.g. alice"
-          className="w-56 rounded-md border border-line bg-panel px-2 py-1.5 text-[13px]"
+          className="field w-56"
         />
-        <button className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white" type="submit">
+        <button className="btn btn-primary" type="submit">
           Sign in
         </button>
         <button
           type="button"
-          className="rounded-md border border-line px-3 py-1.5 text-[13px]"
+          className="btn"
           onClick={() => {
             setIdentity(null);
             setCurrent(null);

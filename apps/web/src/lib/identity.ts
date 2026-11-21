@@ -13,6 +13,9 @@ export function getIdentity(): string | null {
   }
 }
 
+/** Fired on window when the development identity changes, so the shell can show who is signed in. */
+export const IDENTITY_EVENT = "pap:identity";
+
 export function setIdentity(subject: string | null): void {
   try {
     if (subject) window.sessionStorage.setItem(KEY, subject);
@@ -20,4 +23,5 @@ export function setIdentity(subject: string | null): void {
   } catch {
     /* storage unavailable: the user stays signed out */
   }
+  window.dispatchEvent(new Event(IDENTITY_EVENT));
 }

@@ -156,3 +156,13 @@ deletes npm, npx, corepack and yarn. Official base images are an exception to "v
 old": their rebuilds are the security fixes, so waiting keeps known vulnerabilities. They are still pinned by
 digest; bumping them is a reviewed change. Bookworm (not trixie) keeps the runtime on the same Debian release
 as the engine build stage (glibc).
+
+## D-024 (2026-11-21) Design direction "Precision Industrial", written down in DESIGN.md
+The product brief asks for engineering software that reads like Linear, Foxglove and Sentry rather than a generic
+dashboard. DESIGN.md is the contract: tokens, type, spacing, shell, per-module interaction patterns, chart and
+writing rules, anti-patterns. Two departures from the brief's palette: the brief merged "unknown" and "warning"
+into one amber, but the product separates contradiction (warning) from unknown, so unknown keeps its own colour;
+and the brief's tertiary grey was raised to pass AA on the sunken surface. Honesty rules outrank visual ones:
+modules that are not built are not in the navigation, and concept imagery never appears in the application.
+Fonts come from the `geist` package so builds and air-gapped installs do not fetch from Google.
+

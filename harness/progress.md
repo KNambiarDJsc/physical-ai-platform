@@ -2,6 +2,32 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-21 — Session 5: module pages, design system and application shell
+
+**Module pages** (commit 06f037b, pushed with approval): Fleet, Incidents, Verification, Evidence and Integrations
+were "Soon" placeholders; each now renders stored API data only (no figure invented, empty states explicit).
+`e2e/modules.spec.ts`: 7 browser tests against the real API, worker and engine.
+
+**Design system "Precision Industrial"** (DESIGN.md, D-024): graphite dark theme by default, light theme by OS or a
+switch, one blue accent, semantic colours only for states, Geist Sans/Mono bundled (`geist` 1.7.2, no font fetch
+at run time). Every text token computed at >= 4.5:1 on bg, panel, sunken and its own soft background (the first
+choice of `faint` failed on sunken in both themes and was corrected). Shell: grouped navigation of built pages
+only, top bar with URL-derived breadcrumb, theme switch, signed-in identity, Ctrl/Cmd K command palette; shared
+`.btn`/`.btn-primary`/`.field` classes replaced hand-written ones (white text on the new accent would have failed
+contrast).
+
+**Evidence:** typecheck and lint clean; vitest 15/15; Playwright against the live stack: modules 7/7, release-flow
+1/1, failure-paths 6/6 (with `PAP_WORKER_PID_FILE` pointing at the demo stack's worker), trial-exercise skipped
+(clean-install only); OIDC spec not run this session. Screenshots checked at 1280 px (dark and light) and 390 px
+(no horizontal page scroll).
+
+**Not done:** no feature in the registry covers the design system (it changes presentation only). The Workbench,
+Devices, Workflows and Agents modules from the product brief are not built and are not in the navigation.
+Third-party design skills named in the brief (Impeccable, Taste Skill) were not installed: they need review first.
+Found: the local demo database needed crash recovery after an unclean stop (one WAL record replayed, clean).
+
+**Next:** the brief's order continues with first-run onboarding, then hardware and environment discovery.
+
 ## 2026-11-19 — Session 4: Milestone D, trial pack for an independent engineer
 
 **State now:** 26 of 27 features verified (adds INF-003, SEC-001 on CI run 44393338284; EVAL-001; TRIAL-001). Open:

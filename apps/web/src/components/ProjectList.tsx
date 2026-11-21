@@ -57,8 +57,8 @@ function Projects() {
   );
 }
 
-const input = "rounded-md border border-line bg-panel px-2 py-1.5 text-[13px]";
-const button = "rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white disabled:opacity-50";
+const input = "field";
+const button = "btn btn-primary";
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
 
 function SlugForm({ idPrefix, what, submit }: { idPrefix: string; what: string; submit: (slug: string, name: string) => Promise<unknown> }) {

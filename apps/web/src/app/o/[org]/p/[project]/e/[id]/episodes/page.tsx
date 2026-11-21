@@ -44,7 +44,7 @@ function Episodes({ org, project, id }: Params) {
   });
   const j = job.data;
   const releaseLabel = (rid: string) => (j ? (rid === j.baseline_release_id ? j.baseline_label : j.candidate_label) : rid);
-  const sel = "rounded-md border border-line bg-panel px-2 py-1.5 text-[13px]";
+  const sel = "field";
   return (
     <>
       <PageHeader
@@ -76,7 +76,7 @@ function Episodes({ org, project, id }: Params) {
       </div>
       {page.error && <Notice tone="bad">{page.error.message}</Notice>}
       <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="rounded-lg border border-line bg-panel p-2">
+        <div className="rounded-md border border-line bg-panel p-2">
           {page.data && (
             <>
               <Table head={["Episode", "Release", "Robot", "Scenario", "Reported", "Verdict", "Outcome"]} caption="Episodes">

@@ -21,8 +21,8 @@ export default function ProjectPage({ params }: { params: Promise<Params> }) {
   );
 }
 
-const input = "rounded-md border border-line bg-panel px-2 py-1.5 text-[13px]";
-const button = "rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white disabled:opacity-50";
+const input = "field";
+const button = "btn btn-primary";
 
 function Workspace({ org, project }: Params) {
   const base = projectPath(org, project);
