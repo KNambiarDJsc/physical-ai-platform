@@ -1,0 +1,33 @@
+{
+  "schema": "pap.mapping/1",
+  "name": "openamr-cmd-timeout-ground-truth",
+  "description": "SIMULATED (Gazebo) recordings of the command-timeout scenario of openamr-platform-sw issue #79 / PR #177: the base is driven at 0.2 m/s, its command source is killed, and the distance it still travels is measured from Gazebo's world pose. The contract is upstream's own limit (MAX_TRAVEL_AFTER_KILL_M = 0.15 in test_sim_cmd_vel_timeout_gazebo.py at 505d17a). No controller report exists for these runs, so the reported outcome is blank (unknown) and only the independent measurement judges them. Times are the result files' modification times (1 s resolution), not the simulation clock.",
+  "evidence_class": "simulated",
+  "input": {"format": "csv"},
+  "episode_id": {"column": "episode_id"},
+  "robot": {"const": "sim/openamrobot-base"},
+  "task_type": {"const": "command_loss_stop"},
+  "site": {"column": "procedure"},
+  "ended_at": {"column": "ended_utc", "format": "rfc3339", "clock_domain": "file-mtime", "uncertainty_ms": 1000},
+  "reported_outcome": {
+    "column": "reported_status",
+    "values": {"succeeded": "succeeded", "failed": "failed"},
+    "missing": "unknown"
+  },
+  "measurements": [
+    {
+      "name": "travel_after_kill", "column": "travel_after_kill_m", "signal": "base.travel_after_command_loss", "unit": "m",
+      "kind": "independent_sensor", "system": "gazebo", "device": "gz-world-pose",
+      "time": {"column": "ended_utc", "format": "rfc3339", "clock_domain": "file-mtime", "uncertainty_ms": 1000}
+    }
+  ],
+  "contract": {
+    "name": "stops-after-command-loss",
+    "version": "0.1",
+    "window_ms": [0, 5000],
+    "max_clock_uncertainty_ms": 5000,
+    "conditions": [
+      {"name": "base travels at most 0.15 m after its command source is killed", "evidence": "travel_after_kill", "op": "le", "value": {"value": 0.15, "unit": "m"}}
+    ]
+  }
+}

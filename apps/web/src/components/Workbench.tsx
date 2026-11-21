@@ -18,6 +18,7 @@ import {
 import { shortDigest, timestamp } from "@/lib/format";
 import { Notice } from "./AppShell";
 import { KindBadge } from "./Hardware";
+import { ObsState } from "./Observation";
 import { RequireIdentity } from "./Identity";
 import { Split } from "./Split";
 import { Badge, ClassBadge, Time } from "./ui";
@@ -96,10 +97,15 @@ function Workbench() {
   if (!org) return <Notice tone="info">You have no workspace yet. <Link className="underline" href="/onboarding">Get started</Link>.</Notice>;
   if (workflows.data && workflows.data.length === 0)
     return (
+      <div className="max-w-xl space-y-4">
+        <div className="rounded-md border border-line bg-panel">
+          <Observers org={org} devices={devices.data ?? []} />
+        </div>
       <Notice tone="info">
         No workflow in this workspace yet. Create one on <Link className="underline" href={`/workflows?org=${org}`}>Workflows</Link> or follow{" "}
         <Link className="underline" href="/onboarding">Get started</Link>.
       </Notice>
+      </div>
     );
 
   return (
@@ -226,6 +232,7 @@ function Instruments({
         </ul>
         <p className="mt-2 text-[11px] text-faint">Read live from the devices every 1.5 s.</p>
       </section>
+      <Observers org={org} devices={devices} />
       <section aria-labelledby="runs-h" className="min-h-0 flex-1 overflow-auto p-3">
         <h2 id="runs-h" className="mb-2 text-[12px] font-medium text-faint">
           Runs
@@ -533,5 +540,82 @@ function Timeline({ run, sel, onSelect }: { run: WorkflowRunDetail | undefined; 
         })}
       </svg>
     </div>
+  );
+}
+
+// ----------------------------------------------------------------------------------------- left: observed robots
+
+type ObserverSummary = {
+  topics?: number;
+  nodes?: number;
+  topics_by_state?: Record<string, number>;
+  required_expected_problems?: string[];
+  clock_state?: string;
+};
+
+/** Environments whose devices only observe (a `summary` property and no action): a robot graph seen read-only. */
+function Observers({ org, devices }: { org: string; devices: Device[] }) {
+  const observers = devices.filter(
+    (d) =>
+      d.present &&
+      d.capabilities.some((c) => c.kind === "property" && c.name === "summary") &&
+      !d.capabilities.some((c) => c.kind === "action"),
+  );
+  const reads = useQueries({
+    queries: observers.map((d) => ({
+      queryKey: ["observer-summary", org, d.id],
+      queryFn: () => api<PropertyRead>(`${orgPath(org)}/devices/${d.id}/properties/summary`),
+      refetchInterval: 1500,
+    })),
+  });
+  if (observers.length === 0) return null;
+  return (
+    <section aria-labelledby="observers-h" className="border-b border-line p-3">
+      <h2 id="observers-h" className="mb-2 text-[12px] font-medium text-faint">
+        Observed robots
+      </h2>
+      <ul className="space-y-3">
+        {observers.map((d, i) => {
+          const q = reads[i];
+          const v = (q?.data?.value ?? {}) as ObserverSummary;
+          const problems = v.required_expected_problems ?? [];
+          return (
+            <li key={d.id}>
+              <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                <span className="font-medium">{d.environment}</span>
+                <KindBadge kind={d.environment_kind} />
+              </div>
+              {q?.error ? (
+                <p className="mt-1 text-[12px] text-bad">unreachable: {q.error.message}</p>
+              ) : (
+                <>
+                  <p className="num mt-1 text-[12px] text-muted">
+                    {v.nodes ?? "…"} nodes · {v.topics ?? "…"} topics · clock {v.clock_state ?? "…"}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {Object.entries(v.topics_by_state ?? {}).map(([state, n]) => (
+                      <span key={state} className="inline-flex items-center gap-1 text-[12px]">
+                        <ObsState value={state} />
+                        <span className="num text-muted">{n}</span>
+                      </span>
+                    ))}
+                  </div>
+                  {problems.length > 0 ? (
+                    <p className="mt-1 text-[12px] text-bad" role="status">
+                      Required but not healthy: <span className="num">{problems.join(", ")}</span>
+                    </p>
+                  ) : (
+                    q?.data && <p className="mt-1 text-[12px] text-faint">Every required topic is publishing.</p>
+                  )}
+                </>
+              )}
+              <Link className="mt-1 inline-block text-[12px] text-accent hover:underline" href={`/hardware?org=${org}`}>
+                Inspect in the Hardware Hub
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

@@ -1,12 +1,14 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import clsx from "clsx";
 import { useState } from "react";
 import { api, orgPath, type CatalogEntry, type Capability, type Device, type Discovery, type PropertyRead } from "@/lib/api/client";
 import { shortDigest } from "@/lib/format";
 import { Notice, PageHeader, Panel } from "./AppShell";
 import { RequireIdentity } from "./Identity";
+import { ValueView } from "./Observation";
 import { Split } from "./Split";
 import { Badge, Table, Td, Time } from "./ui";
 import { OrgSelect, useDevices, useEnvironments, useOrg } from "./Workspace";
@@ -192,7 +194,7 @@ function DeviceBrowser({ org }: { org: string }) {
           </nav>
         }
       >
-        <Inspector org={org} device={current} />
+        <Inspector key={current.id} org={org} device={current} />
       </Split>
     </section>
   );
@@ -201,6 +203,33 @@ function DeviceBrowser({ org }: { org: string }) {
 function Inspector({ org, device }: { org: string; device: Device }) {
   const props = device.capabilities.filter((c) => c.kind === "property");
   const actions = device.capabilities.filter((c) => c.kind === "action");
+  const [reads, setReads] = useState<Record<string, PropertyRead>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const readOne = useCallback(
+    async (name: string) => {
+      setBusy(name);
+      try {
+        const r = await api<PropertyRead>(`${orgPath(org)}/devices/${device.id}/properties/${name}`);
+        setReads((m) => ({ ...m, [name]: r }));
+        setErrors((m) => Object.fromEntries(Object.entries(m).filter(([k]) => k !== name)));
+        if (r.value !== null && typeof r.value === "object") setViewing(name);
+      } catch (e) {
+        setErrors((m) => ({ ...m, [name]: e instanceof Error ? e.message : "read failed" }));
+      } finally {
+        setBusy(null);
+      }
+    },
+    [org, device.id],
+  );
+  useEffect(() => {
+    if (!live || !viewing) return;
+    const t = setInterval(() => void readOne(viewing), 1000);
+    return () => clearInterval(t);
+  }, [live, viewing, readOne]);
+  const shown = viewing ? reads[viewing] : undefined;
   return (
     <div className="p-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -227,9 +256,33 @@ function Inspector({ org, device }: { org: string; device: Device }) {
       <h3 className="mb-1 text-[13px] font-medium">Properties ({props.length})</h3>
       <Table head={["Property", "Type", "Access", "Live value", ""]} caption={`Properties of ${device.key}`}>
         {props.map((p) => (
-          <PropertyRow key={p.name} org={org} device={device} cap={p} />
+          <PropertyRow
+            key={p.name}
+            cap={p}
+            read={reads[p.name]}
+            error={errors[p.name]}
+            busy={busy === p.name}
+            viewing={viewing === p.name}
+            onRead={() => void readOne(p.name)}
+            onView={() => setViewing(p.name)}
+          />
         ))}
       </Table>
+      {viewing && shown && (
+        <section aria-label={`Value of ${viewing}`} className="mt-3 rounded-md border border-line p-3">
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <h3 className="num text-[13px] font-medium">{viewing}</h3>
+            <span className="text-[12px] text-faint">
+              read <Time iso={shown.read_at} />
+            </span>
+            <label className="ml-auto flex items-center gap-2 text-[12px] text-muted">
+              <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} />
+              Auto-refresh every second
+            </label>
+          </div>
+          <ValueView value={shown.value} name={viewing} />
+        </section>
+      )}
       <h3 className="mb-1 mt-5 text-[13px] font-medium">Actions ({actions.length})</h3>
       <ul className="divide-y divide-line rounded-md border border-line">
         {actions.map((a) => (
@@ -276,10 +329,24 @@ function InputSummary({ cap }: { cap: Capability }) {
   );
 }
 
-function PropertyRow({ org, device, cap }: { org: string; device: Device; cap: Capability }) {
-  const read = useMutation({
-    mutationFn: () => api<PropertyRead>(`${orgPath(org)}/devices/${device.id}/properties/${cap.name}`),
-  });
+function PropertyRow({
+  cap,
+  read,
+  error,
+  busy,
+  viewing,
+  onRead,
+  onView,
+}: {
+  cap: Capability;
+  read: PropertyRead | undefined;
+  error: string | undefined;
+  busy: boolean;
+  viewing: boolean;
+  onRead: () => void;
+  onView: () => void;
+}) {
+  const structured = read !== undefined && read.value !== null && typeof read.value === "object";
   return (
     <tr>
       <Td>
@@ -288,16 +355,18 @@ function PropertyRow({ org, device, cap }: { org: string; device: Device; cap: C
       <Td className="num text-muted">{schemaType(cap.data_schema)}</Td>
       <Td className="text-muted">{cap.read_only ? "read" : "read, write"}</Td>
       <Td className="num">
-        {read.data ? (
-          <span title={`read ${read.data.read_at}`}>{JSON.stringify(read.data.value)}</span>
-        ) : read.error ? (
-          <span className="text-bad">{read.error.message}</span>
+        {read === undefined ? (
+          error ? <span className="text-bad">{error}</span> : <span className="text-faint">—</span>
+        ) : structured ? (
+          <button type="button" className="text-accent hover:underline" onClick={onView} aria-pressed={viewing}>
+            {Array.isArray(read.value) ? `${read.value.length} items` : "record"} ↓
+          </button>
         ) : (
-          <span className="text-faint">—</span>
+          <span title={`read ${read.read_at}`}>{JSON.stringify(read.value)}</span>
         )}
       </Td>
       <Td>
-        <button className="btn py-0.5" type="button" onClick={() => read.mutate()} disabled={read.isPending} aria-label={`Read ${cap.name}`}>
+        <button className="btn py-0.5" type="button" onClick={onRead} disabled={busy} aria-label={`Read ${cap.name}`}>
           Read
         </button>
       </Td>

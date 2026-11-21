@@ -267,10 +267,11 @@ def _comparison(kind: str, c: dict[str, Any], labels: tuple[str, str]) -> str:
                 [
                     [
                         _e(s.get("site")),
-                        f"{_e(s['a'][0])} / {_e(s['a'][1])}",
-                        f"{_e(s['b'][0])} / {_e(s['b'][1])}",
-                        _pp(s["difference"][0]),
-                        _interval(s["difference"][1:], _pp),
+                        # A site seen in only one arm has no counts (or no difference) for the other: say so.
+                        f"{_e(s['a'][0])} / {_e(s['a'][1])}" if s.get("a") else "no data",
+                        f"{_e(s['b'][0])} / {_e(s['b'][1])}" if s.get("b") else "no data",
+                        _pp(s["difference"][0]) if s.get("difference") else "n/a",
+                        _interval(s["difference"][1:], _pp) if s.get("difference") else "n/a",
                     ]
                     for s in c["strata"]
                 ],

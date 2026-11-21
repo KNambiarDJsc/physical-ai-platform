@@ -1,0 +1,207 @@
+{
+  "schema": "pap.openamr-cmd-timeout.runs/1",
+  "description": "Recorded Gazebo runs of upstream's command-timeout scenario (openAMRobot/openamr-platform-sw issue #79, PR #177): the simulated base is driven at 0.2 m/s, its command source is killed, and the distance it still travels is measured from Gazebo ground truth (world pose, simulation time). Produced by the user's own scripts (D:/openmhs-research/openamr/p79) on 2026-11-20; this file only labels them. No run was edited, repeated or selected: every run directory that holds a result file is listed; the last run was made by scenario/run_scenario.sh on 2026-11-21 and carries its own identity file and an MCAP bag.",
+  "upstream": {
+    "repository": "openAMRobot/openamr-platform-sw",
+    "main_commit": "69847ab7c9c6cd49b3022dc1a62f86c044ba10ff",
+    "fix_commit": "505d17ae71c9705878b9245ac237f3f581db7143",
+    "fix_committed_utc": "2026-11-20T12:33:55+00:00",
+    "pass_criterion": {
+      "source": "ros2/src/openamrobot_gazebo/test/test_sim_cmd_vel_timeout_gazebo.py at 505d17a",
+      "max_travel_after_kill_m": 0.15,
+      "max_stop_delay_s": 1.0,
+      "commanded_m_per_s": 0.2,
+      "note": "Only the travel limit is a contract condition here: the stop delay was recorded for 3 of the 11 runs."
+    }
+  },
+  "arms": {
+    "main": "origin/main wiring (gz_bridge.yaml and gz_simulator.launch.py as on main, no command timeout)",
+    "fix": "fix/79-sim-base-command-timeout: sim_cmd_vel_timeout node, 0.2 s of simulation time, non-latching"
+  },
+  "runs": [
+    {
+      "id": "main_red_121822",
+      "arm": "main",
+      "procedure": "publisher_kill",
+      "software_state": "pre-fix tree (the red run before the fix); main at 69847ab",
+      "software_exact": false,
+      "labelled_by": "run name; probe.json travel matches an unbounded base",
+      "file": "probe.json"
+    },
+    {
+      "id": "revert_122455",
+      "arm": "main",
+      "procedure": "publisher_kill",
+      "software_state": "the PR's tests with gz_bridge.yaml and gz_simulator.launch.py restored from origin/main",
+      "software_exact": true,
+      "labelled_by": "scripts revert_run.sh (git show origin/main for both wiring files)",
+      "file": "gazebo_report.json"
+    },
+    {
+      "id": "chain_main_collision_monitor_122805",
+      "arm": "main",
+      "procedure": "chain_kill:collision_monitor",
+      "software_state": "origin/main wiring",
+      "software_exact": true,
+      "labelled_by": "scripts chain_main.sh and chain_run.sh",
+      "file": "probe.json"
+    },
+    {
+      "id": "chain_main_velocity_smoother_122858",
+      "arm": "main",
+      "procedure": "chain_kill:velocity_smoother",
+      "software_state": "origin/main wiring",
+      "software_exact": true,
+      "labelled_by": "scripts chain_main.sh and chain_run.sh",
+      "file": "probe.json"
+    },
+    {
+      "id": "fix_all_122407",
+      "arm": "fix",
+      "procedure": "publisher_kill",
+      "software_state": "fix/79 working tree before commit 505d17a",
+      "software_exact": false,
+      "labelled_by": "run name and time (12:24 UTC; commit at 12:33:55 UTC)",
+      "file": "gazebo_report.json"
+    },
+    {
+      "id": "chain_fix_collision_monitor_122606",
+      "arm": "fix",
+      "procedure": "chain_kill:collision_monitor",
+      "software_state": "fix/79 working tree before commit 505d17a",
+      "software_exact": false,
+      "labelled_by": "script chain_run.sh fix; time 12:26 UTC",
+      "file": "probe.json"
+    },
+    {
+      "id": "chain_fix_velocity_smoother_122711",
+      "arm": "fix",
+      "procedure": "chain_kill:velocity_smoother",
+      "software_state": "fix/79 working tree before commit 505d17a",
+      "software_exact": false,
+      "labelled_by": "script chain_run.sh fix; time 12:27 UTC",
+      "file": "probe.json"
+    },
+    {
+      "id": "rtf01_123018",
+      "arm": "fix",
+      "procedure": "publisher_kill@rtf0.1",
+      "software_state": "fix/79 working tree before commit 505d17a",
+      "software_exact": false,
+      "labelled_by": "run name (real-time factor 0.1) and time (12:30 UTC)",
+      "file": "probe.json"
+    },
+    {
+      "id": "final_123314",
+      "arm": "fix",
+      "procedure": "publisher_kill",
+      "software_state": "fix/79 working tree, 19 s before commit 505d17a",
+      "software_exact": false,
+      "labelled_by": "run name and time (12:33:14 UTC)",
+      "file": "gazebo_report.json"
+    },
+    {
+      "id": "final2_163646",
+      "arm": "fix",
+      "procedure": "publisher_kill",
+      "software_state": "committed fix 505d17a",
+      "software_exact": true,
+      "labelled_by": "final re-run on 505d17a (progress notes, 2026-11-20)",
+      "file": "gazebo_report.json"
+    },
+    {
+      "id": "fix_20261121T185851Z",
+      "arm": "fix",
+      "procedure": "publisher_kill",
+      "software_state": "committed fix 505d17a, clean tree (identity written by run_scenario.sh); MCAP bag recorded",
+      "software_exact": true,
+      "labelled_by": "pap-run-identity.json written by scenario/run_scenario.sh",
+      "file": "probe.json",
+      "source_dir": "fix_3",
+      "extras": [
+        "pap-run-identity.json",
+        "bag",
+        "bag-summary.json"
+      ]
+    }
+  ],
+  "evidence": {
+    "main_red_121822": {
+      "file": "recorded/main_red_121822/probe.json",
+      "sha256": "e3b58b33cef2e363cc56c8d984a39eed2961b23fb9eeaba6ec7b7b914b6f45c6",
+      "bytes": 35751,
+      "ended_utc": "2026-11-20T12:19:03Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "revert_122455": {
+      "file": "recorded/revert_122455/gazebo_report.json",
+      "sha256": "06340b543471e93bf3340917dccfa1cfd94d2ab5eb9b91e4b07ea8ed71f796e5",
+      "bytes": 226,
+      "ended_utc": "2026-11-20T12:25:17Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "chain_main_collision_monitor_122805": {
+      "file": "recorded/chain_main_collision_monitor_122805/probe.json",
+      "sha256": "6c47136316bc5fc025d6fd9770cc8d048e7dcedb0e2f6e3d7860aa2a0ce1762c",
+      "bytes": 35379,
+      "ended_utc": "2026-11-20T12:28:52Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "chain_main_velocity_smoother_122858": {
+      "file": "recorded/chain_main_velocity_smoother_122858/probe.json",
+      "sha256": "b95a2b2e47b865fc6cbcd32f3888086c56500563148d3f3a12b9fd773214c0e7",
+      "bytes": 35907,
+      "ended_utc": "2026-11-20T12:29:46Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "fix_all_122407": {
+      "file": "recorded/fix_all_122407/gazebo_report.json",
+      "sha256": "581dbbfa44a4fc208d742d359e1f57e7d8266dc22f22463516e0127a2629db83",
+      "bytes": 224,
+      "ended_utc": "2026-11-20T12:24:31Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "chain_fix_collision_monitor_122606": {
+      "file": "recorded/chain_fix_collision_monitor_122606/probe.json",
+      "sha256": "0af1e5ab46096d4d8538cc039f124bcc88a9dda28055f8d188175e774a9b2f23",
+      "bytes": 35858,
+      "ended_utc": "2026-11-20T12:26:54Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "chain_fix_velocity_smoother_122711": {
+      "file": "recorded/chain_fix_velocity_smoother_122711/probe.json",
+      "sha256": "16171e59a1ff77a7e2d07424762b9dd64438fc31b2b815652b112c2132e7b0b8",
+      "bytes": 35613,
+      "ended_utc": "2026-11-20T12:27:59Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "rtf01_123018": {
+      "file": "recorded/rtf01_123018/probe.json",
+      "sha256": "281fabb6c51da5b375bee7cf32b09ac1e66f8f910e20b81cd19e46beb923de4d",
+      "bytes": 239774,
+      "ended_utc": "2026-11-20T12:32:14Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "final_123314": {
+      "file": "recorded/final_123314/gazebo_report.json",
+      "sha256": "02f4dd11f958fd8391506c9588ec5ac4c952e9b3228bcacaebb9cd2d940055b3",
+      "bytes": 224,
+      "ended_utc": "2026-11-20T12:33:36Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "final2_163646": {
+      "file": "recorded/final2_163646/gazebo_report.json",
+      "sha256": "c55d8223f0adcc47e3c67a0bfcce472031023a187ddd1df756b036bc02d7f154",
+      "bytes": 224,
+      "ended_utc": "2026-11-20T16:37:14Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "fix_20261121T185851Z": {
+      "file": "recorded/fix_20261121T185851Z/probe.json",
+      "sha256": "88e77a63fec04e71e2e9a5b1ec2343ec424564eeb1ce7cbf310294f533bf89a1",
+      "bytes": 35475,
+      "ended_utc": "2026-11-21T18:59:22Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    }
+  }
+}

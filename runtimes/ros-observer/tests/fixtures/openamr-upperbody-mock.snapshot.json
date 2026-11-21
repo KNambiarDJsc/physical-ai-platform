@@ -1,0 +1,2057 @@
+{
+ "recorded_not_live": true,
+ "schema": "pap.ros-observer.snapshot/1",
+ "source": {
+  "captured_wall_utc": "2026-11-21T11:58:36.124270+00:00",
+  "domain_id": 88,
+  "graph": "openamr-upperbody-sw ros2/openamrobot_upperbody_bringup mock.launch.py (mock_components, real controllers)",
+  "ros_distro": "jazzy",
+  "software_commit": "aefd2e453fbf21b99193d91c662db2ae37b45036"
+ },
+ "things": {
+  "ros-graph": {
+   "clock": {
+    "age_s": null,
+    "backward_jumps": 0,
+    "largest_backward_s": 0.0,
+    "messages": 0,
+    "monotonic": true,
+    "publishers": 0,
+    "real_time_factor": null,
+    "sim_time_s": null,
+    "state": "absent"
+   },
+   "connectivity": {
+    "command_surface": "none",
+    "domain_id": 88,
+    "graph_polls": 46,
+    "host": "DESKTOP-I31D6VO",
+    "last_graph_poll_age_s": 0.305,
+    "nodes_seen": 11,
+    "observer": "pap-ros-observer",
+    "pid": 5474,
+    "read_only_queries": [
+     "controller_manager_msgs/srv/ListControllers"
+    ],
+    "rmw": "rmw_fastrtps_cpp",
+    "ros_distro": "jazzy",
+    "started_wall_utc": "2026-11-21T11:57:50.803113+00:00",
+    "subscriptions": 24,
+    "topics_seen": 30,
+    "uptime_s": 45.306,
+    "version": "0.1.0"
+   },
+   "expected_topics": [
+    {
+     "age_s": 0.006,
+     "max_age_s": null,
+     "name": "/joint_states",
+     "note": "joint_state_broadcaster",
+     "required": true,
+     "state": "fresh"
+    },
+    {
+     "age_s": 0.007,
+     "max_age_s": null,
+     "name": "/dynamic_joint_states",
+     "note": "joint_state_broadcaster",
+     "required": true,
+     "state": "fresh"
+    },
+    {
+     "age_s": 0.036,
+     "max_age_s": null,
+     "name": "/tf",
+     "note": "robot_state_publisher, dynamic transforms",
+     "required": true,
+     "state": "fresh"
+    },
+    {
+     "age_s": 43.083,
+     "max_age_s": null,
+     "name": "/tf_static",
+     "note": "robot_state_publisher, fixed transforms (latched)",
+     "required": true,
+     "state": "latched"
+    },
+    {
+     "age_s": 43.085,
+     "max_age_s": null,
+     "name": "/robot_description",
+     "note": "robot_state_publisher (latched)",
+     "required": true,
+     "state": "latched"
+    },
+    {
+     "age_s": null,
+     "max_age_s": null,
+     "name": "/clock",
+     "note": "only when a simulator provides the clock",
+     "required": false,
+     "state": "missing"
+    },
+    {
+     "age_s": 0.271,
+     "max_age_s": null,
+     "name": "/diagnostics",
+     "note": "only when a diagnostics source runs",
+     "required": false,
+     "state": "fresh"
+    }
+   ],
+   "nodes": [
+    {
+     "name": "/controller_manager",
+     "namespace": "/"
+    },
+    {
+     "name": "/joint_state_broadcaster",
+     "namespace": "/"
+    },
+    {
+     "name": "/left_arm_controller",
+     "namespace": "/"
+    },
+    {
+     "name": "/left_gripper_controller",
+     "namespace": "/"
+    },
+    {
+     "name": "/lift_controller",
+     "namespace": "/"
+    },
+    {
+     "name": "/openamr_lift_mock",
+     "namespace": "/"
+    },
+    {
+     "name": "/openarm_left_hardware_interface",
+     "namespace": "/"
+    },
+    {
+     "name": "/openarm_right_hardware_interface",
+     "namespace": "/"
+    },
+    {
+     "name": "/right_arm_controller",
+     "namespace": "/"
+    },
+    {
+     "name": "/right_gripper_controller",
+     "namespace": "/"
+    },
+    {
+     "name": "/robot_state_publisher",
+     "namespace": "/"
+    }
+   ],
+   "summary": {
+    "clock_state": "absent",
+    "expected_by_state": {
+     "fresh": 4,
+     "latched": 2,
+     "missing": 1
+    },
+    "nodes": 11,
+    "required_expected_problems": [],
+    "topics": 30,
+    "topics_by_state": {
+     "fresh": 11,
+     "latched": 2,
+     "never": 6,
+     "no_publishers": 6,
+     "stale": 5
+    }
+   },
+   "topics": [
+    {
+     "age_s": 39.593,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 16,
+     "name": "/controller_manager/activity",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 49.297,
+     "stale_after_s": 2.0,
+     "state": "stale",
+     "subscribers": 0,
+     "types": [
+      "controller_manager_msgs/msg/ControllerManagerActivity"
+     ]
+    },
+    {
+     "age_s": 0.001,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 4118,
+     "name": "/controller_manager/introspection_data/full",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 99.44,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/Statistics"
+     ]
+    },
+    {
+     "age_s": 39.598,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 11,
+     "name": "/controller_manager/introspection_data/names",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 4.335,
+     "stale_after_s": 2.0,
+     "state": "stale",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/StatisticsNames"
+     ]
+    },
+    {
+     "age_s": 0.001,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 4118,
+     "name": "/controller_manager/introspection_data/values",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 98.954,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/StatisticsValues"
+     ]
+    },
+    {
+     "age_s": 0.001,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 4118,
+     "name": "/controller_manager/statistics/full",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 98.301,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/Statistics"
+     ]
+    },
+    {
+     "age_s": 39.642,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 6,
+     "name": "/controller_manager/statistics/names",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 2.085,
+     "stale_after_s": 2.398,
+     "state": "stale",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/StatisticsNames"
+     ]
+    },
+    {
+     "age_s": 0.001,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 4118,
+     "name": "/controller_manager/statistics/values",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 98.332,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "pal_statistics_msgs/msg/StatisticsValues"
+     ]
+    },
+    {
+     "age_s": 0.278,
+     "header_stamp_s": 1795262315.8381252,
+     "latched": false,
+     "messages": 42,
+     "name": "/diagnostics",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 1.0,
+     "stale_after_s": 5.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "diagnostic_msgs/msg/DiagnosticArray"
+     ]
+    },
+    {
+     "age_s": 0.001,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 4117,
+     "name": "/dynamic_joint_states",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 99.886,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "control_msgs/msg/DynamicJointState"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/joint_state_broadcaster/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": 0.002,
+     "header_stamp_s": 1795262316.1127307,
+     "latched": true,
+     "messages": 4115,
+     "name": "/joint_states",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 98.986,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 1,
+     "types": [
+      "sensor_msgs/msg/JointState"
+     ]
+    },
+    {
+     "age_s": 0.002,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 3730,
+     "name": "/left_arm_controller/controller_state",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 98.179,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "control_msgs/msg/JointTrajectoryControllerState"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/left_arm_controller/joint_trajectory",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "trajectory_msgs/msg/JointTrajectory"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/left_arm_controller/speed_scaling_input",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "control_msgs/msg/SpeedScalingFactor"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/left_arm_controller/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/left_gripper_controller/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": 0.002,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 3830,
+     "name": "/lift_controller/controller_state",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 99.086,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "control_msgs/msg/JointTrajectoryControllerState"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/lift_controller/joint_trajectory",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "trajectory_msgs/msg/JointTrajectory"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/lift_controller/speed_scaling_input",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "control_msgs/msg/SpeedScalingFactor"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/lift_controller/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": 39.623,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 193,
+     "name": "/parameter_events",
+     "not_sampled_reason": null,
+     "publishers": 13,
+     "rate_hz": 2622.6,
+     "stale_after_s": 2.0,
+     "state": "stale",
+     "subscribers": 12,
+     "types": [
+      "rcl_interfaces/msg/ParameterEvent"
+     ]
+    },
+    {
+     "age_s": 0.002,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 3830,
+     "name": "/right_arm_controller/controller_state",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 100.928,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "control_msgs/msg/JointTrajectoryControllerState"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/right_arm_controller/joint_trajectory",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "trajectory_msgs/msg/JointTrajectory"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/right_arm_controller/speed_scaling_input",
+     "not_sampled_reason": null,
+     "publishers": 0,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "no_publishers",
+     "subscribers": 1,
+     "types": [
+      "control_msgs/msg/SpeedScalingFactor"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/right_arm_controller/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": null,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 0,
+     "name": "/right_gripper_controller/transition_event",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "never",
+     "subscribers": 0,
+     "types": [
+      "lifecycle_msgs/msg/TransitionEvent"
+     ]
+    },
+    {
+     "age_s": 43.092,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 1,
+     "name": "/robot_description",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "latched",
+     "subscribers": 1,
+     "types": [
+      "std_msgs/msg/String"
+     ]
+    },
+    {
+     "age_s": 3.522,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 106,
+     "name": "/rosout",
+     "not_sampled_reason": null,
+     "publishers": 13,
+     "rate_hz": 181.884,
+     "stale_after_s": 2.0,
+     "state": "stale",
+     "subscribers": 0,
+     "types": [
+      "rcl_interfaces/msg/Log"
+     ]
+    },
+    {
+     "age_s": 0.042,
+     "header_stamp_s": null,
+     "latched": false,
+     "messages": 739,
+     "name": "/tf",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": 16.867,
+     "stale_after_s": 2.0,
+     "state": "fresh",
+     "subscribers": 0,
+     "types": [
+      "tf2_msgs/msg/TFMessage"
+     ]
+    },
+    {
+     "age_s": 43.089,
+     "header_stamp_s": null,
+     "latched": true,
+     "messages": 1,
+     "name": "/tf_static",
+     "not_sampled_reason": null,
+     "publishers": 1,
+     "rate_hz": null,
+     "stale_after_s": 2.0,
+     "state": "latched",
+     "subscribers": 0,
+     "types": [
+      "tf2_msgs/msg/TFMessage"
+     ]
+    }
+   ]
+  },
+  "ros-robot": {
+   "controllers": {
+    "available": true,
+    "managers": [
+     {
+      "age_s": 1.082,
+      "controllers": [
+       {
+        "claimed_interfaces": 7,
+        "is_chained": false,
+        "name": "left_arm_controller",
+        "state": "active",
+        "type": "joint_trajectory_controller/JointTrajectoryController"
+       },
+       {
+        "claimed_interfaces": 7,
+        "is_chained": false,
+        "name": "right_arm_controller",
+        "state": "active",
+        "type": "joint_trajectory_controller/JointTrajectoryController"
+       },
+       {
+        "claimed_interfaces": 1,
+        "is_chained": false,
+        "name": "left_gripper_controller",
+        "state": "active",
+        "type": "position_controllers/GripperActionController"
+       },
+       {
+        "claimed_interfaces": 1,
+        "is_chained": false,
+        "name": "lift_controller",
+        "state": "active",
+        "type": "joint_trajectory_controller/JointTrajectoryController"
+       },
+       {
+        "claimed_interfaces": 1,
+        "is_chained": false,
+        "name": "right_gripper_controller",
+        "state": "active",
+        "type": "position_controllers/GripperActionController"
+       },
+       {
+        "claimed_interfaces": 0,
+        "is_chained": false,
+        "name": "joint_state_broadcaster",
+        "state": "active",
+        "type": "joint_state_broadcaster/JointStateBroadcaster"
+       }
+      ],
+      "error": null,
+      "service": "/controller_manager/list_controllers"
+     }
+    ]
+   },
+   "diagnostics": {
+    "messages": 126,
+    "state": "received",
+    "statuses": [
+     {
+      "age_s": 0.28,
+      "hardware_id": "ros2_control",
+      "level": "OK",
+      "message": "Controller Manager is running",
+      "name": "controller_manager: Controller Manager Activity",
+      "values": {
+       "periodicity.average": "99.979154",
+       "periodicity.max": "104.090767",
+       "periodicity.min": "0.494955",
+       "periodicity.standard_deviation": "1.611594",
+       "update_rate": "100"
+      }
+     },
+     {
+      "age_s": 0.28,
+      "hardware_id": "ros2_control",
+      "level": "OK",
+      "message": "All controllers are active",
+      "name": "controller_manager: Controllers Activity",
+      "values": {
+       "joint_state_broadcaster.execution_time": "Avg: 66.79 [26.00 - 291.20] us, StdDev: 22.10",
+       "joint_state_broadcaster.state": "active",
+       "left_arm_controller.execution_time": "Avg: 47.23 [15.20 - 342.90] us, StdDev: 19.80",
+       "left_arm_controller.state": "active",
+       "left_gripper_controller.execution_time": "Avg: 7.02 [1.10 - 88.10] us, StdDev: 6.31",
+       "left_gripper_controller.state": "active",
+       "lift_controller.execution_time": "Avg: 33.71 [6.30 - 145.40] us, StdDev: 13.58",
+       "lift_controller.state": "active",
+       "right_arm_controller.execution_time": "Avg: 35.26 [9.90 - 185.50] us, StdDev: 14.57",
+       "right_arm_controller.state": "active",
+       "right_gripper_controller.execution_time": "Avg: 3.05 [0.40 - 55.30] us, StdDev: 4.41",
+       "right_gripper_controller.state": "active"
+      }
+     },
+     {
+      "age_s": 0.28,
+      "hardware_id": "ros2_control",
+      "level": "OK",
+      "message": "All hardware components are active",
+      "name": "controller_manager: Hardware Components Activity",
+      "values": {
+       "openamr_lift_mock.read_cycle.execution_time": "Avg: 1.48 [0.40 - 46.10] us, StdDev: 2.33",
+       "openamr_lift_mock.state": "active",
+       "openamr_lift_mock.write_cycle.execution_time": "Avg: 0.03 [0.00 - 26.80] us, StdDev: 0.54",
+       "openarm_left_hardware_interface.read_cycle.execution_time": "Avg: 29.93 [10.70 - 189.00] us, StdDev: 14.65",
+       "openarm_left_hardware_interface.state": "active",
+       "openarm_left_hardware_interface.write_cycle.execution_time": "Avg: 0.41 [0.00 - 36.50] us, StdDev: 1.58",
+       "openarm_right_hardware_interface.read_cycle.execution_time": "Avg: 22.91 [9.50 - 122.40] us, StdDev: 10.86",
+       "openarm_right_hardware_interface.state": "active",
+       "openarm_right_hardware_interface.write_cycle.execution_time": "Avg: 0.03 [0.00 - 22.70] us, StdDev: 0.48"
+      }
+     }
+    ]
+   },
+   "joint_states": {
+    "sources": [
+     {
+      "age_s": 0.006,
+      "header_stamp_s": 1795262316.1127307,
+      "joints": [
+       {
+        "effort": null,
+        "name": "lift_joint",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_finger_joint1",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint1",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint2",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint3",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint4",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint5",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint6",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_left_joint7",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_finger_joint1",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint1",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint2",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint3",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint4",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint5",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint6",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       },
+       {
+        "effort": 0.0,
+        "name": "openarm_right_joint7",
+        "position": 0.0,
+        "unchanged_for_s": 43.095,
+        "velocity": 0.0
+       }
+      ],
+      "messages": 4115,
+      "state": "fresh",
+      "topic": "/joint_states"
+     }
+    ]
+   },
+   "transforms": {
+    "count": 64,
+    "frames": [
+     {
+      "age_s": null,
+      "child": "adapter_plate_link",
+      "parent": "lift_carriage_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.06,
+       0.0,
+       0.005
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "arm_profile_link",
+      "parent": "adapter_plate_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.12,
+       0.0,
+       0.17500000000000002
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "base_camera_color_optical_frame",
+      "parent": "base_camera_link",
+      "rotation": [
+       0.5,
+       -0.4999999999999999,
+       0.5,
+       -0.5000000000000001
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "base_camera_depth_optical_frame",
+      "parent": "base_camera_link",
+      "rotation": [
+       0.5,
+       -0.4999999999999999,
+       0.5,
+       -0.5000000000000001
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "base_camera_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       -0.08713934278129419,
+       0.0,
+       0.9961961327668584
+      ],
+      "static": true,
+      "translation": [
+       0.387,
+       0.0,
+       0.046
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "base_link",
+      "parent": "base_footprint",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.098
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "bl_caster_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.27495,
+       0.215,
+       -0.043833
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "bl_wheel_link",
+      "parent": "bl_caster_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.015,
+       0.0,
+       -0.027746
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "br_caster_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.27495,
+       -0.215,
+       -0.043833
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "br_wheel_link",
+      "parent": "br_caster_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.015,
+       0.0,
+       -0.027746
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "camera_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.35,
+       0.0,
+       0.2
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "camera_optical_frame",
+      "parent": "camera_link",
+      "rotation": [
+       -0.4999999999999998,
+       0.49999998660255174,
+       -0.4999999999999998,
+       0.5000000133974483
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "fl_caster_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.27505,
+       0.215,
+       -0.043833
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "fl_wheel_link",
+      "parent": "fl_caster_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.015,
+       0.0,
+       -0.027746
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "fr_caster_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.27505,
+       -0.215,
+       -0.043833
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "fr_wheel_link",
+      "parent": "fr_caster_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.015,
+       0.0,
+       -0.027746
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "getac_tablet_link",
+      "parent": "arm_profile_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.0688,
+       0.0,
+       0.06599999999999998
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "head_camera_bracket_link",
+      "parent": "head_camera_mount_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.03,
+       0.0,
+       -0.03899999999999998
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "head_camera_link",
+      "parent": "head_camera_mount_link",
+      "rotation": [
+       0.0,
+       0.2588190451025207,
+       0.0,
+       0.9659258262890684
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "head_camera_mount_link",
+      "parent": "lift_carriage_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.222,
+       0.0,
+       0.389
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "head_camera_optical_frame",
+      "parent": "head_camera_link",
+      "rotation": [
+       0.5,
+       -0.4999999999999999,
+       0.5,
+       -0.5000000000000001
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "head_light_link",
+      "parent": "arm_profile_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.06999999999999999,
+       0.0,
+       -0.047400000000000025
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "imu_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       -0.7071067811865475,
+       0.7071067811865476
+      ],
+      "static": true,
+      "translation": [
+       0.0544,
+       0.0,
+       0.121
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "left_wrist_camera_link",
+      "parent": "openarm_left_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.05,
+       -0.03
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "left_wrist_camera_optical_frame",
+      "parent": "left_wrist_camera_link",
+      "rotation": [
+       0.5,
+       -0.4999999999999999,
+       0.5,
+       -0.5000000000000001
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lidar_link",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       1.0,
+       6.123233995736766e-17
+      ],
+      "static": true,
+      "translation": [
+       0.33,
+       0.0,
+       0.124
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": 0.046,
+      "child": "lift_carriage_link",
+      "parent": "lift_column_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       0.53
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": null,
+      "child": "lift_column_base_link",
+      "parent": "base_footprint",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.06,
+       0.0,
+       0.304
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lift_flag_link",
+      "parent": "lift_flag_rod_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.010999999999999996,
+       -0.012499999999999997,
+       -0.41
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lift_flag_rod_link",
+      "parent": "adapter_plate_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.16899999999999998,
+       0.06999999999999999,
+       -0.005
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lift_stop_sensor_l1000_link",
+      "parent": "lift_column_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.095,
+       0.045,
+       0.12
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lift_stop_sensor_l1175_link",
+      "parent": "lift_column_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.095,
+       0.045,
+       0.295
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "lift_stop_sensor_l1350_link",
+      "parent": "lift_column_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       -0.095,
+       0.045,
+       0.47
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "openarm_left_base_link",
+      "parent": "lift_carriage_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.18,
+       0.031,
+       0.166
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_ee_base_link",
+      "parent": "openarm_left_link6",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_ee_link1",
+      "parent": "openarm_left_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       -0.0014300000000005003,
+       -0.0180000000000009,
+       -0.0680000000000174
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_ee_link2",
+      "parent": "openarm_left_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       -0.0014300000000005003,
+       0.0180000000000012,
+       -0.0680000000000215
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": null,
+      "child": "openarm_left_grasp_frame",
+      "parent": "openarm_left_ee_base_link",
+      "rotation": [
+       0.0,
+       0.7071067811865462,
+       0.0,
+       0.7071067811865488
+      ],
+      "static": true,
+      "translation": [
+       -0.0014300000000008993,
+       0.0,
+       -0.138000000000019
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link1",
+      "parent": "openarm_left_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0625,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link2",
+      "parent": "openarm_left_link1",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0600000000000001,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link3",
+      "parent": "openarm_left_link2",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.0662500000000008
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link4",
+      "parent": "openarm_left_link3",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.15375
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link5",
+      "parent": "openarm_left_link4",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.0955000000000005
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_left_link6",
+      "parent": "openarm_left_link5",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.120499999999998
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": null,
+      "child": "openarm_right_base_link",
+      "parent": "lift_carriage_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.18,
+       -0.031,
+       0.166
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_ee_base_link",
+      "parent": "openarm_right_link6",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_ee_link1",
+      "parent": "openarm_right_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       -0.0014300000000005003,
+       0.0180000000000009,
+       -0.0680000000000174
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_ee_link2",
+      "parent": "openarm_right_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       -0.0014300000000005003,
+       -0.0180000000000012,
+       -0.0680000000000215
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": null,
+      "child": "openarm_right_grasp_frame",
+      "parent": "openarm_right_ee_base_link",
+      "rotation": [
+       0.0,
+       0.7071067811865462,
+       0.0,
+       0.7071067811865488
+      ],
+      "static": true,
+      "translation": [
+       -0.0014300000000008993,
+       0.0,
+       -0.138000000000019
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link1",
+      "parent": "openarm_right_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       -0.0625,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link2",
+      "parent": "openarm_right_link1",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       -0.0600000000000001,
+       0.0
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link3",
+      "parent": "openarm_right_link2",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.0662500000000008
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link4",
+      "parent": "openarm_right_link3",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.15375
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link5",
+      "parent": "openarm_right_link4",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.0955000000000005
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": 0.046,
+      "child": "openarm_right_link6",
+      "parent": "openarm_right_link5",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": false,
+      "translation": [
+       0.0,
+       0.0,
+       -0.120499999999998
+      ],
+      "updates": 739
+     },
+     {
+      "age_s": null,
+      "child": "right_wrist_camera_link",
+      "parent": "openarm_right_ee_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       -0.05,
+       -0.03
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "right_wrist_camera_optical_frame",
+      "parent": "right_wrist_camera_link",
+      "rotation": [
+       0.5,
+       -0.4999999999999999,
+       0.5,
+       -0.5000000000000001
+      ],
+      "static": true,
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "second_estop_link",
+      "parent": "lift_column_base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       1.0,
+       6.123233995736766e-17
+      ],
+      "static": true,
+      "translation": [
+       -0.16799999999999998,
+       0.0,
+       0.47200000000000003
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "tof_front",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.17366499303759564,
+       0.0,
+       0.984804787860646
+      ],
+      "static": true,
+      "translation": [
+       0.399,
+       0.0,
+       -0.0066
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "tof_rear",
+      "parent": "base_link",
+      "rotation": [
+       -0.17366499303759564,
+       1.0633913892371945e-17,
+       0.984804787860646,
+       6.030190156192642e-17
+      ],
+      "static": true,
+      "translation": [
+       -0.399,
+       0.0,
+       -0.0066
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "us_front_left",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.3906,
+       0.13,
+       -0.0066
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "us_front_right",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ],
+      "static": true,
+      "translation": [
+       0.3906,
+       -0.13,
+       -0.0066
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "us_rear_left",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       1.0,
+       6.123233995736766e-17
+      ],
+      "static": true,
+      "translation": [
+       -0.3886,
+       0.13,
+       -0.0066
+      ],
+      "updates": 1
+     },
+     {
+      "age_s": null,
+      "child": "us_rear_right",
+      "parent": "base_link",
+      "rotation": [
+       0.0,
+       0.0,
+       1.0,
+       6.123233995736766e-17
+      ],
+      "static": true,
+      "translation": [
+       -0.3886,
+       -0.13,
+       -0.0066
+      ],
+      "updates": 1
+     }
+    ],
+    "roots": [
+     "base_footprint"
+    ]
+   }
+  }
+ }
+}

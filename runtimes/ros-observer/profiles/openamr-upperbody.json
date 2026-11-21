@@ -1,0 +1,13 @@
+{
+  "profile": "openamr-upperbody",
+  "description": "Topics the OpenAMRobot upperbody stack (arms and lift on ros2_control) is expected to publish. Required ones are the robot's own state; optional ones exist only with a simulator or a diagnostics aggregator.",
+  "expected_topics": [
+    {"name": "/joint_states", "required": true, "note": "joint_state_broadcaster"},
+    {"name": "/dynamic_joint_states", "required": true, "note": "joint_state_broadcaster"},
+    {"name": "/tf", "required": true, "note": "robot_state_publisher, dynamic transforms"},
+    {"name": "/tf_static", "required": true, "note": "robot_state_publisher, fixed transforms (latched)"},
+    {"name": "/robot_description", "required": true, "note": "robot_state_publisher (latched)"},
+    {"name": "/clock", "required": false, "note": "only when a simulator provides the clock"},
+    {"name": "/diagnostics", "required": false, "note": "only when a diagnostics source runs"}
+  ]
+}

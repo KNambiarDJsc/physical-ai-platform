@@ -51,3 +51,10 @@ no-change margin anyway. Correct and conservative, but a release manager cannot 
 answer for a reliable controller without very large samples. **Ask:** state, with the verdict, the smallest
 difference the current samples could exclude, so "insufficient evidence" says how much evidence is missing
 (related to G-4).
+
+## G-9 A comparison cannot tell the platform which arm lacks a stratum
+Found with the command-timeout regression: when `site` carries the procedure and one procedure exists in only one arm,
+the engine returns that stratum with null counts for the other arm and a null difference. The report renderer assumed
+both were present and crashed (fixed here: it now says "no data" / "n/a"). **Ask:** say explicitly in each stratum which
+arm has no units, so a consumer need not infer it from nulls.
+

@@ -1,0 +1,10 @@
+{
+ "commanded_m_per_s": 0.2,
+ "driven_before_kill_m": 0.6389,
+ "travel_after_kill_m": 0.0733,
+ "still_after_kill_s": 0.523,
+ "travel_last_2s_m": 0.0,
+ "timeouts_logged": 1,
+ "samples_after_kill": 364,
+ "kill_sim_s": 6.015
+}

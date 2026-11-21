@@ -86,12 +86,20 @@ def main() -> int:
     ap.add_argument("--state-dir", default=str(ROOT / "var"), help="database, artifacts and work files go here")
     ap.add_argument("--stop-file", help="stop cleanly (database included) when this file appears")
     ap.add_argument("--lab-port", type=int, default=8100, help="virtual laboratory (LabThings); 0 = do not start it")
+    ap.add_argument(
+        "--ros-observer", help="URL of a running ROS observer (scripts/ros_stack.sh): offered as an environment"
+    )
+    ap.add_argument(
+        "--ros-replay", help="serve this RECORDED observer snapshot (needs no ROS) and offer it as an environment"
+    )
+    ap.add_argument("--ros-replay-port", type=int, default=8210)
     ns = ap.parse_args()
     VAR = Path(ns.state_dir).resolve()
     stop = Path(ns.stop_file) if ns.stop_file else None
     if stop:
         stop.unlink(missing_ok=True)
-    busy = [port for port in (ns.api_port, ns.web_port, ns.lab_port) if port and not port_free(port)]
+    ports = (ns.api_port, ns.web_port, ns.lab_port, ns.ros_replay_port if ns.ros_replay else 0)
+    busy = [port for port in ports if port and not port_free(port)]
     if busy:  # a leftover server would answer the readiness checks below in place of ours
         print(f"port(s) {busy} already in use; stop whatever holds them first", file=sys.stderr)
         return 2
@@ -127,12 +135,29 @@ def main() -> int:
         "PYTHONPATH": str(API_DIR),
     }
     lab_url = f"http://127.0.0.1:{ns.lab_port}" if ns.lab_port else None
-    if lab_url and "PAP_ENVIRONMENTS" not in os.environ:
-        # The operator catalog of this local install: the simulated virtual laboratory only (D-026).
-        env["PAP_ENVIRONMENTS"] = json.dumps(
-            [{"key": "virtual-lab", "name": "Virtual laboratory", "kind": "simulated", "endpoint": lab_url,
-              "description": "Simulated syringe pump and analytical balance (LabThings). No hardware."}]
-        )  # fmt: skip
+    replay_url = f"http://127.0.0.1:{ns.ros_replay_port}" if ns.ros_replay else None
+    if (lab_url or ns.ros_observer or replay_url) and "PAP_ENVIRONMENTS" not in os.environ:
+        # The operator catalog of this local install (D-026): the simulated virtual laboratory, and a ROS observer
+        # when one was named. Users choose from this list; they never type an endpoint.
+        catalog = []
+        if lab_url:
+            catalog.append(
+                {"key": "virtual-lab", "name": "Virtual laboratory", "kind": "simulated", "endpoint": lab_url,
+                 "description": "Simulated syringe pump and analytical balance (LabThings). No hardware."}
+            )  # fmt: skip
+        if ns.ros_observer:
+            catalog.append(
+                {"key": "openamr-sim", "name": "OpenAMRobot upperbody (ROS 2, read-only observer)", "kind": "simulated",
+                 "endpoint": ns.ros_observer.rstrip("/"),
+                 "description": "A ROS 2 graph seen through the read-only observer: nodes, topics and their freshness, joints, TF, controllers. Nothing here can send a command."}
+            )  # fmt: skip
+        if replay_url:
+            catalog.append(
+                {"key": "openamr-recorded", "name": "OpenAMRobot upperbody (RECORDED snapshot, not live)", "kind": "simulated",
+                 "endpoint": replay_url,
+                 "description": "Observations recorded from a real ROS 2 graph and replayed unchanged. Ages do not advance. For trying the interface without ROS."}
+            )  # fmt: skip
+        env["PAP_ENVIRONMENTS"] = json.dumps(catalog)
     run_dir = VAR / "dev-stack"
     run_dir.mkdir(parents=True, exist_ok=True)
     pid_file = run_dir / "worker.pid"
@@ -158,8 +183,22 @@ def main() -> int:
         lab_cmd = [uv, "run", "--quiet", "--project", str(ROOT / "runtimes" / "virtual-lab"), "python", "-m",
                    "pap_virtual_lab.server", "--port", str(ns.lab_port)]  # fmt: skip
         procs.append(subprocess.Popen(lab_cmd, env=env, **GROUP))
+    if replay_url:
+        obs_src = str(ROOT / "runtimes" / "ros-observer" / "src")
+        replay_cmd = [
+            sys.executable,
+            "-m",
+            "pap_ros_observer",
+            "replay",
+            ns.ros_replay,
+            "--port",
+            str(ns.ros_replay_port),
+        ]
+        procs.append(subprocess.Popen(replay_cmd, env={**env, "PYTHONPATH": obs_src}, **GROUP))
     try:
         wait(f"http://127.0.0.1:{ns.api_port}/healthz")
+        if replay_url:
+            wait(f"{replay_url}/thing_descriptions/", 30)
         if lab_url:
             wait(f"{lab_url}/thing_descriptions/", 180)
         wait(f"http://127.0.0.1:{ns.web_port}/")
@@ -172,6 +211,7 @@ def main() -> int:
             "database": db,
             "worker_pid_file": str(pid_file),
             "lab": lab_url,
+            "ros_replay": replay_url,
         }
         print(json.dumps(info), flush=True)
         if ns.ready_file:
