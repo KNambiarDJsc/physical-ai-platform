@@ -56,7 +56,8 @@ test.beforeAll(async ({ playwright, baseURL }) => {
 });
 
 async function signIn(page: Page, theme: "dark" | "light") {
-  await page.addInitScript((t) => window.localStorage.setItem("pap.theme", t), theme);
+  const url = test.info().project.use.baseURL ?? "http://127.0.0.1:3000";
+  await page.context().addCookies([{ name: "pap_theme", value: theme, url }]);
   await page.goto("/settings");
   await page.getByLabel("Subject").fill(user);
   await page.getByRole("button", { name: "Sign in" }).click();
