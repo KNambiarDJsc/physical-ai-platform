@@ -97,7 +97,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
           <div className="min-w-0 leading-tight">
             <div className="truncate text-[13px] font-semibold">Reliability Platform</div>
-            <div className="truncate text-[11px] text-faint">Self-hosted · observation only</div>
+            <div className="truncate text-[11px] text-faint" title="Commands go only to simulated devices; physical devices are read, never commanded">
+              Self-hosted · no hardware control
+            </div>
           </div>
         </div>
         <div className="flex gap-0.5 overflow-x-auto px-2 py-1.5 md:block md:space-y-4 md:overflow-visible md:py-0">
