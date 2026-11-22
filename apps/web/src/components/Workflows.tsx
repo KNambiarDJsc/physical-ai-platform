@@ -7,6 +7,7 @@ import { api, orgPath, type Proposal, type Workflow, type WorkflowTemplate } fro
 import { shortDigest } from "@/lib/format";
 import { Notice, PageHeader, Panel } from "./AppShell";
 import { RequireIdentity } from "./Identity";
+import { WorkflowComposer } from "./WorkflowComposer";
 import { KindBadge } from "./Hardware";
 import { Badge, ClassBadge, Table, Td, Time } from "./ui";
 import { VerdictBadge } from "./Workbench";
@@ -48,6 +49,7 @@ function Workflows() {
           </Panel>
           <Proposals org={org} canDecide={role === "engineer" || role === "admin"} />
           {role !== "viewer" && <NewWorkflow org={org} />}
+          {role !== "viewer" && <WorkflowComposer org={org} />}
           <Panel title="Recent runs">
             {runs.data && runs.data.length === 0 && <p className="text-[13px] text-muted">No run yet.</p>}
             {runs.data && runs.data.length > 0 && (

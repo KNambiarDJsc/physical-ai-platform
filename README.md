@@ -1,15 +1,17 @@
 # Physical AI Reliability Platform
 
-Release Intelligence for robotics teams: did the candidate release make the robot better or worse, what does
-independent evidence say about what actually happened, and is there enough evidence to decide?
+One platform for robotics and laboratory teams to run, verify and decide: Release Intelligence (did the candidate
+make the robot better or worse, and is there enough evidence to say), a Hardware Hub for instruments and robots, durable
+workflows across instruments, simulation experiments with approval, a Digital twin to replay and compare runs, and
+permissioned agent tools.
 
-Built on [OpenMHS](https://github.com/KNambiarDJsc/Open-MHS), the open-source Rust engine that verifies
-physical outcomes (SATISFIED / VIOLATED / UNKNOWN) and compares releases with stated statistical rules. This
-repository is the commercial application around it: workspaces, evidence management, evaluation jobs,
-comparisons, drill-down and reports. It observes recorded evidence; it never controls robots.
+Built on [OpenMHS](https://github.com/KNambiarDJsc/Open-MHS), the open-source Rust engine that verifies physical
+outcomes (SATISFIED / VIOLATED / UNKNOWN) and compares releases with stated statistical rules. Commands go only to
+simulated environments; physical equipment is discovered and read, never commanded.
 
-**Status: early build.** See `harness/progress.md` for what works today, with test evidence, and
-`harness/features.json` for every feature and its verification state.
+Start here: [docs/onboarding.md](docs/onboarding.md) (a team's first hour), [docs/deployment.md](docs/deployment.md)
+(install and operate), [docs/HANDOFF.md](docs/HANDOFF.md) (for engineers). Features with their verification evidence:
+`harness/features.json`.
 
 ## Layout
 
@@ -18,6 +20,8 @@ comparisons, drill-down and reports. It observes recorded evidence; it never con
 | `packages/openmhs-bridge` | Runs the pinned OpenMHS binary; typed results with provenance |
 | `services/api` | FastAPI service and evaluation worker |
 | `apps/web` | Next.js application (Release Intelligence workspace, comparison, episodes, report export) |
+| `runtimes/` | Virtual laboratory (LabThings), ROS 2 observer, simulation host (`pap.simulation-host/1`) |
+| `packages/device-sdk`, `packages/agent-tools`, `packages/agent-harness` | Device adapters; typed agent tools (MCP); the Strands agent harness |
 | `harness/` | Feature registry, progress, decisions, blockers, evaluation results |
 | `docs/` | Capability audit, engine interface gaps, integration registry, decisions |
 | `scripts/` | Build, verify, audit, loop, hooks |
@@ -47,7 +51,7 @@ bash scripts/smoke.sh                          # fresh stack in var/smoke, one r
 bash scripts/smoke.sh --e2e                    # plus the Playwright suites (happy path and failure paths)
 ```
 
-Docker Compose for the whole stack is planned (INF-003) and not available yet.
+Docker Compose for the whole stack: `docker compose up -d --build` (see docs/deployment.md); CI builds and tests it.
 
 ## Principles
 

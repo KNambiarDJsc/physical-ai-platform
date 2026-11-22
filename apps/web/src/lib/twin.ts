@@ -235,3 +235,35 @@ export const MODE_TEXT: Record<Mode, string> = {
   simulated: "Simulated",
   disconnected: "Disconnected",
 };
+
+// ---- baseline versus candidate ------------------------------------------------------------------------------------
+
+export type Align = "start" | "command_last";
+
+/** When the last command was received in a recording (the twin's own command_last event), or null. */
+export function lastCommandAt(track: Track): number | null {
+  return track.events.find((e) => e.kind === "command_last")?.t ?? null;
+}
+
+/**
+ * How far the comparison recording's clock is shifted against the main one: aligned at their starts, or at the moment
+ * each received its last command (the command loss, for the #79 scenario). Null when that event is missing in either.
+ */
+export function compareOffset(main: Track, other: Track, align: Align): number | null {
+  if (align === "start") return 0;
+  const a = lastCommandAt(main);
+  const b = lastCommandAt(other);
+  return a === null || b === null ? null : a - b;
+}
+
+/** The comparison recording at main time t, or null when it has not started or has already ended (never a stale pose). */
+export function sampleOther(other: Track, t: number, offset: number): Sample | null {
+  const at = t - offset;
+  if (at < 0 || at > other.duration_s) return null;
+  return sampleAt(other, at);
+}
+
+/** The distance between the two bases, in metres: a geometric difference of two stored poses, not a statistic. */
+export function baseGap(a: Pose | null, b: Pose | null): number | null {
+  return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : null;
+}

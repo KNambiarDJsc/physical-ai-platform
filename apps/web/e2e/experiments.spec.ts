@@ -148,6 +148,8 @@ test.describe("the journey: configure, approve, run, inspect, investigate, revie
     }
     expect(violated).toBeGreaterThan(0); // the baseline setup does not stop its base: this scenario is built to show it
 
+    // baseline and candidate in 3D: the link opens the twin with one recording solid and the other as a ghost
+    await expect(page.getByRole("link", { name: "Compare baseline and candidate in 3D" })).toHaveAttribute("href", /&compare=/);
     const [download] = await Promise.all([page.waitForEvent("download"), trials.first().getByRole("button", { name: "Download recording" }).click()]);
     expect(download.suggestedFilename()).toMatch(/\.mcap$/);
   });

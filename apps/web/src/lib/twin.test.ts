@@ -4,6 +4,10 @@ import main from "./fixtures/openamr-main.track.json";
 import snapshot from "../../../../runtimes/ros-observer/tests/fixtures/openamr-upperbody-mock.snapshot.json";
 import {
   angleAt,
+  baseGap,
+  compareOffset,
+  lastCommandAt,
+  sampleOther,
   drivenJoints,
   holdAt,
   lerpAt,
@@ -146,5 +150,33 @@ describe("an observed ROS graph (the real recorded snapshot of the upper-body mo
     expect(observerBasePose(reads.transforms, "odom", "base_footprint")).toBeNull();
     const pose = observerBasePose({ frames: [{ parent: "odom", child: "base_footprint", translation: [1, 2, 0], rotation: [0, 0, 0, 1], static: false }] }, "odom", "base_footprint");
     expect(pose).toEqual({ x: 1, y: 2, yaw: 0 });
+  });
+});
+
+describe("baseline versus candidate", () => {
+  const a = main as unknown as Track;
+  const b = fix as unknown as Track;
+
+  it("aligns two recordings at their starts or at the moment each received its last command", () => {
+    expect(compareOffset(a, b, "start")).toBe(0);
+    expect(lastCommandAt(a)).toBeCloseTo(6.246, 3);
+    expect(compareOffset(a, b, "command_last")).toBeCloseTo(6.246 - 6.099, 3);
+    expect(compareOffset(a, { ...b, events: [] }, "command_last")).toBeNull(); // no event, no made-up alignment
+  });
+
+  it("shows the other recording only while it has data, never a stale pose", () => {
+    const off = compareOffset(a, b, "command_last")!;
+    expect(sampleOther(b, 0, off)).toBeNull(); // before the other recording starts on the shared axis
+    expect(sampleOther(b, 5, off)).not.toBeNull();
+    expect(sampleOther(b, b.duration_s + off + 0.5, off)).toBeNull(); // after it ends
+  });
+
+  it("measures how far apart the bases are from the stored poses", () => {
+    const off = compareOffset(a, b, "command_last")!;
+    const end = Math.min(a.duration_s, b.duration_s + off) - 0.01;
+    const gap = baseGap(sampleAt(a, end).pose, sampleOther(b, end, off)!.pose);
+    expect(gap).not.toBeNull();
+    expect(gap!).toBeGreaterThan(0.5); // the pre-fix base drove on after command loss, the fix base stopped
+    expect(baseGap(null, sampleAt(b, 1).pose)).toBeNull();
   });
 });

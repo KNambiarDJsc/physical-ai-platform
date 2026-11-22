@@ -489,9 +489,27 @@ function Results({ org, d, spec, sc, onAgain, againBusy }: { org: string; d: Exp
   const armTitle = (key: string) => spec.arms.find((a) => a.key === key)?.title || key;
   const [dlError, setDlError] = useState<string | null>(null);
   const total = (key: string) => d.trial_results.filter((t) => t.arm === key).length;
+  const baseArm = spec.arms.find((a) => a.role === "baseline")?.key ?? spec.arms[0]?.key;
+  const candArm = spec.arms.find((a) => a.key !== baseArm)?.key;
+  const recOf = (arm: string | undefined) => d.trial_results.find((t) => t.arm === arm && t.recording_id)?.recording_id;
+  const compare3d =
+    spec.model && recOf(baseArm) && recOf(candArm)
+      ? `/twin?org=${org}&project=${spec.model.project}&recording=${recOf(baseArm)}&compare=${recOf(candArm)}`
+      : null;
   return (
     <>
-      <Panel title="Setups side by side">
+      <Panel
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            Setups side by side
+            {compare3d && (
+              <Link className="text-[12px] font-normal text-accent hover:underline" href={compare3d}>
+                Compare baseline and candidate in 3D
+              </Link>
+            )}
+          </span>
+        }
+      >
         <p className="mb-3 max-w-3xl text-[12px] text-muted">
           The verdicts are the engine&apos;s, over the measurements the host reported. These are counts and raw values, not a statistical comparison: with few trials a difference may be chance.
         </p>

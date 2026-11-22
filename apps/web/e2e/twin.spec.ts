@@ -190,6 +190,32 @@ test.describe("the milestone: a real recorded failure, in 3D, explained", () => 
   });
 });
 
+test.describe("baseline versus candidate", () => {
+  test("the fix recording is drawn as a ghost beside the pre-fix one, aligned at command loss, with both verdicts", async ({ page }) => {
+    await openTwin(page, MAIN);
+    await page.getByLabel("Compare with (drawn as a ghost)").selectOption({ label: FIX });
+    const strip = page.getByTestId("comparison");
+    await expect(strip).toContainText(`Solid: ${MAIN}`);
+    await expect(strip).toContainText(`Ghost: ${FIX}`);
+    await expect(strip).toContainText("aligned at the last command");
+    const canvas = page.locator("canvas");
+    await expect(canvas).toHaveAttribute("data-ghost-xy", /.+/, { timeout: 60_000 }); // the second robot is drawn
+    const slider = page.getByRole("slider", { name: "Playback position" });
+    await slider.focus();
+    await page.keyboard.press("End");
+    const gapText = async () => Number(/bases ([\d.]+) m apart/.exec((await page.getByTestId("base-gap").textContent()) ?? "")?.[1] ?? "NaN");
+    await expect.poll(gapText, { timeout: 15_000 }).toBeGreaterThan(0.5); // pre-fix drove on, the fix stopped
+    const xy = async (attr: string) => Number(((await canvas.getAttribute(attr)) ?? "0,0").split(",")[0]);
+    expect(Math.abs((await xy("data-robot-xy")) - (await xy("data-ghost-xy")))).toBeGreaterThan(0.5); // the scene agrees
+    await page.getByLabel("Align the two recordings at").selectOption({ label: "their starts" });
+    await expect(strip).toContainText("aligned at their starts");
+    const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+    expect(axe.violations.map((v) => v.id)).toEqual([]);
+    await page.getByRole("button", { name: "Stop comparing" }).click();
+    await expect(strip).toHaveCount(0);
+  });
+});
+
 test.describe("inspection", () => {
   test("a link shows its joint, the controller that drives it, and that the recording holds its wheel angle constant", async ({ page }) => {
     await openTwin(page, FIX);

@@ -5,17 +5,25 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Notice, PageHeader, Panel } from "@/components/AppShell";
 import { signInHref, useAuth } from "@/components/Identity";
+import { MembersPanel } from "@/components/Members";
 import { getIdentity, setIdentity } from "@/lib/identity";
 
 export default function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" />
-      <Panel title="Identity" className="max-w-xl">
-        <Suspense>
-          <IdentityPanel />
-        </Suspense>
-      </Panel>
+      <div className="space-y-4">
+        <Panel title="Identity" className="max-w-xl">
+          <Suspense>
+            <IdentityPanel />
+          </Suspense>
+        </Panel>
+        <Panel title="Members" className="max-w-3xl">
+          <Suspense>
+            <MembersPanel />
+          </Suspense>
+        </Panel>
+      </div>
     </>
   );
 }

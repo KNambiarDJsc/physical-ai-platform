@@ -23,7 +23,11 @@ export type SceneProps = {
   frame: { cx: number; cy: number; radius: number };
   view: "perspective" | "top";
   viewNonce: number;
+  /** A second recording on the same time axis, drawn as a translucent copy of the model (baseline vs candidate). */
+  ghost?: { pose: Pose | null; joints: Record<string, number> } | null;
 };
+
+type RobotProps = SceneProps & { isGhost?: boolean };
 
 /** The colours come from the design tokens (globals.css), read at draw time: no colour is written in this file. */
 function token(name: string, fallback = "#888888"): string {
@@ -59,7 +63,7 @@ function linkOf(o: THREE.Object3D | null): string | null {
   return null;
 }
 
-function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onStatus }: SceneProps) {
+function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onStatus, isGhost }: RobotProps) {
   const [robot, setRobot] = useState<URDFRobot | null>(null);
   const fetchRef = useRef(fetchFile);
   fetchRef.current = fetchFile;
@@ -121,7 +125,20 @@ function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onSta
   useFrame(({ gl }) => {
     if (!robot) return;
     robot.getWorldPosition(where);
-    gl.domElement.dataset["robotXy"] = `${where.x.toFixed(3)},${(-where.z).toFixed(3)}`;
+    gl.domElement.dataset[isGhost ? "ghostXy" : "robotXy"] = `${where.x.toFixed(3)},${(-where.z).toFixed(3)}`;
+    if (isGhost) {
+      // Meshes arrive asynchronously: make each one translucent once, whenever it appears.
+      robot.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (!m.isMesh || m.userData["ghost"]) return;
+        const mat = (m.material as THREE.Material).clone();
+        mat.transparent = true;
+        mat.opacity = 0.35;
+        mat.depthWrite = false;
+        m.material = mat;
+        m.userData["ghost"] = true;
+      });
+    }
   });
 
   const accent = useMemo(() => new THREE.Color(token("--color-accent")), [selected]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -140,11 +157,11 @@ function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onSta
   if (!robot) return null;
   const click = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    onSelect(linkOf(e.object));
+    if (!isGhost) onSelect(linkOf(e.object));
   };
   return (
     // URDF is Z-up; the scene is Y-up. The base pose from /tf places the model's root (base_footprint) on the ground.
-    <group rotation={[-Math.PI / 2, 0, 0]}>
+    <group rotation={[-Math.PI / 2, 0, 0]} visible={!isGhost || pose !== null}>
       <group position={[pose?.x ?? 0, pose?.y ?? 0, 0]} rotation={[0, 0, pose?.yaw ?? 0]} onClick={click}>
         <primitive object={robot} />
       </group>
@@ -181,6 +198,9 @@ export default function Scene(props: SceneProps) {
         <gridHelper args={[20, 40, grid.major, grid.minor]} />
         <Controls frame={props.frame} view={props.view} viewNonce={props.viewNonce} />
         <Robot {...props} />
+        {props.ghost && (
+          <Robot {...props} pose={props.ghost.pose} joints={props.ghost.joints} selected={null} onStatus={() => undefined} isGhost />
+        )}
       </Canvas>
     </Boundary>
   );

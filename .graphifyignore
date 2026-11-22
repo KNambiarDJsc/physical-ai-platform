@@ -15,3 +15,7 @@ examples/**/data/
 **/*.db3
 .env
 .env.*
+**/__pycache__/
+apps/web/playwright-report/
+graphify-out/
+examples/**/recorded/**/bag/

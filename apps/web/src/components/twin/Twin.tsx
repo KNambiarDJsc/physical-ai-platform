@@ -27,6 +27,10 @@ import {
   observerJoints,
   observerMode,
   sampleAt,
+  sampleOther,
+  compareOffset,
+  baseGap,
+  type Align,
   type Mode,
   type ObserverReads,
   type Pose,
@@ -137,6 +141,21 @@ function Twin() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
   const tr = track.data ?? null;
+  // Baseline versus candidate: a second recording of the project, drawn as a ghost on the same time axis.
+  const compareId = params.get("compare");
+  const [align, setAlign] = useState<Align>("command_last");
+  const detail2 = useQuery({
+    queryKey: ["twin-recording", org, project, compareId],
+    queryFn: () => api<RecordingDetail>(`${base}/twin/recordings/${compareId}`),
+    enabled: !!base && !!compareId,
+  });
+  const track2 = useQuery({
+    queryKey: ["twin-track", org, project, compareId, detail2.data?.track_sha256],
+    queryFn: () => api<Track>(`${base}/twin/recordings/${compareId}/track`),
+    enabled: !!base && !!compareId && !!detail2.data,
+    staleTime: Infinity,
+  });
+  const tr2 = compareId ? (track2.data ?? null) : null;
   useEffect(() => {
     setT(0);
     setPlaying(false);
@@ -223,6 +242,11 @@ function Twin() {
       reported = [];
     }
   }
+  const alignedOffset = tr && tr2 ? compareOffset(tr, tr2, align) : null;
+  const offset = alignedOffset ?? 0; // without the event in both recordings, they are aligned at their starts (said below)
+  const ghostSample = source.kind === "recording" && tr2 ? sampleOther(tr2, t, offset) : null;
+  const ghost = source.kind === "recording" && tr2 ? { pose: ghostSample?.pose ?? null, joints: ghostSample ? jointValues(ghostSample) : {} } : null;
+  const gap = baseGap(pose, ghostSample?.pose ?? null);
   const modelJointNames = useMemo(() => (structure?.joints ?? []).filter((j) => j.type !== "fixed").map((j) => j.name), [structure]);
   const jointMatch = matchJoints(modelJointNames, reported);
 
@@ -295,6 +319,32 @@ function Twin() {
               </button>
             </li>
           ))}
+          {source.kind === "recording" && (recs.data ?? []).length > 1 && (
+            <li className="pt-2">
+              <label className="block text-[12px] text-muted">
+                Compare with (drawn as a ghost)
+                <select className="field mt-1 w-full py-1" value={compareId ?? ""} onChange={(e) => setParam("compare", e.target.value)}>
+                  <option value="">No comparison</option>
+                  {(recs.data ?? [])
+                    .filter((r) => r.id !== recId)
+                    .map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.label}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              {compareId && (
+                <label className="mt-1 block text-[12px] text-muted">
+                  Align the two recordings at
+                  <select className="field mt-1 w-full py-1" value={align} onChange={(e) => setAlign(e.target.value as Align)}>
+                    <option value="command_last">the last command each received</option>
+                    <option value="start">their starts</option>
+                  </select>
+                </label>
+              )}
+            </li>
+          )}
           {observers.map((o) => (
             <li key={o.env}>
               <button
@@ -354,6 +404,30 @@ function Twin() {
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line px-3 py-1.5 text-[12px]">
         <ModeBadge mode={mode} />
         <span className="text-muted" data-testid="mode-reason">{modeReason}</span>
+        {source.kind === "recording" && compareId && detail2.data && (
+          <span className="flex w-full flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-1" data-testid="comparison">
+            <span>
+              <span className="text-muted">Solid: </span>
+              <span className="font-medium">{d?.label}</span>{" "}
+            </span>
+            {d?.run?.verdict && <VerdictBadge verdict={d.run.verdict} />}
+            <span>
+              <span className="text-muted"> · Ghost: </span>
+              <span className="font-medium">{detail2.data.label}</span>{" "}
+            </span>
+            {detail2.data.run?.verdict && <VerdictBadge verdict={detail2.data.run.verdict} />}
+            <span className="text-muted">
+              {" "}· aligned at {align === "start" || alignedOffset === null ? "their starts" : "the last command"}
+              {align === "command_last" && alignedOffset === null ? " (one recording has no last-command event)" : ""}{" "}
+            </span>
+            <span className="num" data-testid="base-gap">
+              {ghostSample ? (gap !== null ? `· bases ${gap.toFixed(2)} m apart now ` : "") : "· the ghost recording has no data at this moment "}
+            </span>
+            <button className="ml-auto text-accent hover:underline" onClick={() => setParam("compare", "")}>
+              Stop comparing
+            </button>
+          </span>
+        )}
         {source.kind === "recording" && d?.run && (
           <span className="ml-auto flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="trial-link">
             <span className="text-muted">
@@ -409,6 +483,7 @@ function Twin() {
               frame={frame}
               view={view}
               viewNonce={viewNonce}
+              ghost={ghost}
             />
           </div>
         ) : (

@@ -1808,11 +1808,12 @@
         "services/api/app/experiments/releases.py",
         "apps/web/src/components/experiments/ReleaseVerdict.tsx"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-23",
         "evidence": [
-          "API: test_two_setups_are_judged_as_releases_by_the_engine_over_every_finished_trial passes (8 real trials over two approved runs; CSV rows equal the trials' measurements; engine verdict insufficient_evidence with its 'fewer than 30' reason; repeat returns the same evaluation; viewer 403; other workspace 404). test_isolation.py 4 passed with the new route. Browser e2e for the panel NOT yet run (the run was interrupted)."
+          "API: test_two_setups_are_judged_as_releases_by_the_engine_over_every_finished_trial passes (8 real trials over two approved runs; CSV rows equal the trials' measurements; engine verdict insufficient_evidence with its 'fewer than 30' reason; repeat returns the same evaluation; viewer 403; other workspace 404). test_isolation.py 4 passed with the new route. Browser e2e for the panel NOT yet run (the run was interrupted).",
+          "Browser: e2e/experiments.spec.ts 8 passed (2026-11-22), including the Release verdict panel: an engineer judges version 1's setups as releases, the engine's 'Insufficient evidence' and its 'fewer than 30' reason are shown verbatim, and 'Open in Releases' opens the evaluation. Re-run with the twin and composer specs: 19 passed."
         ]
       },
       "limitations": []
@@ -1854,6 +1855,100 @@
         "Real-model behaviour is not yet verified.",
         "Traces are local files (var/agent-traces), not yet stored in or shown by the platform."
       ]
+    },
+    {
+      "id": "TWN-006",
+      "title": "Baseline versus candidate in the 3D Digital twin",
+      "priority": 3,
+      "depends_on": [
+        "SIM-004"
+      ],
+      "description": "The twin draws a second recording of the project as a translucent ghost robot on the same time axis as the main one, aligned at their starts or at the moment each received its last command, with both runs' engine verdicts and the distance between the two bases. The Studio links baseline and candidate straight into it.",
+      "acceptance": [
+        "The ghost is the same model, translucent, not selectable; it is drawn only while its recording has data at that moment (never a stale pose), and the page says when it has none.",
+        "Alignment at the last command uses the twin's own command_last events; when either recording lacks it, the page says it fell back to the starts.",
+        "Both verdicts are the engine's; the base gap is a geometric difference of the two stored poses, not a statistic; the text and the scene agree; axe passes."
+      ],
+      "tests": [
+        "npx vitest run src/lib/twin.test.ts",
+        "npx playwright test e2e/twin.spec.ts -g 'baseline versus candidate'"
+      ],
+      "paths": [
+        "apps/web/src/components/twin/",
+        "apps/web/src/lib/twin.ts"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-23",
+        "evidence": [
+          "vitest twin.test.ts 19 passed: offsets at starts and at command_last on the real OpenAMRobot pre-fix and fix tracks (6.246 vs 6.099 s), null when the event is missing, no sample before or after the other recording, base gap > 0.5 m at the end (pre-fix drove on, fix stopped).",
+          "e2e twin.spec.ts 'baseline versus candidate' passed (batch of 19 passed with the experiments spec): pre-fix solid, fix ghost, aligned at the last command, data-ghost-xy drawn, the base-gap readout and the two robots' scene positions both > 0.5 m apart at the end, switching to 'their starts', axe clean, 'Stop comparing' removes it. The Studio's 'Compare baseline and candidate in 3D' link carries recording and compare. A screen-reader text defect (legend words run together) was found by this test and fixed."
+        ]
+      },
+      "limitations": [
+        "One comparison recording at a time; joints of the ghost follow its own recording."
+      ]
+    },
+    {
+      "id": "WF-002",
+      "title": "Multi-instrument workflow composition in the interface",
+      "priority": 3,
+      "depends_on": [
+        "WF-001"
+      ],
+      "description": "On the Workflows page an engineer composes a workflow across the instruments an environment's discovery found: ordered actions with inputs from each action's own JSON Schema, and a verification contract (the claim step, independent evidence from another step's output, conditions). Saved as an ordinary pap.workflow/1 definition, checked again by the API, run by the worker, judged by the engine.",
+      "acceptance": [
+        "Inputs come from each action's schema (idempotency key excluded) and are refused in words before saving; evidence must come from a different step than the claim.",
+        "An action that does not declare its output fields lets the engineer name the field, and says so; a wrong name leaves the evidence missing (unknown), never invented.",
+        "End to end in the browser on the real virtual lab: a four-step, two-instrument workflow with a mass contract runs, and the engine's verdict agrees with the balance's reading."
+      ],
+      "tests": [
+        "npx vitest run src/lib/compose.test.ts",
+        "npx playwright test e2e/compose.spec.ts -g 'composes'"
+      ],
+      "paths": [
+        "apps/web/src/lib/compose.ts",
+        "apps/web/src/components/WorkflowComposer.tsx"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-23",
+        "evidence": [
+          "vitest compose.test.ts 4 passed: inputs and outputs from schemas, an open dict[str, float] output detected, a pap.workflow/1 across balance and pump with claim s3, evidence mass_g from s4 and a unit-carrying between condition; refusals in words.",
+          "e2e compose.spec.ts 'composes' passed on the real virtual lab: incomplete form refused, tare + dispense 50 + dispense 30 + weigh composed, the open-output note shown and mass_g named, axe clean, saved, run by the worker: steps balance.tare, pump.dispense, pump.dispense, balance.weigh; verdict == SATISFIED iff the measured mass is within [0.0783, 0.0815] g. The first run of this test found that the lab's weigh action declares no output names; the composer now handles such instruments."
+        ]
+      },
+      "limitations": [
+        "A linear sequence; no branches or loops. Single environment per workflow."
+      ]
+    },
+    {
+      "id": "ONB-001",
+      "title": "Customer onboarding and deployment readiness",
+      "priority": 3,
+      "depends_on": [
+        "SIM-005"
+      ],
+      "description": "A team can be onboarded from the product and the docs: members are added and their roles changed in Settings; docs/onboarding.md (first hour), docs/deployment.md (install, configuration, operations, security checklist) and docs/HANDOFF.md (engineering handoff); README updated.",
+      "acceptance": [
+        "An admin adds a colleague by sign-in identity with a role, changes the role and removes them in Settings; non-admins see the list and who manages it.",
+        "The deployment guide's settings match .env.example and config.py; the Compose stack it describes is the one CI builds and tests."
+      ],
+      "tests": [
+        "npx playwright test e2e/compose.spec.ts -g 'adds a colleague'"
+      ],
+      "paths": [
+        "apps/web/src/components/Members.tsx",
+        "docs/"
+      ],
+      "status": "in_progress",
+      "verification": {
+        "verified_at": null,
+        "evidence": [
+          "The Members e2e found that a select inside a label gets the selected option in its accessible name; the label is now 'Role for the new member'. Its re-run is pending. Docs written against .env.example, config.py and docker-compose.yml."
+        ]
+      },
+      "limitations": []
     }
   ]
 }
