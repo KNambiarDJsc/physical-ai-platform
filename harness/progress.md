@@ -319,3 +319,52 @@ document). Starlette warns that httpx TestClient support is deprecated (harmless
 - WSL kills background processes when the wsl.exe session ends (run the scenario in a foreground session).
 - Windows takes about 2 s to refuse a localhost connection: anything that probes a default database URL is slow.
 
+## 2026-11-22 - Session 8 (later): Simulation Experiment Studio started (SIM-001..006), handoff
+
+**State**
+- Local commits, NOT pushed (no push approval for them): 28fc38a (Digital Twin Workbench, fully gated) and 6a0c9d2
+  (dependency advisories: next 15.5.29, vitest 4.1.12, pytest 9.0.3; audits clean). Origin is at 688914d.
+- Registered (unstarted, harness/features.json): SIM-001 host contract and runtime, SIM-002 immutable experiment specs,
+  SIM-003 request/approve/execute through the existing workflows, SIM-004 artifact capture and twin recording,
+  SIM-005 Experiment Studio UI, SIM-006 real Gazebo acceptance. Design: docs/simulation-studio.md; decision D-036.
+- UNCOMMITTED work in the tree for SIM-001 (not gated yet): runtimes/sim-host (catalog, runner, LabThings Thing, server,
+  selftest scenarios and catalog), device-sdk additions (invoke_action on_wait/on_wait_every_s, fetch_bytes,
+  testing.run_sim_host), services/api/tests/test_sim_host.py, docs/simulation-studio.md, features and decisions edits.
+
+**The open bug (fix this first)**
+- Against a real host, the 8th REFUSED run_scenario call in a row hangs: the invocation's log shows the ValueError but its
+  status stays `running`, so WotHttpAdapter.invoke_action returns `timeout` after its deadline. Calls 1-7 return `error`
+  in 0.16 s. Reproduce with D:/openmhs-tmp/tmp/probe_host5.py (selftest-nope in a loop). It is not the host's lock:
+  refusals happen before it. LabThings 0.3.0 `actions.py` Invocation.run sets ERROR under `_status_lock` after logging, so
+  suspect a race or a thread-pool/limiter exhaustion in labthings (look at `thing.py` run_sync / anyio limiter, and at
+  what happens when an action raises quickly many times). Options: raise a LabThings InvocationError subclass instead of
+  ValueError; validate parameters BEFORE the action (pydantic input model so LabThings answers 422 and the adapter
+  returns accepted=False, which is how the virtual lab refuses bad input); or find the labthings limiter. Do not weaken
+  the tests: they assert refused runs return `error` promptly.
+- Also open in test_sim_host.py: nothing else known failing; fetch_bytes is now inside WotHttpAdapter.
+
+**Next after the bug**: run test_sim_host.py (engine not needed), ruff/mypy, commit SIM-001; then SIM-002 (experiments
+package: models, migration 0008, spec validation against the host's `scenarios` property), SIM-003 (compile to
+workflows, request/approve, StepDef.timeout_s, executor heartbeat via on_wait, dotted output_field), SIM-004 (capture and
+register recording with a workflow_run link), SIM-005 (Studio page, e2e with the selftest host in dev_stack), SIM-006
+(Gazebo catalog entry wrapping examples/openamr-cmd-timeout/scenario scripts through wsl.exe; needs ~1.5 GB RAM and
+about 3 minutes per run; never start Docker).
+
+**Paid LLM usage**: the user gave an aicredits.in API key in chat on 2026-11-22 for minimal-cost agent experiments. It is
+NOT stored anywhere (do not write it to files, memory or commits); ask the user to supply it via an environment variable
+when an agent step needs it, cap spend per experiment, and tell them to rotate it afterwards.
+
+**Cost note**: this session ran for hours and was compacted once; each monitor event cost a full-context turn. In long
+runs, block on one command and print summary lines only.
+
+
+## 2026-11-22 - Session 9: SIM-001 verified and committed
+
+- Root cause of the "8th refusal hangs" bug: pap_device_sdk.testing started the host with `stderr=PIPE` and never read
+  it. Every refusal logged a traceback; once the pipe buffer was full, the logging call blocked inside the action thread
+  before LabThings set ERROR, so the invocation stayed `running`. Fix: a shared `_serve` helper sends stderr to a
+  temporary file (run_sim_host and run_virtual_lab both had the latent bug). Refusals now raise `ScenarioRefused`
+  (LabThings InvocationError, logged without a traceback). Probe: 14 refusals in a row, each `error` in 0.16 s.
+- Gate: test_sim_host.py 9 passed; verify.sh --python all ok except one MemoryError in test_twin_assistant.py (96 MB
+  upload, ~2.4 GB RAM free); that file passes alone. Recorded in features.json.
+- Next: SIM-002 (experiments package, migration 0008, spec validation against the host's `scenarios`).

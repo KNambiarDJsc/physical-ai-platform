@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from collections.abc import Callable
 from typing import Any
 from urllib.parse import urljoin, urlsplit
 
@@ -143,7 +144,15 @@ class WotHttpAdapter:
             raise AdapterError(f"reading {device}.{name} failed (HTTP {r.status_code})")
         return r.json()
 
-    def invoke_action(self, device: str, name: str, payload: dict[str, Any], timeout_s: float = 60.0) -> Invocation:
+    def invoke_action(
+        self,
+        device: str,
+        name: str,
+        payload: dict[str, Any],
+        timeout_s: float = 60.0,
+        on_wait: Callable[[], None] | None = None,
+        on_wait_every_s: float = 5.0,
+    ) -> Invocation:
         act = (self._td(device).get("actions") or {}).get(name)
         href = _forms_href(act or {}, "invokeaction")
         if not href:
@@ -159,7 +168,11 @@ class WotHttpAdapter:
             raise AdapterError(f"{device}.{name} answered HTTP {r.status_code}")
         inv = r.json()
         deadline = time.monotonic() + timeout_s
+        next_wait = time.monotonic() + on_wait_every_s
         while inv.get("status") not in _FINAL:
+            if on_wait is not None and time.monotonic() >= next_wait:
+                on_wait()
+                next_wait = time.monotonic() + on_wait_every_s
             if time.monotonic() > deadline:
                 return Invocation(status="timeout", invocation_id=str(inv.get("id")), started_at=inv.get("timeStarted"))
             time.sleep(0.15)
@@ -176,6 +189,25 @@ class WotHttpAdapter:
             started_at=inv.get("timeStarted"),
             completed_at=inv.get("timeCompleted"),
         )
+
+    def fetch_bytes(
+        self, device: str, path: str, max_bytes: int, timeout_s: float = 120.0
+    ) -> tuple[bytes, dict[str, str]]:
+        """GET a path under a Thing (an artifact), on the configured origin only, bounded in size. Returns the body and
+        the response headers. The caller must check the bytes against the digest the device reported."""
+        url = self._url(urljoin(self.endpoint.rstrip("/") + "/", f"{device}/{path.lstrip(chr(47))}"))
+        try:
+            with self._client.stream("GET", url, timeout=timeout_s) as r:
+                if r.status_code != 200:
+                    raise AdapterError(f"{device}: {path} answered HTTP {r.status_code}")
+                body = bytearray()
+                for chunk in r.iter_bytes():
+                    body += chunk
+                    if len(body) > max_bytes:
+                        raise AdapterError(f"{device}: {path} is larger than {max_bytes} bytes")
+                return bytes(body), dict(r.headers)
+        except httpx.HTTPError as e:
+            raise AdapterError(f"cannot fetch {path} from {device}: {type(e).__name__}") from None
 
 
 def _problem(r: httpx.Response) -> str:

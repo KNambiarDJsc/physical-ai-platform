@@ -1555,6 +1555,180 @@
       "limitations": [
         "The comparison between arms (5 vs 7 runs) remains insufficient evidence in the engine; the twin shows each recording and verdict, not a statistical claim."
       ]
+    },
+    {
+      "id": "SIM-001",
+      "title": "Simulation host contract and runtime (simulator-independent, Gazebo first)",
+      "priority": 3,
+      "depends_on": [
+        "HUB-001"
+      ],
+      "description": "runtimes/sim-host serves the pap.simulation-host/1 contract as a LabThings Thing so the existing adapter discovers it: simulated=true, the simulator, the operator's scenario catalog (parameter JSON Schemas, outputs, artifacts, maximum duration), recent runs, one blocking idempotent run_scenario action and a read-only artifact route. It runs only the operator's fixed commands (argument lists, no shell).",
+      "acceptance": [
+        "The Thing Description declares simulated=true, a scenarios property with schemas, and an action run_scenario whose input has a request_id the adapter reads as the idempotency key.",
+        "Unknown scenarios, parameters outside the scenario's schema and substituted values that look like options are refused before anything is started; the command is an argument list from the operator's catalog.",
+        "A run returns the measurements and artifact digests that the scenario's own result file contains; a command that fails, times out, or leaves no result file, a missing declared measurement or artifact, or an artifact path that leaves the run directory, is a failed run with no fabricated values.",
+        "A repeated request_id returns the stored result and runs nothing; runs are serialised; only listed artifacts of a run are served, with their digest."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_sim_host.py"
+      ],
+      "paths": [
+        "runtimes/sim-host/",
+        "packages/device-sdk/src/pap_device_sdk/testing.py"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_sim_host.py: 9 passed (real host started by pap_device_sdk.testing.run_sim_host with the selftest catalog; no mocks): Thing Description (simulated=true, scenarios with schemas, run_scenario with request_id), refusals of unknown scenarios, out-of-schema parameters and option-like substitutions before anything starts, failed/timed-out/result-less runs and missing measurements or artifacts or escaping artifact paths reported as failures with no values, idempotent request_id, serialised runs, only listed artifacts served with their digest, heartbeat via invoke_action on_wait.",
+          "Bug fixed (root cause, not a retry): after about 7 refused calls an invocation stayed 'running'. The test helper started the host with stderr=PIPE and never read it; each refusal logged a traceback, the pipe filled and the logging call blocked inside the action thread before LabThings set ERROR. run_sim_host and run_virtual_lab now send stderr to a temporary file (shared _serve helper). Probe D:/openmhs-tmp/tmp/probe_host5.py: before, call 8 timed out after 4.13 s; after, 14 refused calls in a row each returned 'error' in 0.15-0.16 s. Refusals now raise ScenarioRefused (a LabThings InvocationError), which LabThings logs without a traceback.",
+          "Python gate (bash scripts/verify.sh --python, 2026-11-22): ruff, ruff format, mypy (bridge, device sdk, agent tools, api), Semgrep and rule self-test, contract/openapi/demo/fixture/model checks, openmhs audit 11/11 all ok. pytest with the real engine required: 267 passed, 4 skipped (S3 needs a SeaweedFS binary), 1 error: test_twin_assistant.py raised MemoryError reading a 96 MB upload while the machine had about 2.4 GB free; that file re-run alone with PAP_REQUIRE_ENGINE=1: 4 passed. runtimes/sim-host/src: mypy clean (with types-jsonschema; the sim-host package is not in the verify.sh mypy list)."
+        ]
+      },
+      "limitations": [
+        "Only the selftest catalog has been run; the Gazebo catalog is SIM-006.",
+        "The sim-host package is type-checked by hand, not by scripts/verify.sh."
+      ]
+    },
+    {
+      "id": "SIM-002",
+      "title": "Immutable experiment specifications validated against the discovered scenario",
+      "priority": 3,
+      "depends_on": [
+        "SIM-001",
+        "WF-001"
+      ],
+      "description": "An experiment has immutable, content-addressed versions (pap.experiment-spec/1): a registered simulated environment, a pinned scenario id and version, arms with parameters, repetitions, a contract over the scenario's measurements, and what to capture. A version is validated against what the environment's host lists now.",
+      "acceptance": [
+        "A version is refused unless the environment is simulated and hosts a simulation-host, the scenario and its version are listed, every arm's parameters satisfy the scenario's schema, every condition names a declared measurement and every captured artifact is one the scenario leaves.",
+        "The same specification is the same version (digest); a change is a new version; versions are never edited.",
+        "Another workspace gets 404; viewers read, engineers create."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_experiments.py"
+      ],
+      "paths": [
+        "services/api/app/experiments/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "verified_at": null,
+        "evidence": []
+      },
+      "limitations": []
+    },
+    {
+      "id": "SIM-003",
+      "title": "Requested, approved and executed through the existing workflow infrastructure",
+      "priority": 3,
+      "depends_on": [
+        "SIM-002",
+        "AGT-001"
+      ],
+      "description": "Anyone in the workspace may request a run of a version; only an engineer approves or rejects; approval compiles the version into one workflow per arm and queues the trials through the unchanged workflow service, so the durable worker, simulated-only safety check, step journal and engine verification all apply.",
+      "acceptance": [
+        "A request does nothing; approval by a viewer is 403; a rejected request never runs; a physical environment is never queued (the executor's check still applies).",
+        "Each trial is an ordinary workflow run whose evidence is the scenario's measurements and whose verdict is the engine's over the spec's contract; a long step does not lose its lease (heartbeat while waiting) and has the scenario's own timeout.",
+        "Arms with different parameters become separate workflows and results are grouped by arm without computing a statistic: this is the infrastructure for controlled camera-configuration comparisons."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_experiments.py"
+      ],
+      "paths": [
+        "services/api/app/experiments/",
+        "services/api/app/workflows/",
+        "packages/device-sdk/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "verified_at": null,
+        "evidence": []
+      },
+      "limitations": []
+    },
+    {
+      "id": "SIM-004",
+      "title": "Telemetry and artifact capture, results in the Digital Twin",
+      "priority": 3,
+      "depends_on": [
+        "SIM-003",
+        "TWN-005"
+      ],
+      "description": "After a trial succeeds the worker fetches the captured artifacts from the host, checks them against the digests the host reported, stores them content-addressed and registers an MCAP artifact as a recording linked to the run, so the Digital Twin plays it beside the engine's verdict and the assistant can explain it.",
+      "acceptance": [
+        "An artifact whose bytes do not match the reported digest is not stored and the trial says so; unlisted artifacts are never fetched.",
+        "A captured MCAP appears as a recording linked to the workflow run (model version, run identity and bag summary stored as reported); the twin shows the run's verdict and the assistant's explanation cites the run's verification and contract.",
+        "Artifacts are served to workspace members only."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_experiments.py services/api/tests/test_twin_assistant.py"
+      ],
+      "paths": [
+        "services/api/app/experiments/",
+        "services/api/app/twin/",
+        "packages/agent-tools/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "verified_at": null,
+        "evidence": []
+      },
+      "limitations": []
+    },
+    {
+      "id": "SIM-005",
+      "title": "Experiment Studio in the interface",
+      "priority": 3,
+      "depends_on": [
+        "SIM-004"
+      ],
+      "description": "A page to see registered simulation environments and the scenarios they list, configure an immutable experiment from a form generated from the scenario's schema, request, approve or reject a run, watch trials and open each result in the Digital Twin.",
+      "acceptance": [
+        "Environments, scenarios and their parameter forms come from the host's own listing; the form refuses values outside the schema before submission and the API refuses them again.",
+        "The approval queue shows who requested and who decided; a viewer sees no approve control.",
+        "Results show measurements, the engine's verdict, artifacts with digests and 'Open in Digital twin'; axe WCAG 2.2 A/AA passes in both themes."
+      ],
+      "tests": [
+        "npx playwright test e2e/experiments.spec.ts"
+      ],
+      "paths": [
+        "apps/web/src/components/experiments/",
+        "apps/web/e2e/experiments.spec.ts"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "verified_at": null,
+        "evidence": []
+      },
+      "limitations": []
+    },
+    {
+      "id": "SIM-006",
+      "title": "Acceptance: the OpenAMRobot command-loss regression executed by the platform on Gazebo",
+      "priority": 3,
+      "depends_on": [
+        "SIM-005"
+      ],
+      "description": "An engineer registers the Gazebo host, discovers the scenario, configures an experiment with a pre-fix arm and a fix arm, approves it, the platform launches the real simulation twice, captures the MCAP bags and probes, the engine judges both against upstream's 0.15 m limit, and the recordings open in the Digital Twin.",
+      "acceptance": [
+        "Both runs are real Gazebo executions started by the platform through the host (not replays); the run identity of each is stored; no telemetry or outcome is supplied by the platform or the test.",
+        "The engine's verdicts agree with the recorded measurements: the pre-fix arm travels far beyond 0.15 m (violated), the fix arm stays under it (satisfied); the test reads the numbers back and asserts the relation, not a hard-coded outcome.",
+        "Runs only where Gazebo is available (PAP_REQUIRE_GAZEBO=1 makes absence a failure); CI states that it skipped."
+      ],
+      "tests": [
+        "PAP_REQUIRE_GAZEBO=1 uv run pytest services/api/tests/test_experiments_gazebo.py"
+      ],
+      "paths": [
+        "examples/openamr-cmd-timeout/scenario/",
+        "runtimes/sim-host/catalogs/"
+      ],
+      "status": "unstarted",
+      "verification": {
+        "verified_at": null,
+        "evidence": []
+      },
+      "limitations": []
     }
   ]
 }

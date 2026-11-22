@@ -265,3 +265,15 @@ The twin's assistant calls `POST /orgs/{org}/assistant/tools/{tool}`, which runs
 (read-only ones only) against this API with the caller's own Authorization header, so roles and isolation are unchanged.
 `propose_experiment` is not reachable there. The explanation is rule-based, cites evidence ids, separates the recording's
 measurement from the engine's verdict, and lists what is not known. HTTP and MCP return byte-identical answers (tested).
+
+## D-036 (2026-11-22) Simulation execution is a host contract plus the existing workflow engine
+A simulation host is a LabThings Thing (`pap.simulation-host/1`) in front of any simulator; the platform never learns
+which. Scenarios are an operator-owned catalog of fixed argument lists with parameter JSON Schemas, outputs and
+artifacts; the platform sends a scenario id and validated parameters, never a command. An experiment version is an
+immutable spec; approval of a version compiles it to ordinary workflows (one per arm) and queues trials through the
+unchanged workflow service, so the durable worker, the simulated-only safety check (D-026), the journal and the engine's
+verdict apply without a second execution engine. A host reports only what the scenario's own result file contains.
+Because the host's claim ("the run completed") is not the robot's claim, the experiment views show the engine's verdict
+(satisfied/violated) and never the 'contradiction' class an instrument report would imply. Camera-configuration
+comparisons are experiments with several arms; the scenario that measures visibility belongs to the simulation owners.
+
