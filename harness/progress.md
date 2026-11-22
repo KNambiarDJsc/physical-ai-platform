@@ -2,6 +2,22 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-23 - Customer onboarding verified
+
+**Changes:** Kept ONB-001 for first-run onboarding and assigned ONB-002 to customer onboarding.
+Added a browser check for the viewer member list and admin guidance. Documented the empty
+operator environment catalog default in .env.example.
+
+**Evidence:** Git Bash ran scripts/verify.sh --quick and scripts/verify.sh successfully. The full
+gate reported 301 pytest passes, 5 skips (Gazebo opt-in and S3 binary absent), 14 harness tests,
+11/11 OpenMHS audit checks, 57 web unit tests and a production build. scripts/smoke.sh --e2e
+passed API smoke and 51 browser tests, with 13 skipped (OIDC, live ROS and trial modes).
+The Settings membership scenario passed within the suite. A separate focused invocation
+encountered connection refusal after the smoke stack stopped.
+
+**Next:** HAR-001 needs provider configuration and explicit spending authorization. Registry:
+53 verified, 1 in progress. Changes are included in this local checkpoint.
+
 ## 2026-11-22 — Session 7: robotics on the same platform (OpenAMRobot), agent tools, observability profile
 
 **State now:** 37 of 38 verified (adds ROS-001..004, AGT-001). OBS-002 in progress: written, needs Docker (CI on push).

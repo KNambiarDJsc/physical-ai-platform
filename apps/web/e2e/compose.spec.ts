@@ -99,6 +99,19 @@ test("an admin adds a colleague, changes their role and removes them, from Setti
   await expect(row.getByLabel(`Role of ${colleague}`)).toHaveValue("engineer");
   await row.getByLabel(`Role of ${colleague}`).selectOption("viewer");
   await expect(row.getByLabel(`Role of ${colleague}`)).toHaveValue("viewer");
+  const viewer = await page.context().browser()!.newPage();
+  try {
+    await viewer.goto("/settings");
+    await viewer.getByLabel("Subject").fill(colleague);
+    await viewer.getByRole("button", { name: "Sign in" }).click();
+    await viewer.goto(`/settings?org=${org}`);
+    const viewerMembers = viewer.getByRole("table", { name: `Members of ${org}` });
+    await expect(viewerMembers.getByText(user, { exact: true })).toBeVisible();
+    await expect(viewer.getByText("An admin of this workspace adds members and changes roles.")).toBeVisible();
+    await expect(viewer.getByRole("button", { name: "Add member" })).toHaveCount(0);
+  } finally {
+    await viewer.close();
+  }
   expect((await new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations.map((v) => v.id)).toEqual([]);
   await row.getByRole("button", { name: `Remove ${colleague}` }).click();
   await expect(members.getByRole("row", { name: new RegExp(colleague) })).toHaveCount(0);

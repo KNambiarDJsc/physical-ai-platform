@@ -26,17 +26,15 @@ contains no evidence files, keys or machine paths. It is a map: read the source 
 
 - `origin/main` is at `314f5a6` (CI green on all four jobs, including the Docker Compose stack). Local commits after it
   (not pushed; the user approves every push): agent harness (HAR-001), its orchestration, the 3D baseline-vs-candidate
-  comparison (TWN-006), the workflow composer (WF-002), members and onboarding docs (ONB-001), and this handoff.
-- 52 features verified, 2 in progress (HAR-001, ONB-001). Full local gate last run green before the harness work:
-  `verify.sh` all passed (pytest 299 passed, 0 errors) and `smoke.sh --e2e` 47 passed, 13 skipped. Later work was
-  verified by its own suites (listed in each feature's evidence), not yet by one full gate run.
+  comparison (TWN-006), the workflow composer (WF-002), members and onboarding docs (ONB-002), and this handoff.
+- 53 features verified, with HAR-001 awaiting a real model. Customer onboarding is tracked as ONB-002.
+  The quick gate and local browser smoke passed on 2026-11-23 (301 pytest and 51 browser tests passed).
 
 ## Open work, in order
 
-1. **Run the full gate on the current tree**: `bash scripts/verify.sh`, then `bash scripts/smoke.sh --e2e`. Fix what
-   fails at its cause. Then ask the user before pushing.
-2. **ONB-001**: re-run `npx playwright test e2e/compose.spec.ts -g "adds a colleague"` against a stack with the virtual
-   lab (`--lab-port`); its label was fixed after the last run. Record the evidence; mark verified only if it passes.
+1. Review the current local checkpoint before asking for approval to push.
+2. Review the status of the full gate in `harness/progress.md`.
+
 3. **HAR-001 real-model run**: needs the user's key as environment variables (`PAP_LLM_API_KEY`, `PAP_LLM_BASE_URL`,
    `PAP_LLM_MODEL`) and explicit spending authorization. Never write the key anywhere. Use a cap
    (`--max-usd 0.20`), record the trace path, the answer's grounding and the usage; claim only what that run shows.

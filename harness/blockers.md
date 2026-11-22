@@ -25,3 +25,8 @@ RESOLVED 2026-11-18 (user approved; D-022): reviewed in a throwaway clone, insta
 ## B-004 Live OIDC provider not exercised
 JWT validation is tested with a locally generated RSA key set and JWKS. A real IdP (Keycloak) round trip
 needs Docker (B-001). Owner: user/CI.
+
+## B-005 Real-model harness verification needs provider configuration and authorization
+HAR-001 has passing scripted tests. PAP_LLM_API_KEY, PAP_LLM_BASE_URL and PAP_LLM_MODEL were
+absent when checked on 2026-11-23. Configure them in the process environment and authorize a
+model run with a USD 0.20 cap. Owner: user.

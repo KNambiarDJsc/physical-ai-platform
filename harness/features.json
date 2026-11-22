@@ -1923,7 +1923,7 @@
       ]
     },
     {
-      "id": "ONB-001",
+      "id": "ONB-002",
       "title": "Customer onboarding and deployment readiness",
       "priority": 3,
       "depends_on": [
@@ -1941,11 +1941,12 @@
         "apps/web/src/components/Members.tsx",
         "docs/"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-23",
         "evidence": [
-          "The Members e2e found that a select inside a label gets the selected option in its accessible name; the label is now 'Role for the new member'. Its re-run is pending. Docs written against .env.example, config.py and docker-compose.yml."
+          "bash scripts/smoke.sh --e2e: API smoke passed, 51 browser tests passed and 13 skipped. The Settings test verified add, change to viewer, the viewer member list and admin guidance, and removal.",
+          "Reviewed docs/deployment.md against .env.example, services/api/app/config.py and docker-compose.yml. Added the missing empty PAP_ENVIRONMENTS example. CI invokes scripts/smoke.sh --compose --e2e --observability for this Compose stack."
         ]
       },
       "limitations": []

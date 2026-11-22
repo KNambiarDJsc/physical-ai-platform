@@ -52,7 +52,7 @@ and the Docker Compose stack with an image scan on every push.
 
 ## Where things stand (2026-11-23)
 
-- 49 features verified in `harness/features.json`; HAR-001 (agent harness) is in progress until a real model run.
+- 53 features verified in `harness/features.json`. HAR-001 (agent harness) awaits a real model run.
 - Real Gazebo runs need the shared WSL workspace `~/p79` idle and clean; the host refuses otherwise.
 - Open items and limits: `harness/blockers.md`, each feature's `limitations`, and the "Not built yet" sections of
   `docs/simulation-studio.md` and `docs/agent-harness.md`.
