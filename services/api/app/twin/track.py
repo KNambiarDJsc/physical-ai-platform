@@ -16,7 +16,7 @@ import hashlib
 import io
 import json
 import math
-from typing import Any
+from typing import Any, BinaryIO
 
 from mcap.reader import make_reader
 from mcap_ros2.decoder import DecoderFactory
@@ -63,9 +63,12 @@ def changes(samples: list[tuple[float, tuple[float, float]]]) -> list[tuple[floa
     return out
 
 
-def build_track(data: bytes, summary: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_track(data: bytes | BinaryIO, summary: dict[str, Any] | None = None) -> dict[str, Any]:
+    """``data`` is the file's bytes or a seekable binary stream (read in chunks, so a large recording is not loaded)."""
     try:
-        reader = make_reader(io.BytesIO(data), decoder_factories=[DecoderFactory()])
+        reader = make_reader(
+            io.BytesIO(data) if isinstance(data, bytes) else data, decoder_factories=[DecoderFactory()]
+        )
         stats = reader.get_summary()
     except Exception as e:  # noqa: BLE001 - any parse failure is the uploader's file
         raise RecordingError(f"not a readable MCAP file: {e}") from None

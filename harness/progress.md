@@ -376,3 +376,11 @@ runs, block on one command and print summary lines only.
   executor heartbeat on wait, dotted output_field. Selftest host gains selftest-drive (a stated kinematic model that
   writes a real MCAP). D-037. sim-host is in the verify.sh type-check gate. test_isolation.py extended for the new routes.
 - Next: SIM-004 (capture and recording, bounded-memory uploads: the 96 MB MemoryError), then SIM-005 (Studio UI + e2e).
+
+## 2026-11-22 - Session 9 (cont.): SIM-004 verified
+- app/experiments/capture.py (worker hook: after each workflow run and when idle), app/twin/ingest.py (bounded-memory
+  spool, shared by uploads and capture), recordings link to their workflow run (twin RecordingOut.run), the assistant
+  explains a trial from the run's verification and contract. SDK: WotHttpAdapter.download (streaming).
+- The 96 MB MemoryError: root cause is read(limit + 1) reserving the limit up front (96.0 MiB measured for a 1.24 MiB
+  file; now 3.0 MiB). Fixed, with a regression test. Not a flaky test.
+- Next: SIM-005 (Studio UI, e2e with the selftest host in dev_stack, design pass), then the full gate.

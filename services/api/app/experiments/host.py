@@ -167,6 +167,8 @@ def validate(spec: ExperimentSpec, listing: Listing) -> dict[str, Any]:
         raise SpecError(422, "experiment.observations", f"the scenario does not leave {unknown}")
     if spec.observations.recording and "mcap" not in str(arts[spec.observations.recording].get("media_type")):
         raise SpecError(422, "experiment.observations", f"{spec.observations.recording} is not an MCAP artifact")
+    if spec.observations.summary and "json" not in str(arts[spec.observations.summary].get("media_type")):
+        raise SpecError(422, "experiment.observations", f"{spec.observations.summary} is not a JSON artifact")
     for c in spec.contract.conditions:
         if c.measurement not in outputs:
             raise SpecError(422, "experiment.contract", f"condition {c.name!r} uses {c.measurement!r}, not an output")

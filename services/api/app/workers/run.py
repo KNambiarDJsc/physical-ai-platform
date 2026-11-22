@@ -30,6 +30,7 @@ from ..evaluations import service
 from ..evaluations.models import EvaluationJob
 from ..evaluations.pipeline import PipelineError, run_pipeline
 from ..evidence.storage import get_storage
+from ..experiments.capture import capture_ready
 from ..observability import (
     JOB_SECONDS,
     configure_logging,
@@ -196,8 +197,11 @@ def run(once: bool = False, poll_s: float = 1.0) -> None:
             if run_id is not None:
                 log.info("workflow run %s claimed by %s", run_id, worker)
                 execute_run(run_id, worker)
+                capture_ready()
                 if once:
                     return
+                continue
+            if capture_ready():  # a trial whose run finished before its capture (for instance after a crash)
                 continue
             if once:
                 return

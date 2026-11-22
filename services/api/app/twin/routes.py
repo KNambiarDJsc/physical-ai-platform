@@ -22,9 +22,11 @@ from ..auth.deps import SLUG, ProjectEngineer, ProjectViewer, audit_allow, error
 from ..db import get_session
 from ..evaluations.models import EpisodeRecord
 from ..evidence.storage import Storage, TooLarge, get_storage
+from ..experiments.models import Experiment, ExperimentRequest, ExperimentTrial, ExperimentVersion
 from ..releases.models import Release
+from ..workflows.models import WorkflowRun
+from .ingest import MCAP_MAGIC, IngestError, check_summary, spool, store_recording
 from .models import Recording, RobotModel, RobotModelVersion
-from .track import RecordingError, build_track, track_sha256
 from .urdf import ALLOWED_EXT, MAX_MESH_BYTES, MAX_URDF_BYTES, ModelError, check_path, check_stl, parse_urdf
 
 router = APIRouter(prefix="/api/v1/orgs/{org_slug}/projects/{project_slug}/twin", tags=["twin"])
@@ -34,7 +36,6 @@ StorageDep = Annotated[Storage, Depends(get_storage)]
 MAX_FILES = 64
 MAX_MODEL_BYTES = 32 * 1024 * 1024
 MAX_RECORDING_BYTES = 96 * 1024 * 1024
-MCAP_MAGIC = b"\x89MCAP0\r\n"
 SHA = r"^sha256:[0-9a-f]{64}$"
 
 
@@ -130,10 +131,13 @@ def _version_out(model: RobotModel, v: RobotModelVersion) -> VersionOut:
 
 
 def _read_limited(f: UploadFile, limit: int) -> bytes:
-    data = f.file.read(limit + 1)
-    if len(data) > limit:
-        raise error(413, "twin.too_large", f"a file is larger than {limit} bytes")
-    return data
+    """The file's bytes, read in chunks: ``read(limit + 1)`` reserves that many bytes before reading anything."""
+    data = bytearray()
+    while chunk := f.file.read(1024 * 1024):
+        data += chunk
+        if len(data) > limit:
+            raise error(413, "twin.too_large", f"a file is larger than {limit} bytes")
+    return bytes(data)
 
 
 @router.post("/models", status_code=201, responses={200: {"description": "this exact version already exists"}})
@@ -323,6 +327,24 @@ class EpisodeLink(BaseModel):
     reasons: list[str]
 
 
+class RunLink(BaseModel):
+    """The experiment trial (a workflow run) a recording was captured from, with the engine's verdict on it."""
+
+    id: uuid.UUID
+    state: str
+    verdict: str | None
+    outcome_class: str | None
+    contract: str | None
+    contract_version: str | None
+    experiment: str | None
+    experiment_name: str | None
+    version: int | None
+    arm: str | None
+    repetition: int | None
+    seed: int | None
+    request_id: uuid.UUID | None
+
+
 class RecordingOut(BaseModel):
     id: uuid.UUID
     label: str
@@ -333,6 +355,7 @@ class RecordingOut(BaseModel):
     duration_s: float
     model: str | None
     episode: EpisodeLink | None
+    run: RunLink | None
     created_at: datetime
     created_by: str
 
@@ -370,6 +393,34 @@ def _episode_link(session: Session, ep_id: uuid.UUID | None) -> EpisodeLink | No
     )
 
 
+def _run_link(session: Session, run_id: uuid.UUID | None) -> RunLink | None:
+    if run_id is None:
+        return None
+    run = session.get(WorkflowRun, run_id)
+    if run is None:
+        return None
+    trial = session.scalar(select(ExperimentTrial).where(ExperimentTrial.run_id == run.id))
+    req = session.get(ExperimentRequest, trial.request_id) if trial else None
+    ver = session.get(ExperimentVersion, req.version_id) if req else None
+    exp = session.get(Experiment, ver.experiment_id) if ver else None
+    contract = ((run.verification or {}).get("contract")) or {}
+    return RunLink(
+        id=run.id,
+        state=run.state,
+        verdict=(run.verification or {}).get("verdict"),
+        outcome_class=run.outcome_class,
+        contract=contract.get("contract"),
+        contract_version=contract.get("version"),
+        experiment=exp.slug if exp else None,
+        experiment_name=exp.name if exp else None,
+        version=ver.number if ver else None,
+        arm=trial.arm if trial else None,
+        repetition=trial.repetition if trial else None,
+        seed=trial.seed if trial else None,
+        request_id=req.id if req else None,
+    )
+
+
 def _model_label(session: Session, vid: uuid.UUID | None) -> tuple[str | None, RobotModelVersion | None]:
     if vid is None:
         return None, None
@@ -392,6 +443,7 @@ def _rec_out(session: Session, r: Recording) -> RecordingOut:
         duration_s=r.track["duration_s"],
         model=label,
         episode=_episode_link(session, r.episode_id),
+        run=_run_link(session, r.workflow_run_id),
         created_at=r.created_at,
         created_by=r.created_by,
     )
@@ -423,59 +475,60 @@ def create_recording(
     model_version: Annotated[int | None, Form(ge=1)] = None,
     episode_id: Annotated[uuid.UUID | None, Form()] = None,
 ) -> RecordingOut:
-    name = re.split(r"[\\/]", file.filename or "")[-1]
+    name = re.split(r"[\/]", file.filename or "")[-1]
     name = "".join(c for c in name if c.isprintable())[:200].lstrip(".") or "recording.mcap"
     if not name.lower().endswith(".mcap"):
         raise error(415, "twin.type", "a recording is an .mcap file")
-    data = _read_limited(file, MAX_RECORDING_BYTES)
-    if not data.startswith(MCAP_MAGIC):
-        raise error(415, "twin.type", "the file is not an MCAP file")
-    sha = "sha256:" + hashlib.sha256(data).hexdigest()
-    summ = _json_form(summary, "summary", "pap.ros.bag-summary/1")
-    ident = _json_form(identity, "identity", "pap.ros.run-identity/1")
-    if summ is not None:
-        listed = {f.get("sha256") for f in summ.get("files", []) if str(f.get("name", "")).endswith(".mcap")}
-        if sha.removeprefix("sha256:") not in listed and sha not in listed:
-            raise error(422, "twin.summary", "the summary does not describe this file (its sha256 is not listed)")
-    existing = session.scalar(select(Recording).where(Recording.project_id == ctx.project.id, Recording.sha256 == sha))
-    if existing is not None:
-        response.status_code = 200
-        return _rec_out(session, existing)
-    mv: RobotModelVersion | None = None
-    if (model_slug is None) != (model_version is None):
-        raise error(422, "twin.model", "give both model_slug and model_version, or neither")
-    if model_slug is not None and model_version is not None:
-        _, mv = _version(session, ctx, model_slug, model_version)
-    ep: EpisodeRecord | None = None
-    if episode_id is not None:
-        ep = session.scalar(
-            select(EpisodeRecord).where(EpisodeRecord.id == episode_id, EpisodeRecord.project_id == ctx.project.id)
-        )
-        if ep is None:
-            raise error(404, "not_found", "episode not found")
     try:
-        track = build_track(data, summ)
-    except RecordingError as e:
-        raise error(422, "twin.recording", str(e)) from None
-    stored = storage.put([data], MAX_RECORDING_BYTES)
-    r = Recording(
-        project_id=ctx.project.id,
-        label=label,
-        filename=name,
-        sha256=sha,
-        size_bytes=stored.size,
-        storage_key=stored.key,
-        summary=summ,
-        identity=ident,
-        model_version_id=mv.id if mv else None,
-        episode_id=ep.id if ep else None,
-        track=track,
-        track_sha256=track_sha256(track),
-        created_by=ctx.principal.label,
-    )
-    session.add(r)
-    session.flush()
-    audit_allow(session, ctx, "twin.recording.create", f"recording:{r.id}", sha256=sha, bytes=r.size_bytes)
+        spooled = spool(file.file, MAX_RECORDING_BYTES, magic=MCAP_MAGIC)
+    except IngestError as e:
+        raise error(e.status, e.code, e.message) from None
+    try:
+        summ = _json_form(summary, "summary", "pap.ros.bag-summary/1")
+        ident = _json_form(identity, "identity", "pap.ros.run-identity/1")
+        try:
+            check_summary(spooled.sha256, summ)
+        except IngestError as e:
+            raise error(e.status, e.code, e.message) from None
+        existing = session.scalar(
+            select(Recording).where(Recording.project_id == ctx.project.id, Recording.sha256 == spooled.sha256)
+        )
+        if existing is not None:
+            response.status_code = 200
+            return _rec_out(session, existing)
+        mv: RobotModelVersion | None = None
+        if (model_slug is None) != (model_version is None):
+            raise error(422, "twin.model", "give both model_slug and model_version, or neither")
+        if model_slug is not None and model_version is not None:
+            _, mv = _version(session, ctx, model_slug, model_version)
+        ep: EpisodeRecord | None = None
+        if episode_id is not None:
+            ep = session.scalar(
+                select(EpisodeRecord).where(EpisodeRecord.id == episode_id, EpisodeRecord.project_id == ctx.project.id)
+            )
+            if ep is None:
+                raise error(404, "not_found", "episode not found")
+        try:
+            r, _ = store_recording(
+                session,
+                storage,
+                project_id=ctx.project.id,
+                spooled=spooled,
+                label=label,
+                filename=name,
+                max_bytes=MAX_RECORDING_BYTES,
+                summary=summ,
+                identity=ident,
+                model_version_id=mv.id if mv else None,
+                episode_id=ep.id if ep else None,
+                workflow_run_id=None,
+                created_by=ctx.principal.label,
+            )
+        except IngestError as e:
+            raise error(e.status, e.code, e.message) from None
+    finally:
+        spooled.close()
+    audit_allow(session, ctx, "twin.recording.create", f"recording:{r.id}", sha256=r.sha256, bytes=r.size_bytes)
     session.commit()
     return _rec_out(session, r)
 

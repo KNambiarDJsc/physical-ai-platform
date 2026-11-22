@@ -21,6 +21,7 @@ import pytest
 from fastapi.testclient import TestClient
 from helpers import add_member, as_user, make_org, ok
 from pap_device_sdk.testing import run_sim_host
+from test_agent_tools import api_url  # noqa: F401  (a pytest fixture: the real API served over HTTP)
 
 ROOT = Path(__file__).resolve().parents[3]
 CATALOG = ROOT / "runtimes" / "sim-host" / "catalogs" / "selftest.json"
@@ -386,3 +387,272 @@ def test_a_changed_host_listing_invalidates_approval(
         runs(client) == []
         and ok(client.get(f"{ORG}/experiment-requests/{rid}", headers=VIC))["state"] == "awaiting_approval"
     )
+
+
+# ------------------------------------------------------------------------------------------------- SIM-004
+
+PROJECT = f"{ORG}/projects/robots"
+
+
+def with_model(client: TestClient) -> dict[str, Any]:
+    """A registered robot model version (the toy one the isolation test uses) in a project of the workspace."""
+    from test_isolation import TOY_MANIFEST, TOY_STL, TOY_URDF
+
+    ok(client.post(f"{ORG}/projects", json={"slug": "robots", "name": "Robots"}, headers=ADA), 201)
+    ok(
+        client.post(
+            f"{PROJECT}/twin/models",
+            data={"manifest": json.dumps(TOY_MANIFEST)},
+            files=[("files", ("robot.urdf", TOY_URDF, "application/xml")), ("files", ("a.stl", TOY_STL, "model/stl"))],
+            headers=ADA,
+        ),
+        201,
+    )
+    return {"project": "robots", "model": TOY_MANIFEST["slug"], "version": 1}
+
+
+def recording_spec(client: TestClient, **over: Any) -> dict[str, Any]:
+    spec = drive_spec(
+        client,
+        model=with_model(client),
+        observations={
+            "measurements": ["travel_after_kill_m"],
+            "artifacts": ["recording"],
+            "recording": "recording",
+        },
+    )
+    spec.update(over)
+    return spec
+
+
+def approved(client: TestClient, spec: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    v = new_version(client, spec)
+    rid = request(client, v["number"])["id"]
+    decide(client, rid, "approve", v["spec_sha256"])
+    return rid, v
+
+
+def capture() -> int:
+    from app.experiments.capture import capture_ready
+
+    return capture_ready()
+
+
+def trials_of(client: TestClient, rid: str) -> list[dict[str, Any]]:
+    return ok(client.get(f"{ORG}/experiment-requests/{rid}", headers=VIC))["trial_results"]
+
+
+def test_captured_artifacts_are_checked_stored_and_the_mcap_becomes_a_linked_recording(
+    client: TestClient, lab: str
+) -> None:
+    rid, _ = approved(client, recording_spec(client))
+    assert all(t["capture_state"] == "pending" for t in trials_of(client, rid))
+    assert work_all() == ["succeeded"] * 4 and capture() == 4
+    ts = trials_of(client, rid)
+    assert {t["capture_state"] for t in ts} == {"stored"}
+    for t in ts:
+        art = t["artifacts"][0]
+        assert art["name"] == "recording" and art["state"] == "stored" and art["sha256"].startswith("sha256:")
+        got = client.get(f"{ORG}/experiment-trials/{t['id']}/artifacts/recording", headers=VIC)
+        assert got.status_code == 200 and "sha256:" + hashlib.sha256(got.content).hexdigest() == art["sha256"]
+        assert got.headers["x-artifact-sha256"] == art["sha256"] and len(got.content) == art["size_bytes"]
+        # the recording is linked to the workflow run, the model version and the host's identity, as reported
+        rec = ok(client.get(f"{PROJECT}/twin/recordings/{t['recording_id']}", headers=VIC))
+        assert rec["sha256"] == art["sha256"] and rec["model"].endswith("@1")
+        assert rec["identity"]["seed"] == t["seed"] and rec["identity"]["kind"] == "selftest"
+        link = rec["run"]
+        assert link["id"] == t["run_id"] and link["arm"] == t["arm"] and link["seed"] == t["seed"]
+        assert link["verdict"] == t["verdict"] and link["contract"] == "stop-on-command-loss"
+        assert link["experiment"] == "stop" and link["version"] == 1 and rec["episode"] is None
+        events = {e["kind"] for e in rec["events"]}
+        # the twin's own rule over the recorded messages, next to (never replacing) the engine's verdict
+        assert ("motion_continues" in events) == (t["arm"] == "pre-fix"), (t["arm"], events)
+    # artifacts are for workspace members only
+    make_org(client, "eve", "other")
+    tid = ts[0]["id"]
+    assert client.get(f"{ORG}/experiment-trials/{tid}/artifacts/recording", headers=as_user("eve")).status_code == 404
+    assert client.get(f"{ORG}/experiment-trials/{tid}/artifacts/telemetry", headers=VIC).status_code == 404
+
+
+def test_the_assistant_explains_a_trial_from_the_runs_own_verification_and_contract(
+    client: TestClient,
+    lab: str,
+    api_url: str,  # noqa: F811
+) -> None:
+    import httpx
+
+    rid, _ = approved(client, recording_spec(client, seeds=[3], repetitions=1))
+    work_all()
+    capture()
+    bad = next(t for t in trials_of(client, rid) if t["arm"] == "pre-fix")
+    good = next(t for t in trials_of(client, rid) if t["arm"] == "fix")
+    rec = ok(client.get(f"{PROJECT}/twin/recordings/{bad['recording_id']}", headers=VIC))
+    ev = next(e for e in rec["events"] if e["kind"] == "motion_continues")
+    # through the real assistant endpoint, as the caller: the tool fetches the recording and the run itself
+    r = httpx.post(
+        f"{api_url}{ORG}/assistant/tools/explain_recording_event",
+        json={"arguments": {"project": "robots", "recording_id": bad["recording_id"], "event_id": ev["id"]}},
+        headers=VIC,
+        timeout=60,
+    ).json()
+    assert r["is_error"] is False, r
+    out = r["result"]
+    judged = next(f for f in out["findings"] if "OpenMHS engine judged" in f["statement"])
+    run = ok(client.get(f"{ORG}/workflow-runs/{bad['run_id']}", headers=VIC))
+    assert "trial pre-fix, seed 3 of experiment Stop on command loss v1" in judged["statement"]
+    assert "violated" in judged["statement"] and "stop-on-command-loss" in judged["statement"]
+    assert f"verification:{run['id']}" in judged["evidence"] and f"workflow-run:{run['id']}" in judged["evidence"]
+    assert any(e.startswith("contract:") for e in judged["evidence"])
+    assert "Evidence class: simulated" in judged["statement"]
+    assert any("agree" in f["statement"] or "point the same way" in f["statement"] for f in out["findings"])
+    assert out["basis"].startswith("rule-based")
+    assert not any("not linked" in n for n in out["not_known"])
+    # the passing arm: the engine says satisfied and the twin raises no problem
+    gr = ok(client.get(f"{PROJECT}/twin/recordings/{good['recording_id']}", headers=VIC))
+    assert gr["run"]["verdict"] == "SATISFIED" and not [e for e in gr["events"] if e["severity"] == "problem"]
+
+
+def test_a_trial_that_did_not_complete_says_so_and_stores_nothing(client: TestClient, lab: str) -> None:
+    sc = scenario(client, "selftest-escape")
+    spec = drive_spec(
+        client,
+        scenario={"id": "selftest-escape", "version": "1", "definition_sha256": sc["definition_sha256"]},
+        initial_conditions={},
+        seeds=[],
+        repetitions=1,
+        arms=[{"key": "bad", "parameters": {}}],
+        observations={"measurements": ["sum"], "artifacts": ["telemetry"]},
+        contract={
+            "name": "sum",
+            "version": "1",
+            "conditions": [{"name": "sum", "measurement": "sum", "op": "eq", "value": 1}],
+        },
+    )
+    rid, _ = approved(client, spec)
+    assert work_all() == ["failed"] and capture() == 1
+    t = trials_of(client, rid)[0]
+    assert t["state"] == "failed" and t["capture_state"] == "none" and t["artifacts"] == []
+    assert "failed" in t["capture_error"] and "nothing to capture" in t["capture_error"]
+
+
+def test_bytes_the_host_will_not_vouch_for_are_not_stored(client: TestClient, lab: str, sim_host_work: Path) -> None:
+    rid, _ = approved(client, recording_spec(client, seeds=[3], repetitions=1))
+    work_all()
+    # corrupt one trial's file on the host after its run: the host re-hashes before serving and refuses
+    victim = next(t for t in trials_of(client, rid) if t["arm"] == "pre-fix")
+    path = sim_host_work / "runs" / victim["host_run"]["run_id"] / "run" / "drive.mcap"
+    path.write_bytes(path.read_bytes()[:-1] + b"X")
+    assert capture() == 2
+    by_arm = {t["arm"]: t for t in trials_of(client, rid)}
+    assert by_arm["fix"]["capture_state"] == "stored" and by_arm["fix"]["recording_id"]
+    bad = by_arm["pre-fix"]
+    assert bad["capture_state"] == "failed" and bad["recording_id"] is None
+    assert bad["artifacts"][0]["state"] == "rejected" and "storage_key" not in bad["artifacts"][0]
+    assert "HTTP 409" in bad["capture_error"]
+    assert client.get(f"{ORG}/experiment-trials/{bad['id']}/artifacts/recording", headers=VIC).status_code == 404
+
+
+def test_the_platform_checks_the_digest_itself_when_a_host_serves_other_bytes() -> None:
+    """A real HTTP server that reports one digest and serves other bytes: the second line of defence."""
+    import http.server
+    import threading
+
+    from app.experiments.capture import CaptureError, _download
+    from pap_device_sdk import WotHttpAdapter
+
+    body = b"these are not the bytes that were hashed"
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self) -> None:
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a: Any) -> None:
+            pass
+
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        adapter = WotHttpAdapter(f"http://127.0.0.1:{srv.server_port}")
+        entry = {"name": "recording", "sha256": hashlib.sha256(b"something else").hexdigest(), "size_bytes": len(body)}
+        with pytest.raises(CaptureError, match="do not match what the host reported"):
+            _download(adapter, "r1", entry, 1024)
+        good = {**entry, "sha256": hashlib.sha256(body).hexdigest()}
+        sp = _download(adapter, "r1", good, 1024)
+        assert sp.sha256 == "sha256:" + hashlib.sha256(body).hexdigest() and sp.size == len(body)
+        sp.close()
+        with pytest.raises(CaptureError, match="above the limit"):
+            _download(adapter, "r1", {**good, "size_bytes": 5000}, 1024)
+    finally:
+        srv.shutdown()
+
+
+def test_only_the_artifacts_the_spec_lists_are_captured(client: TestClient, lab: str) -> None:
+    sc = scenario(client, "selftest-sum")
+    base = drive_spec(
+        client,
+        scenario={"id": "selftest-sum", "version": "1", "definition_sha256": sc["definition_sha256"]},
+        initial_conditions={"b": 1},
+        seeds=[],
+        repetitions=1,
+        arms=[{"key": "one", "parameters": {"a": 1, "rows": 3}}],
+        contract={
+            "name": "sum",
+            "version": "1",
+            "conditions": [{"name": "sum", "measurement": "sum", "op": "eq", "value": 2}],
+        },
+    )
+    rid, _ = approved(client, {**base, "observations": {"measurements": ["sum"], "artifacts": []}})
+    work_all()
+    capture()
+    t = trials_of(client, rid)[0]
+    assert t["capture_state"] == "none" and t["artifacts"] == []  # the host left a telemetry file; nobody asked for it
+    rid2, _ = approved(client, {**base, "observations": {"measurements": ["sum"], "artifacts": ["telemetry"]}})
+    work_all()
+    capture()
+    t = trials_of(client, rid2)[0]
+    assert t["capture_state"] == "stored" and [a["name"] for a in t["artifacts"]] == ["telemetry"]
+    body = client.get(f"{ORG}/experiment-trials/{t['id']}/artifacts/telemetry", headers=VIC).text
+    assert body.splitlines()[0] == "i,value" and len(body.splitlines()) == 4  # the bytes the scenario wrote
+
+
+def test_a_recording_upload_is_processed_in_bounded_memory(client: TestClient, lab: str, monkeypatch: Any) -> None:
+    """The 2026-11-22 gate raised MemoryError reading an upload: read(limit + 1) reserves that many bytes up front,
+    so every recording upload, even a small one, asked the allocator for 96 MiB. Peak traced memory must now stay far
+    below the 96 MiB limit for a real recording, and an oversize upload is refused after reading only a little."""
+    import tracemalloc
+
+    from test_twin_recordings import FIX, run_files
+
+    ok(client.post(f"{ORG}/projects", json={"slug": "arm", "name": "Arm"}, headers=ADA), 201)
+    mcap, summary, identity, _ = run_files(FIX)
+    tracemalloc.start()
+    r = client.post(
+        f"{ORG}/projects/arm/twin/recordings",
+        data={"label": "bounded", "summary": json.dumps(summary), "identity": json.dumps(identity)},
+        files={"file": ("bounded.mcap", mcap, "application/octet-stream")},
+        headers=ADA,
+    )
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert r.status_code == 201, r.text
+    assert peak < 24 * 1024 * 1024, f"peak {peak / 2**20:.1f} MiB for a {len(mcap) / 2**20:.1f} MiB recording"
+
+    import app.twin.routes as routes
+
+    monkeypatch.setattr(routes, "MAX_RECORDING_BYTES", 5 * 1024 * 1024)
+    big = b"\x89MCAP0\r\n" + b"\0" * (6 * 1024 * 1024)
+    tracemalloc.start()
+    r = client.post(
+        f"{ORG}/projects/arm/twin/recordings",
+        data={"label": "too big"},
+        files={"file": ("big.mcap", big, "application/octet-stream")},
+        headers=ADA,
+    )
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert r.status_code == 413 and r.json()["detail"]["code"] == "twin.too_large"
+    assert peak < 24 * 1024 * 1024
+    assert len(ok(client.get(f"{ORG}/projects/arm/twin/recordings", headers=ADA))) == 1  # nothing was stored for it

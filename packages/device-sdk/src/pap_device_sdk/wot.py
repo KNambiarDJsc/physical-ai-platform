@@ -12,7 +12,7 @@ import hashlib
 import json
 import time
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import urljoin, urlsplit
 
 import httpx
@@ -86,6 +86,10 @@ def parse_td(key: str, td: dict[str, Any], protocol: str = "wot-http") -> Discov
         affordances=affs,
         description_document=td,
     )
+
+
+class Writable(Protocol):
+    def write(self, data: bytes, /) -> Any: ...
 
 
 class WotHttpAdapter:
@@ -206,6 +210,29 @@ class WotHttpAdapter:
                     if len(body) > max_bytes:
                         raise AdapterError(f"{device}: {path} is larger than {max_bytes} bytes")
                 return bytes(body), dict(r.headers)
+        except httpx.HTTPError as e:
+            raise AdapterError(f"cannot fetch {path} from {device}: {type(e).__name__}") from None
+
+    def download(
+        self, device: str, path: str, dest: Writable, max_bytes: int, timeout_s: float = 300.0
+    ) -> tuple[str, int, dict[str, str]]:
+        """Stream a path under a Thing (an artifact) into ``dest``, bounded in size and in memory: one chunk at a time.
+        Returns the sha256 (hex) and size of the bytes written and the response headers. As for ``fetch_bytes``, the
+        caller must check the digest against what the device reported."""
+        url = self._url(urljoin(self.endpoint.rstrip("/") + "/", f"{device}/{path.lstrip(chr(47))}"))
+        h = hashlib.sha256()
+        size = 0
+        try:
+            with self._client.stream("GET", url, timeout=timeout_s) as r:
+                if r.status_code != 200:
+                    raise AdapterError(f"{device}: {path} answered HTTP {r.status_code}")
+                for chunk in r.iter_bytes(1024 * 1024):
+                    size += len(chunk)
+                    if size > max_bytes:
+                        raise AdapterError(f"{device}: {path} is larger than {max_bytes} bytes")
+                    h.update(chunk)
+                    dest.write(chunk)
+                return h.hexdigest(), size, dict(r.headers)
         except httpx.HTTPError as e:
             raise AdapterError(f"cannot fetch {path} from {device}: {type(e).__name__}") from None
 

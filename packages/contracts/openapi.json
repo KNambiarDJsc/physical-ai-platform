@@ -1053,24 +1053,6 @@
         "title": "CredentialOut",
         "type": "object"
       },
-      "DecisionIn": {
-        "properties": {
-          "note": {
-            "anyOf": [
-              {
-                "maxLength": 1000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Note"
-          }
-        },
-        "title": "DecisionIn",
-        "type": "object"
-      },
       "DeviceDetailOut": {
         "properties": {
           "capabilities": {
@@ -2009,6 +1991,83 @@
           "created_by"
         ],
         "title": "EvaluationOut",
+        "type": "object"
+      },
+      "ExperimentIn": {
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "ExperimentIn",
+        "type": "object"
+      },
+      "ExperimentOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/RequestOut"
+            },
+            "title": "Requests",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "created_by",
+          "created_at",
+          "versions",
+          "requests"
+        ],
+        "title": "ExperimentOut",
         "type": "object"
       },
       "FileOut": {
@@ -2986,6 +3045,16 @@
               }
             ]
           },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunLink"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "sha256": {
             "title": "Sha256",
             "type": "string"
@@ -3021,6 +3090,7 @@
           "duration_s",
           "model",
           "episode",
+          "run",
           "created_at",
           "created_by",
           "summary",
@@ -3088,6 +3158,16 @@
             ],
             "title": "Model"
           },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunLink"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "sha256": {
             "title": "Sha256",
             "type": "string"
@@ -3107,6 +3187,7 @@
           "duration_s",
           "model",
           "episode",
+          "run",
           "created_at",
           "created_by"
         ],
@@ -3252,6 +3333,243 @@
           "values"
         ],
         "title": "ReportedOutcome",
+        "type": "object"
+      },
+      "RequestDetail": {
+        "properties": {
+          "arms": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Arms",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decision_note": {
+            "title": "Decision Note",
+            "type": "string"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "experiment": {
+            "title": "Experiment",
+            "type": "string"
+          },
+          "experiment_name": {
+            "title": "Experiment Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "scenario": {
+            "additionalProperties": true,
+            "title": "Scenario",
+            "type": "object"
+          },
+          "spec": {
+            "additionalProperties": true,
+            "title": "Spec",
+            "type": "object"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "trial_results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Trial Results",
+            "type": "array"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          },
+          "trials_done": {
+            "title": "Trials Done",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "experiment",
+          "experiment_name",
+          "version",
+          "spec_sha256",
+          "state",
+          "requested_by",
+          "note",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "created_at",
+          "trials",
+          "trials_done",
+          "spec",
+          "scenario",
+          "environment",
+          "arms",
+          "trial_results"
+        ],
+        "title": "RequestDetail",
+        "type": "object"
+      },
+      "RequestIn": {
+        "properties": {
+          "note": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "title": "RequestIn",
+        "type": "object"
+      },
+      "RequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decision_note": {
+            "title": "Decision Note",
+            "type": "string"
+          },
+          "experiment": {
+            "title": "Experiment",
+            "type": "string"
+          },
+          "experiment_name": {
+            "title": "Experiment Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          },
+          "trials_done": {
+            "title": "Trials Done",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "experiment",
+          "experiment_name",
+          "version",
+          "spec_sha256",
+          "state",
+          "requested_by",
+          "note",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "created_at",
+          "trials",
+          "trials_done"
+        ],
+        "title": "RequestOut",
         "type": "object"
       },
       "RunDetailOut": {
@@ -3420,6 +3738,159 @@
         "title": "RunDetailOut",
         "type": "object"
       },
+      "RunLink": {
+        "description": "The experiment trial (a workflow run) a recording was captured from, with the engine's verdict on it.",
+        "properties": {
+          "arm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arm"
+          },
+          "contract": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract"
+          },
+          "contract_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Version"
+          },
+          "experiment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experiment"
+          },
+          "experiment_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experiment Name"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Class"
+          },
+          "repetition": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repetition"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "verdict",
+          "outcome_class",
+          "contract",
+          "contract_version",
+          "experiment",
+          "experiment_name",
+          "version",
+          "arm",
+          "repetition",
+          "seed",
+          "request_id"
+        ],
+        "title": "RunLink",
+        "type": "object"
+      },
       "RunOut": {
         "properties": {
           "attempts": {
@@ -3544,6 +4015,151 @@
           "finished_at"
         ],
         "title": "RunOut",
+        "type": "object"
+      },
+      "ScenarioOut": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "definition_sha256": {
+            "title": "Definition Sha256",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "max_duration_s": {
+            "title": "Max Duration S",
+            "type": "number"
+          },
+          "outputs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "parameters_schema": {
+            "additionalProperties": true,
+            "title": "Parameters Schema",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "title",
+          "description",
+          "parameters_schema",
+          "outputs",
+          "artifacts",
+          "max_duration_s",
+          "definition_sha256"
+        ],
+        "title": "ScenarioOut",
+        "type": "object"
+      },
+      "SimEnvironmentOut": {
+        "properties": {
+          "last_discovered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Discovered At"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioOut"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "simulator": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulator"
+          },
+          "simulator_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulator Description"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ready",
+              "no_host",
+              "unreachable",
+              "unavailable",
+              "invalid"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "state"
+        ],
+        "title": "SimEnvironmentOut",
         "type": "object"
       },
       "Source": {
@@ -3973,77 +4589,24 @@
         "title": "ValidationError",
         "type": "object"
       },
-      "VersionOut": {
+      "VersionIn": {
         "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
+          "notes": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Notes",
             "type": "string"
           },
-          "created_by": {
-            "title": "Created By",
-            "type": "string"
-          },
-          "files": {
-            "items": {
-              "$ref": "#/components/schemas/FileOut"
-            },
-            "title": "Files",
-            "type": "array"
-          },
-          "manifest_sha256": {
-            "title": "Manifest Sha256",
-            "type": "string"
-          },
-          "model_name": {
-            "title": "Model Name",
-            "type": "string"
-          },
-          "model_slug": {
-            "title": "Model Slug",
-            "type": "string"
-          },
-          "number": {
-            "title": "Number",
-            "type": "integer"
-          },
-          "omitted": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Omitted",
-            "type": "array"
-          },
-          "source": {
+          "spec": {
             "additionalProperties": true,
-            "title": "Source",
+            "title": "Spec",
             "type": "object"
-          },
-          "structure": {
-            "additionalProperties": true,
-            "title": "Structure",
-            "type": "object"
-          },
-          "urdf_path": {
-            "title": "Urdf Path",
-            "type": "string"
           }
         },
         "required": [
-          "model_slug",
-          "model_name",
-          "number",
-          "manifest_sha256",
-          "urdf_path",
-          "source",
-          "files",
-          "omitted",
-          "structure",
-          "created_at",
-          "created_by"
+          "spec"
         ],
-        "title": "VersionOut",
+        "title": "VersionIn",
         "type": "object"
       },
       "VersionSummary": {
@@ -4214,6 +4777,169 @@
           "created_at"
         ],
         "title": "WorkflowOut",
+        "type": "object"
+      },
+      "app__agent__routes__DecisionIn": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "DecisionIn",
+        "type": "object"
+      },
+      "app__experiments__routes__DecisionIn": {
+        "properties": {
+          "note": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Note",
+            "type": "string"
+          },
+          "spec_sha256": {
+            "description": "The checksum of the version the decider reviewed.",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "spec_sha256"
+        ],
+        "title": "DecisionIn",
+        "type": "object"
+      },
+      "app__experiments__routes__VersionOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "scenario": {
+            "additionalProperties": true,
+            "title": "Scenario",
+            "type": "object"
+          },
+          "spec": {
+            "additionalProperties": true,
+            "title": "Spec",
+            "type": "object"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "spec",
+          "spec_sha256",
+          "scenario",
+          "notes",
+          "environment",
+          "created_by",
+          "created_at"
+        ],
+        "title": "VersionOut",
+        "type": "object"
+      },
+      "app__twin__routes__VersionOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/FileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "manifest_sha256": {
+            "title": "Manifest Sha256",
+            "type": "string"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "model_slug": {
+            "title": "Model Slug",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "omitted": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Omitted",
+            "type": "array"
+          },
+          "source": {
+            "additionalProperties": true,
+            "title": "Source",
+            "type": "object"
+          },
+          "structure": {
+            "additionalProperties": true,
+            "title": "Structure",
+            "type": "object"
+          },
+          "urdf_path": {
+            "title": "Urdf Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_slug",
+          "model_name",
+          "number",
+          "manifest_sha256",
+          "urdf_path",
+          "source",
+          "files",
+          "omitted",
+          "structure",
+          "created_at",
+          "created_by"
+        ],
+        "title": "VersionOut",
         "type": "object"
       }
     }
@@ -5125,7 +5851,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DecisionIn"
+                "$ref": "#/components/schemas/app__agent__routes__DecisionIn"
               }
             }
           },
@@ -5156,6 +5882,671 @@
         "summary": "Reject",
         "tags": [
           "agent"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiment-requests": {
+      "get": {
+        "operationId": "list_experiment_requests_api_v1_orgs__org_slug__experiment_requests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "awaiting_approval",
+                    "approved",
+                    "rejected"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RequestOut"
+                  },
+                  "title": "Response List Experiment Requests Api V1 Orgs  Org Slug  Experiment Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Experiment Requests",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiment-requests/{request_id}": {
+      "get": {
+        "operationId": "get_experiment_request_api_v1_orgs__org_slug__experiment_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Experiment Request",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiment-requests/{request_id}/approve": {
+      "post": {
+        "description": "Approve the exact checksum reviewed: re-check against the host, compile to workflows, queue every trial.",
+        "operationId": "approve_experiment_request_api_v1_orgs__org_slug__experiment_requests__request_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__experiments__routes__DecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Experiment Request",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiment-requests/{request_id}/reject": {
+      "post": {
+        "operationId": "reject_experiment_request_api_v1_orgs__org_slug__experiment_requests__request_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__experiments__routes__DecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject Experiment Request",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiment-trials/{trial_id}/artifacts/{name}": {
+      "get": {
+        "description": "The bytes of an artifact captured from a trial, as stored (checked against its digest when read).",
+        "operationId": "get_trial_artifact_api_v1_orgs__org_slug__experiment_trials__trial_id__artifacts__name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trial_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Trial Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Trial Artifact",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiments": {
+      "get": {
+        "operationId": "list_experiments_api_v1_orgs__org_slug__experiments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExperimentOut"
+                  },
+                  "title": "Response List Experiments Api V1 Orgs  Org Slug  Experiments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Experiments",
+        "tags": [
+          "experiments"
+        ]
+      },
+      "post": {
+        "operationId": "create_experiment_api_v1_orgs__org_slug__experiments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Experiment",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}": {
+      "get": {
+        "operationId": "get_experiment_api_v1_orgs__org_slug__experiments__experiment_slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Experiment Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Experiment",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}/versions": {
+      "post": {
+        "description": "Validate a spec against what the host lists now and store it as an immutable version (checksum computed here).",
+        "operationId": "create_experiment_version_api_v1_orgs__org_slug__experiments__experiment_slug__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Experiment Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "this exact specification is already a version"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Experiment Version",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}/versions/{number}": {
+      "get": {
+        "operationId": "get_experiment_version_api_v1_orgs__org_slug__experiments__experiment_slug__versions__number__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Experiment Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "number",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "Number",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Experiment Version",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}/versions/{number}/requests": {
+      "post": {
+        "description": "Ask for a run of one version. This queues nothing: an approval of this exact checksum does.",
+        "operationId": "request_experiment_run_api_v1_orgs__org_slug__experiments__experiment_slug__versions__number__requests_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Experiment Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "number",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "Number",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Experiment Run",
+        "tags": [
+          "experiments"
         ]
       }
     },
@@ -6949,7 +8340,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VersionOut"
+                  "$ref": "#/components/schemas/app__twin__routes__VersionOut"
                 }
               }
             },
@@ -7021,7 +8412,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VersionOut"
+                  "$ref": "#/components/schemas/app__twin__routes__VersionOut"
                 }
               }
             },
@@ -7508,6 +8899,54 @@
         "summary": "Revoke Credential",
         "tags": [
           "organizations"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_slug}/simulation-environments": {
+      "get": {
+        "description": "Simulated environments that have a discovered simulation host, with what the host lists now.",
+        "operationId": "list_sim_environments_api_v1_orgs__org_slug__simulation_environments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+              "title": "Org Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SimEnvironmentOut"
+                  },
+                  "title": "Response List Sim Environments Api V1 Orgs  Org Slug  Simulation Environments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Sim Environments",
+        "tags": [
+          "experiments"
         ]
       }
     },

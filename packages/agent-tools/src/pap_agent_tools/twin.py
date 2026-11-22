@@ -14,7 +14,48 @@ def _short(sha: str | None) -> str:
     return (sha or "").removeprefix("sha256:")[:12]
 
 
-def explain_event(rec: dict[str, Any], event_id: str, episode: dict[str, Any] | None) -> dict[str, Any]:
+def _judged(rec: dict[str, Any], episode: dict[str, Any] | None, run: dict[str, Any] | None) -> dict[str, Any] | None:
+    """What the engine judged, from the linked episode or the linked experiment trial (a workflow run)."""
+    if episode:
+        link = rec["episode"]
+        report = episode.get("verifier_report") or {}
+        return {
+            "report": report,
+            "verdict": episode["verdict"],
+            "outcome_class": episode["outcome_class"],
+            "evidence_class": (episode.get("document") or {}).get("evidence_class", "unknown"),
+            "subject": f"episode {link['episode_key']} ({link['release_label']})",
+            "basis": "the episode's evidence file",
+            "ids": [
+                f"verification:{link['id']}",
+                f"contract:{_short((report.get('contract') or {}).get('sha256'))}",
+                f"evaluation:{link['evaluation_id']}",
+            ],
+        }
+    if run and run.get("verification"):
+        link = rec["run"]
+        report = run["verification"].get("report") or {}
+        seed = f", seed {link['seed']}" if link.get("seed") is not None else ""
+        where = f" of experiment {link['experiment_name']} v{link['version']}" if link.get("experiment") else ""
+        return {
+            "report": report,
+            "verdict": run["verification"]["verdict"],
+            "outcome_class": run.get("outcome_class"),
+            "evidence_class": (run.get("provenance") or {}).get("evidence_class", "unknown"),
+            "subject": f"trial {link.get('arm') or run['id']}{seed}{where}",
+            "basis": "the measurements the simulation host reported for this trial",
+            "ids": [
+                f"verification:{run['id']}",
+                f"contract:{_short((report.get('contract') or {}).get('sha256'))}",
+                f"workflow-run:{run['id']}",
+            ],
+        }
+    return None
+
+
+def explain_event(
+    rec: dict[str, Any], event_id: str, episode: dict[str, Any] | None, run: dict[str, Any] | None = None
+) -> dict[str, Any]:
     rid = rec["id"]
     event = next((e for e in rec["events"] if e["id"] == event_id), None)
     if event is None:
@@ -62,54 +103,50 @@ def explain_event(rec: dict[str, Any], event_id: str, episode: dict[str, Any] | 
     if clock and not clock.get("monotonic", True):
         not_known.append("exact message times inside the window where the clock moved backwards")
 
-    if episode:
-        report = episode.get("verifier_report") or {}
+    judged = _judged(rec, episode, run)
+    if judged:
+        report, ids = judged["report"], judged["ids"]
         contract = report.get("contract") or {}
         cond = (
             next((c for c in report.get("conditions", []) if c.get("result") != "TRUE"), None)
             or ((report.get("conditions") or [None])[0])
         )
         obs = ", ".join(f"{o['value']} {o.get('unit', '')}".strip() for o in (cond or {}).get("observed", []))
-        link = rec["episode"]
-        ids = [
-            f"verification:{link['id']}",
-            f"contract:{_short(contract.get('sha256'))}",
-            f"evaluation:{link['evaluation_id']}",
-        ]
-        ev_class = (episode.get("document") or {}).get("evidence_class", "unknown")
+        outcome = judged["outcome_class"]
         add(
-            "bad" if episode["outcome_class"] == "verified_failure" else "info",
-            f"The OpenMHS engine judged episode {link['episode_key']} ({link['release_label']}) "
-            f"{str(episode['verdict']).lower()}: contract '{contract.get('name')}' v{contract.get('version')}"
+            "bad" if outcome == "verified_failure" else "info",
+            f"The OpenMHS engine judged {judged['subject']} {str(judged['verdict']).lower()}: contract "
+            f"'{contract.get('name')}' v{contract.get('version')}"
             f"{', ' + repr(cond['name']) + ' is ' + str(cond['result']).lower() if cond else ''}"
-            f"{', observed ' + obs if obs else ''}. Evidence class: {ev_class}. "
+            f"{', observed ' + obs if obs else ''}. Evidence class: {judged['evidence_class']}. "
             f"Evidence digest {_short((report.get('evidence') or {}).get('sha256'))}.",
             ids,
         )
-        if event["kind"] in PROBLEM_KINDS and episode["outcome_class"] == "verified_failure":
+        if event["kind"] in PROBLEM_KINDS and outcome == "verified_failure":
             add(
                 "info",
                 "The recording and the engine point the same way, by different measurements: this event is this "
-                "reader's rule over the recorded messages, the verdict is the engine's over the episode's evidence "
-                "file.",
+                "reader's rule over the recorded messages, the verdict is the engine's over " + judged["basis"] + ".",
                 ids + ev_ids[2:],
             )
         elif event["kind"] in PROBLEM_KINDS:
             add(
                 "warn",
-                f"The recording shows a problem but the engine's outcome is {episode['outcome_class']}: the two do not "
-                "agree and neither is overridden; the episode's evidence file and this recording measure differently.",
+                f"The recording shows a problem but the engine's outcome is {outcome}: the two do not "
+                f"agree and neither is overridden; {judged['basis']} and this recording measure differently.",
                 ids + ev_ids[2:],
             )
-        elif episode["outcome_class"] == "verified_failure":
+        elif outcome == "verified_failure":
             add(
                 "warn",
-                "The engine judged this episode a failure, but this event is not itself a problem; look at the events "
+                "The engine judged this a failure, but this event is not itself a problem; look at the events "
                 "marked problem on the timeline.",
                 ids,
             )
     else:
-        not_known.append("the engine's verdict: this recording is not linked to an evaluated episode")
+        not_known.append(
+            "the engine's verdict: this recording is not linked to an evaluated episode or an experiment trial"
+        )
 
     not_known.append(
         "why it happened: the recording shows what the base did, not the cause (no node logs or controller state)"

@@ -74,6 +74,9 @@ class Observations(_Strict):
     recording: str | None = Field(
         default=None, description="An MCAP artifact to register as a Digital Twin recording (needs `model`)."
     )
+    summary: str | None = Field(
+        default=None, description="A JSON artifact: the bag summary (pap.ros.bag-summary/1) of the recording."
+    )
 
 
 class Condition(_Strict):
@@ -149,6 +152,10 @@ class ExperimentSpec(_Strict):
             raise ValueError("a recording is registered on a model version: give `model`")
         if self.observations.recording and self.observations.recording not in self.observations.artifacts:
             raise ValueError("the recording must be one of the required artifacts")
+        if self.observations.summary and (
+            not self.observations.recording or self.observations.summary not in self.observations.artifacts
+        ):
+            raise ValueError("a summary describes a recording: name both as required artifacts")
         return self
 
     @property

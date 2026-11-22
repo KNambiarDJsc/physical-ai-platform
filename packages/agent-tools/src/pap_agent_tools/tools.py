@@ -160,8 +160,11 @@ def _explain(c: PlatformClient, a: EventIn) -> Any:
     if rec.get("episode"):
         link = rec["episode"]
         episode = c.get(f"{_o(a)}/projects/{a.project}/evaluations/{link['evaluation_id']}/episodes/{link['id']}")
+    run = None
+    if episode is None and rec.get("run"):
+        run = c.get(f"{_o(a)}/workflow-runs/{rec['run']['id']}")
     try:
-        return explain_event(rec, a.event_id, episode)
+        return explain_event(rec, a.event_id, episode, run)
     except LookupError as e:
         from .client import ToolError
 

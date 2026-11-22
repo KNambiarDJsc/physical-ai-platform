@@ -1688,12 +1688,23 @@
         "services/api/app/experiments/",
         "services/api/app/twin/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
-        "evidence": []
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_experiments.py (real host, real worker functions, real engine; 31 tests in the file) plus test_twin_recordings, test_twin_models, test_twin_assistant, test_isolation: 53 passed together.",
+          "Capture: after the 4 trials of an approved spec ran, capture_ready() stored each trial's listed MCAP; the bytes served by GET experiment-trials/<id>/artifacts/recording hash to the recorded digest and size; each is a Digital Twin recording linked to its workflow run, to the registered model version and to the host's identity (seed included) as reported; the twin's own rule raised motion_continues exactly for the pre-fix arm and nothing problematic for the fix arm, beside the engine's verdict. Non-members get 404; an artifact the trial did not capture is 404.",
+          "Digest checks: a file corrupted on the host after its run makes the host refuse (HTTP 409); that trial's artifact is state 'rejected', no storage_key, no recording, capture_state 'failed' with the reason, the other trial stored. A real HTTP server that reports one digest and serves other bytes makes the platform's own check raise ('do not match what the host reported'), a matching one passes, an oversize report is refused before download. A spec that lists no artifacts captures nothing even though the host left a telemetry file; one that lists telemetry stores exactly the bytes the scenario wrote. A trial whose run failed is capture_state 'none' with 'nothing to capture'.",
+          "The assistant: explain_recording_event over the real assistant endpoint, as the caller, for the pre-fix trial's problem event cites verification:<run>, contract:<digest> and workflow-run:<run>, names the trial, arm, seed, experiment and version, the contract, 'violated' and 'Evidence class: simulated', and the 'rule-based, no language model' basis; the passing arm's recording shows verdict SATISFIED and no problem event.",
+          "96 MB upload MemoryError investigated, not dismissed: ROOT CAUSE is f.read(limit + 1) on an upload that has rolled over to disk, which reserves limit + 1 bytes before reading, so every recording upload (and every model file, 32 MiB each) asked the allocator for the full limit and failed whenever memory was short, independent of file size. Measured on the real 1.24 MiB fix recording: old read peak 96.0 MiB, new spool peak 3.0 MiB. Fixed in app/twin/ingest.py (chunked spool, hashed as read, stored and decoded from the file) shared by uploads and capture, and in _read_limited. test_a_recording_upload_is_processed_in_bounded_memory fails above 24 MiB peak and checks an oversize upload is refused with nothing stored.",
+          "Python gate at SIM-005 (the full gate is run once per the harness)."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Downloads, hashing, storing and decoding stream in chunks, but serving a stored artifact to a client still reads the object once through Storage.get, so it is bounded by the 96 MiB capture limit, not streamed.",
+        "A second trial that leaves byte-identical output shares the project's one recording (recordings are unique per project and digest) and so shares its run link; the trial's own artifact record is still its own.",
+        "The bag-summary artifact path (observations.summary) is validated and stored but only exercised by SIM-006 (the selftest scenario leaves none)."
+      ]
     },
     {
       "id": "SIM-005",
