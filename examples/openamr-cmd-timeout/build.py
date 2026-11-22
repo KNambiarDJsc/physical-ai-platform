@@ -60,11 +60,18 @@ def find(sources: list[Path], r: dict) -> Path:
     sys.exit(f"missing original for {r['id']} in {[str(s) for s in sources]}")
 
 
-def do_import(sources: list[Path]) -> None:
+def do_import(sources: list[Path], only: str | None = None) -> None:
+    """Copy the listed runs' files into recorded/ and record their digests. With ``only``, import that one run and
+    keep every other run's recorded evidence exactly as it is."""
     doc = load()
-    doc["evidence"] = {}
+    if only is None:
+        doc["evidence"] = {}
+    elif only not in {r["id"] for r in doc["runs"]}:
+        sys.exit(f"{only} is not listed in runs.json")
     RECORDED.mkdir(exist_ok=True)
     for r in doc["runs"]:
+        if only is not None and r["id"] != only:
+            continue
         d = find(sources, r)
         src = d / r["file"]
         dst = RECORDED / r["id"] / r["file"]
@@ -84,7 +91,7 @@ def do_import(sources: list[Path]) -> None:
             "ended_utc_basis": "modification time of the result file (1 s resolution)",
         }
     RUNS.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-    print(f"imported {len(doc['runs'])} runs")
+    print(f"imported {1 if only else len(doc['runs'])} run(s)")
 
 
 def rows() -> list[dict[str, object]]:
@@ -147,7 +154,8 @@ if __name__ == "__main__":
     sub = ap.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("import")
     i.add_argument("--source", required=True, type=Path, action="append", help="folder of run folders; repeatable")
+    i.add_argument("--only", help="import just this run id, leaving the others' recorded evidence untouched")
     b = sub.add_parser("build")
     b.add_argument("--check", action="store_true")
     ns = ap.parse_args()
-    do_import(ns.source) if ns.cmd == "import" else do_build(ns.check)
+    do_import(ns.source, ns.only) if ns.cmd == "import" else do_build(ns.check)

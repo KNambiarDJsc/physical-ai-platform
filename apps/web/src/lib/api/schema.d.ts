@@ -75,6 +75,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/assistant/tools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Tools
+         * @description The tools the assistant may call here: the read-only ones, with their JSON Schemas.
+         */
+        get: operations["list_tools_api_v1_orgs__org_slug__assistant_tools_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/assistant/tools/{tool_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Call */
+        post: operations["call_api_v1_orgs__org_slug__assistant_tools__tool_name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_slug}/audit-events": {
         parameters: {
             query?: never;
@@ -617,6 +654,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Models */
+        get: operations["list_models_api_v1_orgs__org_slug__projects__project_slug__twin_models_get"];
+        put?: never;
+        /** Create Model Version */
+        post: operations["create_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/models/{model_slug}/versions/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Model Version */
+        get: operations["get_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models__model_slug__versions__number__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/models/{model_slug}/versions/{number}/files/{file_path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Model File */
+        get: operations["get_model_file_api_v1_orgs__org_slug__projects__project_slug__twin_models__model_slug__versions__number__files__file_path__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Recordings */
+        get: operations["list_recordings_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_get"];
+        put?: never;
+        /** Create Recording */
+        post: operations["create_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/recordings/{recording_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Recording */
+        get: operations["get_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings__recording_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/projects/{project_slug}/twin/recordings/{recording_id}/track": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Track */
+        get: operations["get_track_api_v1_orgs__org_slug__projects__project_slug__twin_recordings__recording_id__track_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_slug}/service-credentials": {
         parameters: {
             query?: never;
@@ -917,6 +1058,30 @@ export interface components {
             id: number;
             /** Resource */
             resource: string;
+        };
+        /** Body_create_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models_post */
+        Body_create_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models_post: {
+            /** Files */
+            files: string[];
+            /** Manifest */
+            manifest: string;
+        };
+        /** Body_create_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_post */
+        Body_create_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_post: {
+            /** Episode Id */
+            episode_id?: string | null;
+            /** File */
+            file: string;
+            /** Identity */
+            identity?: string | null;
+            /** Label */
+            label: string;
+            /** Model Slug */
+            model_slug?: string | null;
+            /** Model Version */
+            model_version?: number | null;
+            /** Summary */
+            summary?: string | null;
         };
         /** Body_upload_api_v1_orgs__org_slug__projects__project_slug__artifacts_post */
         Body_upload_api_v1_orgs__org_slug__projects__project_slug__artifacts_post: {
@@ -1343,6 +1508,40 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /** EpisodeLink */
+        EpisodeLink: {
+            /** Episode Key */
+            episode_key: string;
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Outcome Class */
+            outcome_class: string;
+            /** Reasons */
+            reasons: string[];
+            /**
+             * Release Id
+             * Format: uuid
+             */
+            release_id: string;
+            /** Release Label */
+            release_label: string;
+            /** Reported */
+            reported: string;
+            /** Robot */
+            robot: string;
+            /** Scenario */
+            scenario: string | null;
+            /** Verdict */
+            verdict: string | null;
+        };
         /** EpisodeOut */
         EpisodeOut: {
             /** Ended At */
@@ -1522,6 +1721,17 @@ export interface components {
             summary: {
                 [key: string]: unknown;
             } | null;
+        };
+        /** FileOut */
+        FileOut: {
+            /** Media Type */
+            media_type: string;
+            /** Path */
+            path: string;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1709,6 +1919,15 @@ export interface components {
              */
             started_at: "unavailable" | "reject";
         };
+        /** ModelOut */
+        ModelOut: {
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Versions */
+            versions: components["schemas"]["VersionSummary"][];
+        };
         /** OrgIn */
         OrgIn: {
             /** Name */
@@ -1846,6 +2065,93 @@ export interface components {
             state: string;
             /** Workflow */
             workflow: string;
+        };
+        /** RecordingDetail */
+        RecordingDetail: {
+            /** Clock */
+            clock: string;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Duration S */
+            duration_s: number;
+            episode: components["schemas"]["EpisodeLink"] | null;
+            /** Events */
+            events: {
+                [key: string]: unknown;
+            }[];
+            /** Filename */
+            filename: string;
+            /** Frames */
+            frames: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Identity */
+            identity: {
+                [key: string]: unknown;
+            } | null;
+            /** Label */
+            label: string;
+            /** Limits */
+            limits: {
+                [key: string]: unknown;
+            };
+            /** Model */
+            model: string | null;
+            model_version: components["schemas"]["VersionSummary"] | null;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            } | null;
+            /** Track Sha256 */
+            track_sha256: string;
+        };
+        /** RecordingOut */
+        RecordingOut: {
+            /** Clock */
+            clock: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Duration S */
+            duration_s: number;
+            episode: components["schemas"]["EpisodeLink"] | null;
+            /** Filename */
+            filename: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Model */
+            model: string | null;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
         };
         /** ReleaseIn */
         ReleaseIn: {
@@ -2104,6 +2410,42 @@ export interface components {
              */
             uncertainty_ms?: number | null;
         };
+        /** ToolCallIn */
+        ToolCallIn: {
+            /** Arguments */
+            arguments?: {
+                [key: string]: unknown;
+            };
+        };
+        /** ToolCallOut */
+        ToolCallOut: {
+            /** Arguments */
+            arguments: {
+                [key: string]: unknown;
+            };
+            /** Is Error */
+            is_error: boolean;
+            /**
+             * Read Only
+             * @default true
+             */
+            read_only: boolean;
+            /** Result */
+            result: unknown;
+            /** Tool */
+            tool: string;
+        };
+        /** ToolDescriptor */
+        ToolDescriptor: {
+            /** Description */
+            description: string;
+            /** Input Schema */
+            input_schema: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -2116,6 +2458,58 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VersionOut */
+        VersionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Files */
+            files: components["schemas"]["FileOut"][];
+            /** Manifest Sha256 */
+            manifest_sha256: string;
+            /** Model Name */
+            model_name: string;
+            /** Model Slug */
+            model_slug: string;
+            /** Number */
+            number: number;
+            /** Omitted */
+            omitted: {
+                [key: string]: unknown;
+            }[];
+            /** Source */
+            source: {
+                [key: string]: unknown;
+            };
+            /** Structure */
+            structure: {
+                [key: string]: unknown;
+            };
+            /** Urdf Path */
+            urdf_path: string;
+        };
+        /** VersionSummary */
+        VersionSummary: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** License Spdx */
+            license_spdx: string;
+            /** Manifest Sha256 */
+            manifest_sha256: string;
+            /** Number */
+            number: number;
+            /** Source Commit */
+            source_commit: string;
+            /** Source Repository */
+            source_repository: string;
         };
         /** WorkflowIn */
         WorkflowIn: {
@@ -2276,6 +2670,75 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tools_api_v1_orgs__org_slug__assistant_tools_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolDescriptor"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    call_api_v1_orgs__org_slug__assistant_tools__tool_name__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                tool_name: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToolCallIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolCallOut"];
                 };
             };
             /** @description Validation Error */
@@ -3577,6 +4040,291 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReleaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_models_api_v1_orgs__org_slug__projects__project_slug__twin_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_create_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models_post"];
+            };
+        };
+        responses: {
+            /** @description this exact version already exists */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_model_version_api_v1_orgs__org_slug__projects__project_slug__twin_models__model_slug__versions__number__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                model_slug: string;
+                number: number;
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_model_file_api_v1_orgs__org_slug__projects__project_slug__twin_models__model_slug__versions__number__files__file_path__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                model_slug: string;
+                number: number;
+                file_path: string;
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_recordings_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_create_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings_post"];
+            };
+        };
+        responses: {
+            /** @description this recording is already stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_recording_api_v1_orgs__org_slug__projects__project_slug__twin_recordings__recording_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_track_api_v1_orgs__org_slug__projects__project_slug__twin_recordings__recording_id__track_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+                project_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

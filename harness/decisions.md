@@ -242,3 +242,26 @@ Compose profile `observability`: OpenTelemetry Collector 0.164.0 and Prometheus 
 (both older than two weeks), configs in infrastructure/observability. Grafana, Loki and Tempo (AGPL-3.0) are not
 included; they may only ever run as separate, unmodified services of the operator's own.
 
+## D-033 (2026-11-22) The official MCP SDK was verified, and is still not adopted
+`mcp` 2.3.0 (MIT, 2026-10-02) was run as a client against our stdio server (`scripts/mcp_sdk_interop.py`, in an isolated
+`uv run --isolated --with mcp==2.3.0`, so it never enters the platform's lock). It negotiates, lists all tools with their
+annotations, and treats bad input and unknown tools as errors. It found one real defect, fixed: the server echoed any
+protocol version it was asked for instead of answering with the one it implements (2025-06-18). Adopting the SDK as the
+server would add starlette, uvicorn, sse-starlette, pyjwt, httpx2, jsonschema and opentelemetry-api to a package whose job
+is a small tools-only stdio server; the interoperability evidence is the reason to keep the small server, and the reason
+to revisit is a need for streamable HTTP, OAuth or resources/prompts.
+
+## D-034 (2026-11-22) A robot model is imported, never drawn; a recording is evidence with provenance
+The registry stores upstream's own expanded URDF and the meshes it references byte for byte, addressed by digest, with
+repository, commit and licence (OpenAMRobot: CERN-OHL-P-2.0 for CAD-derived geometry; upstream's NOTICE and LICENSING are
+kept beside the files). Unreferenced files, `..`, `file://`, DTDs and non-STL meshes are refused. A recording is an MCAP
+file whose track is decoded by `mcap-ros2-support` (no ROS needed) on the recording's own clock: the running maximum of
+`/clock`, because the pre-fix bag's clock moved backwards (reported as a warning event, never smoothed away). Wheel joint
+positions are constant 0 in both bags while the base drives: the twin draws exactly that and says so. Events carry their
+rule and source topic; the verdict beside them is the engine's, never recomputed from the track.
+
+## D-035 (2026-11-22) The assistant is the existing tool registry, run as the caller
+The twin's assistant calls `POST /orgs/{org}/assistant/tools/{tool}`, which runs the SAME typed tools the MCP server serves
+(read-only ones only) against this API with the caller's own Authorization header, so roles and isolation are unchanged.
+`propose_experiment` is not reachable there. The explanation is rule-based, cites evidence ids, separates the recording's
+measurement from the engine's verdict, and lists what is not known. HTTP and MCP return byte-identical answers (tested).

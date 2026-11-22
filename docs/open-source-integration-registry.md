@@ -37,7 +37,11 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | ROS 2 Jazzy, rclpy, rosbag2_py, rosbag2_storage_mcap (ros.org) | The observer's ROS client; bag reading and MCAP storage | system install in WSL (Ubuntu 24.04) | Apache-2.0 (stated; not redistributed) | Not shipped: the observer runs where ROS is installed | ROS-001, ROS-003; the platform itself never imports ROS |
 | OpenTelemetry Collector (otel/opentelemetry-collector) | Optional trace receiver (Compose profile) | 0.164.0 @ sha256:28b6d41a... | Apache-2.0 (stated) | Unmodified upstream image | D-032 |
 | Prometheus (prom/prometheus) | Optional metrics scraper (Compose profile) | v3.15.1 @ sha256:fa330227... | Apache-2.0 (stated) | Unmodified upstream image | D-032 |
-| mcp (github.com/modelcontextprotocol/python-sdk) | The official MCP SDK | NOT adopted (2.3.0 exists, MIT) | MIT (PyPI metadata) | n/a | D-031: a minimal stdio tools server is implemented and tested instead; revisit when the 2.x API can be verified |
+| mcp (github.com/modelcontextprotocol/python-sdk) | The official MCP SDK | 2.3.0, used only as a test client (isolated env) | MIT (PyPI metadata) | n/a | D-033: its client interoperates with our stdio server (scripts/mcp_sdk_interop.py); not adopted as the server |
+| mcap, mcap-ros2-support (github.com/foxglove/mcap) | Read MCAP recordings without ROS | 1.6.0 / 0.6.0 | MIT (PyPI classifiers) | Permissive | D-034: decode recordings into playback tracks |
+| three, @react-three/fiber | 3D rendering | 0.187.0 / 9.8.2 | MIT (npm) | Permissive | Digital twin viewport |
+| urdf-loader (github.com/gkjohnson/urdf-loaders) | URDF to three.js scene, joint kinematics | 0.13.1 | Apache-2.0 (npm) | Permissive; keep NOTICE | Loads upstream's URDF unchanged |
+| OpenAMRobot platform model (openAMRobot/openamr-platform-sw, description package) | Robot URDF and meshes | commit 505d17a | CERN-OHL-P-2.0 (CAD-derived), MIT envelopes; see model/NOTICE.md | Names/logos not licensed; no endorsement implied | Imported unchanged by examples/openamr-cmd-timeout/model/build.py |
 | SQLite (sqlite.org) | Inside the engine only | bundled in OpenMHS (rusqlite) | Public domain (stated) | None | Engine's store |
 
 ## Dev-only (never shipped)

@@ -13,6 +13,7 @@ from .ingestion.models import MappingRevision
 from .organizations.models import Membership, Organization, ServiceCredential
 from .projects.models import Project
 from .releases.models import Release
+from .twin.models import Recording, RobotModel, RobotModelVersion
 from .workflows.models import Workflow, WorkflowRun, WorkflowStep
 
 __all__ = [
@@ -31,7 +32,10 @@ __all__ = [
     "Membership",
     "Organization",
     "Project",
+    "Recording",
     "Release",
+    "RobotModel",
+    "RobotModelVersion",
     "ServiceCredential",
     "User",
     "Workflow",

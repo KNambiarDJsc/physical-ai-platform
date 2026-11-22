@@ -4,6 +4,7 @@ import clsx from "clsx";
 import {
   Activity,
   AlertTriangle,
+  Box,
   Boxes,
   ChevronRight,
   Cpu,
@@ -37,6 +38,7 @@ const GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { href: "/onboarding", label: "Get started", icon: Rocket, hint: "Workspace, environment, first verified run" },
       { href: "/workbench", label: "Workbench", icon: PanelsTopLeft, hint: "Run workflows, watch instruments, read verdicts" },
+      { href: "/twin", label: "Digital twin", icon: Box, hint: "Robot model, recordings and the event timeline" },
       { href: "/hardware", label: "Hardware Hub", icon: Cpu, hint: "Environments, devices and capabilities" },
       { href: "/workflows", label: "Workflows", icon: Workflow, hint: "Device actions with a verification contract" },
     ],

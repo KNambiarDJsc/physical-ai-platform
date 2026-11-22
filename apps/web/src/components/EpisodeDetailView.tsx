@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { EpisodeDetail } from "@/lib/api/client";
 import { CLASS_LABEL, shortDigest } from "@/lib/format";
 import { Panel } from "./AppShell";
@@ -34,7 +35,7 @@ const WHY: Record<string, string> = {
 };
 
 /** Everything the verifier and the mapping recorded about one episode. Nothing here is computed. */
-export function EpisodeDetailView({ ep }: { ep: EpisodeDetail }) {
+export function EpisodeDetailView({ ep, twin }: { ep: EpisodeDetail; twin?: string }) {
   const report = ep.verifier_report as Report | null;
   const doc = ep.document as Record<string, unknown>;
   const field = (k: string) => {
@@ -46,6 +47,11 @@ export function EpisodeDetailView({ ep }: { ep: EpisodeDetail }) {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <ClassBadge value={ep.outcome_class} />
         <span className="text-[13px] text-muted">{WHY[ep.outcome_class] ?? CLASS_LABEL[ep.outcome_class]}</span>
+        {twin && (
+          <Link className="btn ml-auto" href={twin}>
+            Open in Workbench
+          </Link>
+        )}
       </div>
       <dl className="mb-4 grid gap-x-6 gap-y-1 text-[13px] break-all sm:grid-cols-[max-content_1fr]">
         <dt className="text-muted">Robot reported</dt>

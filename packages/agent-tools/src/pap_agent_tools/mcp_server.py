@@ -13,6 +13,8 @@ from . import __version__
 from .client import PlatformClient, ToolError
 from .tools import TOOLS
 
+# The one revision this server implements. Every client is answered with it, whatever it asked for, as the
+# specification requires; the client decides whether to continue (the official SDK 2.3.0 client does).
 PROTOCOL = "2025-06-18"
 
 
@@ -67,7 +69,7 @@ def handle(client: PlatformClient, msg: dict[str, Any]) -> dict[str, Any] | None
     if method == "initialize":
         return ok(
             {
-                "protocolVersion": params.get("protocolVersion") or PROTOCOL,
+                "protocolVersion": PROTOCOL,
                 "capabilities": {"tools": {"listChanged": False}},
                 "serverInfo": {"name": "pap-agent-tools", "version": __version__},
             }

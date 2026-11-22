@@ -146,7 +146,7 @@ def test_the_tool_list_is_exactly_the_allowlist_with_typed_schemas_and_honest_hi
     from pap_agent_tools.tools import ALLOWLIST
 
     tools = viewer.rpc("tools/list")["result"]["tools"]
-    assert {t["name"] for t in tools} == ALLOWLIST and len(tools) == 13
+    assert {t["name"] for t in tools} == ALLOWLIST and len(tools) == 16
     for t in tools:
         assert t["inputSchema"]["type"] == "object" and t["inputSchema"]["properties"] is not None, t["name"]
         assert t["description"]
@@ -277,3 +277,22 @@ def test_no_credential_is_refused_at_start() -> None:
         check=False,
     )
     assert p.returncode != 0 and "PAP_API_TOKEN" in p.stderr
+
+
+def test_only_the_implemented_protocol_version_is_negotiated() -> None:
+    # Found by the official MCP SDK 2.3.0 client (scripts/mcp_sdk_interop.py): the server used to echo any version it
+    # was asked for, claiming support for revisions it never implemented.
+    from pap_agent_tools.mcp_server import PROTOCOL, handle
+
+    def negotiate(version: str | None) -> str:
+        params = {"capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}
+        if version:
+            params["protocolVersion"] = version
+        reply = handle(None, {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": params})  # type: ignore[arg-type]
+        assert reply is not None
+        return str(reply["result"]["protocolVersion"])
+
+    assert negotiate("2025-06-18") == PROTOCOL == "2025-06-18"
+    assert negotiate("2025-11-25") == PROTOCOL
+    assert negotiate("1999-01-01") == PROTOCOL
+    assert negotiate(None) == PROTOCOL

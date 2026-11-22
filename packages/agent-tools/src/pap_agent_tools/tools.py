@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from .client import PlatformClient
 from .investigate import investigate
+from .twin import explain_event
 
 SLUG = r"^[a-z0-9][a-z0-9-]{0,62}$"
 READ_ONLY = (
@@ -28,6 +29,9 @@ READ_ONLY = (
     "list_evaluations",
     "get_comparison",
     "list_experiment_proposals",
+    "list_recordings",
+    "get_recording",
+    "explain_recording_event",
 )
 WRITES = ("propose_experiment",)
 ALLOWLIST = frozenset(READ_ONLY + WRITES)
@@ -60,6 +64,14 @@ class ProjectIn(Org):
 
 class ComparisonIn(ProjectIn):
     evaluation_id: UUID = Field(description="Evaluation id from list_evaluations.")
+
+
+class RecordingIn(ProjectIn):
+    recording_id: UUID = Field(description="Recording id from list_recordings.")
+
+
+class EventIn(RecordingIn):
+    event_id: str = Field(pattern=r"^ev-[0-9]{1,4}$", description="An event id from get_recording, e.g. ev-3.")
 
 
 class ProposalsIn(Org):
@@ -130,6 +142,30 @@ def _health(c: PlatformClient, a: Org) -> Any:
             entry["expected_topics"] = c.get(f"{base}/expected_topics")["value"]
         out.append(entry)
     return out
+
+
+def _rec(a: ProjectIn) -> str:
+    return f"{_o(a)}/projects/{a.project}/twin/recordings"
+
+
+def _recording(c: PlatformClient, a: RecordingIn) -> Any:
+    """The recording without its bulky summary: events, counts, model and the linked episode with the verdict."""
+    d = c.get(f"{_rec(a)}/{a.recording_id}")
+    return {k: v for k, v in d.items() if k not in ("summary",)}
+
+
+def _explain(c: PlatformClient, a: EventIn) -> Any:
+    rec = c.get(f"{_rec(a)}/{a.recording_id}")
+    episode = None
+    if rec.get("episode"):
+        link = rec["episode"]
+        episode = c.get(f"{_o(a)}/projects/{a.project}/evaluations/{link['evaluation_id']}/episodes/{link['id']}")
+    try:
+        return explain_event(rec, a.event_id, episode)
+    except LookupError as e:
+        from .client import ToolError
+
+        raise ToolError(str(e)) from None
 
 
 def _propose(c: PlatformClient, a: ProposeIn) -> Any:
@@ -207,6 +243,28 @@ TOOLS: dict[str, Tool] = {
             "The engine's comparison (reported and verified) of one evaluation.",
             ComparisonIn,
             lambda c, a: c.get(f"{_o(a)}/projects/{a.project}/evaluations/{a.evaluation_id}/comparison"),
+        ),
+        Tool(
+            "list_recordings",
+            "List the MCAP recordings in a project: label, clock, duration, robot model and the linked episode with "
+            "the engine's verdict.",
+            ProjectIn,
+            lambda c, a: c.get(_rec(a)),
+        ),
+        Tool(
+            "get_recording",
+            "One recording: run identity, message counts, the evidence events found in it (each with its rule and "
+            "source topics) and the linked episode's engine verdict.",
+            RecordingIn,
+            _recording,
+        ),
+        Tool(
+            "explain_recording_event",
+            "Explain one event of a recording by citing the stored evidence behind it: the event's rule, the run "
+            "identity, data-quality events, and the engine's verdict and contract for the linked episode. States what "
+            "is not known. Rule-based, no language model.",
+            EventIn,
+            _explain,
         ),
         Tool(
             "list_experiment_proposals",

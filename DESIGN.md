@@ -75,7 +75,8 @@ not carry a state.
   arrow keys, Enter, Escape.
 
 The Workbench (instruments left, the run centre, inspector right, timeline bottom, every pane resizable by pointer
-and keyboard) uses the same shell. Its 3D viewport and engineering assistant are not built and are not suggested.
+and keyboard) uses the same shell. The Digital twin page (`/twin`) is its robot view: sources and events left, the 3D
+viewport centre, inspector and assistant right, the recording's timeline and telemetry bottom.
 
 ## 6. Interaction model per module
 
@@ -92,9 +93,10 @@ Each module gets the pattern that fits its job, not a grid of cards.
 | Hardware Hub (devices) | Device tree and capability inspector, live reads; structured values as tables with freshness badges | Built (WoT/LabThings adapter; ROS observer) |
 | Workflows | Template form today; node canvas with properties inspector later | Built (templates and definitions; no canvas) |
 | Agents | Tool permissions, configuration, execution traces | Not built |
-| Workbench | Instruments, observed robots, run, inspector, timeline; resizable | Built (no 3D viewport, no assistant panel) |
+| Workbench | Instruments, observed robots, run, inspector, timeline; resizable | Built |
+| Digital twin | Model viewport, mode badge, MCAP playback, evidence events, inspector, assistant | Built (recordings and read-only observers; no simulator connector yet) |
 | Proposed experiments | Table on the Workflows page; engineers approve or reject | Built (proposals come from people or the tool layer) |
-| Experiments / simulation | Viewport, scenario controls, synchronized telemetry | Not built |
+| Experiments / simulation | Viewport, scenario controls, synchronized telemetry | Viewport and telemetry built (Digital twin); scenario controls not built |
 | Datasets, policies, deployments | Episode browser, version history, approvals | Not built |
 
 ## 6a. Observations
@@ -104,6 +106,15 @@ always as text in a badge, the age with its unit, and "—" for no value. A requ
 problem (red); the same word on an optional one is not. Identifying columns come first (name, topic, frame, service),
 then the state. Wide tables scroll inside a focusable, labelled region. A replayed snapshot says so in its environment
 name and in its connectivity record; nothing pretends to be live.
+
+## 6b. Digital twin
+The mode is always stated, as a badge with its reason: Recorded (a recording, or an observer replaying a snapshot, whatever
+kind of environment it sits in), Simulated, Live (a physical robot's graph, read-only) or Disconnected (the model does not
+move and says so; it is never left at a stale pose). The 3D view is never the only carrier of information: the same
+values are in the readout, the joint table and the event list; the view has an accessible name and a text equivalent.
+Events carry their rule and sit on the timeline by severity (info, warning, problem); the engine's verdict is shown
+beside them and is never derived from them. A joint the recording holds constant is drawn constant, with a warning.
+The assistant's answers are findings with evidence ids and a "not known" list, never free prose.
 
 ## 7. Data visualization
 

@@ -19,7 +19,7 @@ export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-79}" GZ_PARTITION="${GZ_PARTITION:-p79}"
 mkdir -p "$OUT"; RUN_ID="${LABEL}_$(date -u +%Y%m%dT%H%M%SZ)"
 
 python3 - "$RUN_ID" "$LABEL" "$UP" "$OUT" <<'PY'
-import json, os, socket, subprocess, sys, datetime
+import hashlib, json, os, socket, subprocess, sys, datetime
 run_id, label, up, out = sys.argv[1:5]
 def git(*a):
     return subprocess.run(["git", "-C", up, *a], capture_output=True, text=True, check=False).stdout.strip()
@@ -30,7 +30,11 @@ ident = {
                  "kill_after_sim_s": 4.0, "watch_sim_s": 5.0, "upstream_test": "test_sim_cmd_vel_timeout_gazebo.py"},
     "software": {"repository": "openAMRobot/openamr-platform-sw", "commit": git("rev-parse", "HEAD"),
                  "branch": git("branch", "--show-current"), "tree_dirty": bool(git("status", "--porcelain")),
-                 "origin_main": git("rev-parse", "origin/main")},
+                 "origin_main": git("rev-parse", "origin/main"),
+                 # A dirty tree is described, not hidden: which files differ from the commit, and a digest of the diff.
+                 "changed_files": sorted(git("diff", "--name-only").split()),
+                 "diff_sha256": hashlib.sha256(git("diff").encode()).hexdigest() if git("diff") else None,
+                 "note": os.environ.get("PAP_IDENTITY_NOTE")},
     "configuration": {"launch": "openamrobot_gazebo gz_simulator.launch.py gui:=false",
                       "sim_cmd_vel_timeout.yaml": open(cfg, encoding="utf-8").read() if os.path.exists(cfg) else None},
     "environment": {"ros_distro": os.environ.get("ROS_DISTRO"), "rmw": os.environ.get("RMW_IMPLEMENTATION", "default"),

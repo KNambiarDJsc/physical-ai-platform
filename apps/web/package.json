@@ -14,6 +14,7 @@
     "check:api": "openapi-typescript ../../packages/contracts/openapi.json -o .api-check.d.ts && node -e \"const f=require('fs');if(f.readFileSync('.api-check.d.ts','utf8')!==f.readFileSync('src/lib/api/schema.d.ts','utf8')){console.error('src/lib/api/schema.d.ts is stale: npm run gen:api');process.exit(1)}f.unlinkSync('.api-check.d.ts')\""
   },
   "dependencies": {
+    "@react-three/fiber": "9.8.2",
     "@tanstack/react-query": "5.108.0",
     "clsx": "2.1.1",
     "echarts": "6.1.0",
@@ -22,7 +23,9 @@
     "next": "15.5.28",
     "openid-client": "6.8.9",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "three": "0.187.0",
+    "urdf-loader": "0.13.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
@@ -34,6 +37,7 @@
     "@types/node": "22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "@types/three": "0.187.0",
     "@vitejs/plugin-react": "4.4.1",
     "eslint": "9.39.5",
     "eslint-config-next": "15.5.28",

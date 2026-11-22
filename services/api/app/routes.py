@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 
 def register(app: FastAPI) -> None:
+    from .agent.assistant import router as assistant
     from .agent.routes import router as agent
     from .evaluations.routes import router as evaluations
     from .evidence.routes import router as evidence
@@ -14,7 +15,20 @@ def register(app: FastAPI) -> None:
     from .organizations.routes import router as organizations
     from .projects.routes import router as projects
     from .releases.routes import router as releases
+    from .twin.routes import router as twin
     from .workflows.routes import router as workflows
 
-    for r in (organizations, projects, releases, evidence, mappings, evaluations, hardware, workflows, agent):
+    for r in (
+        organizations,
+        projects,
+        releases,
+        evidence,
+        mappings,
+        evaluations,
+        hardware,
+        workflows,
+        agent,
+        twin,
+        assistant,
+    ):
         app.include_router(r)

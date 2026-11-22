@@ -8,7 +8,7 @@ import { Notice, PageHeader } from "@/components/AppShell";
 import { EpisodeDetailView } from "@/components/EpisodeDetailView";
 import { RequireIdentity } from "@/components/Identity";
 import { ClassBadge, Table, Td } from "@/components/ui";
-import { api, projectPath, type EpisodeDetail, type EpisodePage, type Evaluation } from "@/lib/api/client";
+import { api, projectPath, type EpisodeDetail, type EpisodePage, type Evaluation, type Recording } from "@/lib/api/client";
 import { CLASS_LABEL } from "@/lib/format";
 
 type Params = { org: string; project: string; id: string };
@@ -31,7 +31,7 @@ function Episodes({ org, project, id }: Params) {
   const [cls, setCls] = useState(search.get("outcome_class") ?? "");
   const [release, setRelease] = useState("");
   const [offset, setOffset] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(search.get("episode"));
   const job = useQuery({ queryKey: ["evaluation", id], queryFn: () => api<Evaluation>(base) });
   const qs = new URLSearchParams({ limit: String(PAGE), offset: String(offset) });
   if (cls) qs.set("outcome_class", cls);
@@ -42,6 +42,9 @@ function Episodes({ org, project, id }: Params) {
     queryFn: () => api<EpisodeDetail>(`${base}/episodes/${selected}`),
     enabled: !!selected,
   });
+  // Recordings linked to episodes of this project: an episode with one can be opened in the digital twin.
+  const recordings = useQuery({ queryKey: ["twin-recordings", org, project], queryFn: () => api<Recording[]>(`${projectPath(org, project)}/twin/recordings`), retry: false });
+  const recordingOf = (episodeId: string) => recordings.data?.find((r) => r.episode?.id === episodeId);
   const j = job.data;
   const releaseLabel = (rid: string) => (j ? (rid === j.baseline_release_id ? j.baseline_label : j.candidate_label) : rid);
   const sel = "field";
@@ -116,7 +119,12 @@ function Episodes({ org, project, id }: Params) {
         </div>
         <div>
           {!selected && <Notice tone="info">Select an episode to see its evidence and the verifier&apos;s reasons.</Notice>}
-          {detail.data && <EpisodeDetailView ep={detail.data} />}
+          {detail.data && (
+            <EpisodeDetailView
+              ep={detail.data}
+              twin={recordingOf(detail.data.id) ? `/twin?org=${org}&project=${project}&recording=${recordingOf(detail.data.id)!.id}` : undefined}
+            />
+          )}
           {detail.error && <Notice tone="bad">{detail.error.message}</Notice>}
         </div>
       </div>

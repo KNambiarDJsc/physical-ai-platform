@@ -21,9 +21,27 @@ from helpers import as_user, bearer, make_org, ok
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
 ID_PARAMS = {
     "user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id",
-    "device_id", "run_id", "proposal_id",
+    "device_id", "run_id", "proposal_id", "recording_id",
 }  # fmt: skip
 pytestmark = pytest.mark.engine
+
+
+def _toy() -> tuple[dict[str, Any], bytes, bytes]:
+    import hashlib
+    import struct
+
+    urdf = b'<robot name="t"><link name="b"><visual><geometry><mesh filename="package://t/a.stl"/></geometry></visual></link></robot>'
+    stl = b"x".ljust(80, b" ") + struct.pack("<I", 1) + b"\x00" * 50
+    sha = lambda b: "sha256:" + hashlib.sha256(b).hexdigest()  # noqa: E731
+    manifest = {
+        "slug": "planted-model", "name": "planted", "urdf": "robot.urdf",
+        "files": [{"path": "robot.urdf", "sha256": sha(urdf)}, {"path": "a.stl", "sha256": sha(stl)}],
+        "source": {"repository": "x/y", "commit": "abcdef1", "license_spdx": "MIT"},
+    }  # fmt: skip
+    return manifest, urdf, stl
+
+
+TOY_MANIFEST, TOY_URDF, TOY_STL = _toy()
 
 
 def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
@@ -51,6 +69,18 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
             }
         },
         ("POST", f"{o}/workflows/{{workflow_slug}}/runs"): {},
+        ("POST", f"{p}/twin/models"): {
+            "data": {"manifest": json.dumps(TOY_MANIFEST)},
+            "files": [
+                ("files", ("robot.urdf", TOY_URDF, "application/xml")),
+                ("files", ("a.stl", TOY_STL, "model/stl")),
+            ],
+        },
+        ("POST", f"{p}/twin/recordings"): {
+            "data": {"label": "planted"},
+            "files": {"file": ("planted.mcap", b"\x89MCAP0\r\n", "application/octet-stream")},
+        },
+        ("POST", f"{o}/assistant/tools/{{tool_name}}"): {"json": {"arguments": {}}},
         ("POST", f"{o}/experiment-proposals"): {"json": {"workflow": "dispense", "rationale": "planted proposal text"}},
         ("POST", f"{o}/experiment-proposals/{{proposal_id}}/approve"): {},
         ("POST", f"{o}/experiment-proposals/{{proposal_id}}/reject"): {"json": {"note": "planted"}},
@@ -163,13 +193,36 @@ def world(client: TestClient, omhs: Any, with_lab: str) -> dict[str, Any]:
     v["run_id"] = ok(client.post("/api/v1/orgs/acme/workflows/dispense/runs", headers=h), 201)["id"]
     prop = {"workflow": "dispense", "rationale": "victim-proposal-rationale", "evidence_ids": ["run:victim"]}
     v["proposal_id"] = ok(client.post("/api/v1/orgs/acme/experiment-proposals", json=prop, headers=h), 201)["id"]
+    # Digital twin: the victim's robot model version and a recording of theirs.
+    from test_twin_recordings import FIX, run_files
+
+    manifest = dict(TOY_MANIFEST, slug="victim-model", name="victim-model")
+    ok(
+        client.post(
+            f"{P}/twin/models",
+            data={"manifest": json.dumps(manifest)},
+            files=[("files", ("robot.urdf", TOY_URDF, "application/xml")), ("files", ("a.stl", TOY_STL, "model/stl"))],
+            headers=h,
+        ),
+        201,
+    )
+    mcap, summary, identity, _ = run_files(FIX)
+    rec = client.post(
+        f"{P}/twin/recordings",
+        data={"label": "victim-recording", "summary": json.dumps(summary), "identity": json.dumps(identity)},
+        files={"file": ("victim.mcap", mcap, "application/octet-stream")},
+        headers=h,
+    )
+    v["recording_id"] = ok(rec, 201)["id"]
+    v["model_slug"], v["number"], v["file_path"] = "victim-model", 1, "robot.urdf"
+    v["tool_name"] = "list_workspaces"
     secrets = {
         v[k]
         for k in ("user_id", "credential_id", "baseline", "candidate", "baseline_art", "candidate_art", "mapping_id",
-                  "job_id", "episode_id", "device_id", "run_id", "proposal_id")
+                  "job_id", "episode_id", "device_id", "run_id", "proposal_id", "recording_id")
     } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate",
          "victim-proposal-rationale",
-         "victim-workflow"}  # fmt: skip
+         "victim-workflow", "victim-recording", "victim-model"}  # fmt: skip
     make_org(client, "mallory", "mallory-co", "mallory-proj")
     mcred = ok(
         client.post("/api/v1/orgs/mallory-co/service-credentials", json={"name": "m", "role": "admin"},

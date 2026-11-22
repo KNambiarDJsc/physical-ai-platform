@@ -47,30 +47,44 @@ def test_the_episode_files_are_rebuilt_exactly_from_the_hashed_recordings() -> N
         [sys.executable, str(EXP / "build.py"), "build", "--check"], capture_output=True, text=True, check=False
     )
     assert r.returncode == 0, r.stdout + r.stderr
-    assert len(RUNS["runs"]) == len(RUNS["evidence"]) == 11
+    assert len(RUNS["runs"]) == len(RUNS["evidence"]) == 12
     for run in RUNS["runs"]:  # every run directory that holds a result is listed, none is skipped or repeated
         assert RUNS["evidence"][run["id"]]["sha256"] and len(RUNS["evidence"][run["id"]]["sha256"]) == 64
     assert {r["arm"] for r in RUNS["runs"]} == {"main", "fix"}
     assert all(r["software_exact"] in (True, False) for r in RUNS["runs"])
 
 
-def test_the_scenario_run_carries_its_own_identity_and_a_bag_that_matches_its_summary() -> None:
+def test_each_scenario_run_carries_its_own_identity_and_a_bag_that_matches_its_summary() -> None:
     import hashlib
 
-    run = next(r for r in RUNS["runs"] if "bag" in r.get("extras", []))
-    d = EXP / "recorded" / run["id"]
-    identity = json.loads((d / "pap-run-identity.json").read_text(encoding="utf-8"))
-    assert identity["run_id"] == run["id"] and identity["software"]["commit"] == RUNS["upstream"]["fix_commit"]
-    assert identity["software"]["tree_dirty"] is False and identity["scenario"]["commanded_m_per_s"] == 0.2
-    summary = json.loads((d / "bag-summary.json").read_text(encoding="utf-8"))
-    assert summary["schema"] == "pap.ros.bag-summary/1" and summary["identity"] == identity
-    mcap = next(f for f in summary["files"] if f["name"].endswith(".mcap"))
-    assert (
-        hashlib.sha256((d / "bag" / mcap["name"]).read_bytes()).hexdigest() == mcap["sha256"]
-    )  # the bag is the one summarised
-    assert summary["clock"]["monotonic"] and {t["name"] for t in summary["topics"]} >= {"/clock", "/cmd_vel", "/odom"}
-    # the recorded travel is under upstream's limit, from the same run
-    assert recorded(run) <= LIMIT_M
+    bagged = [r for r in RUNS["runs"] if "bag" in r.get("extras", [])]
+    assert {r["arm"] for r in bagged} == {"main", "fix"}
+    for run in bagged:
+        d = EXP / "recorded" / run["id"]
+        identity = json.loads((d / "pap-run-identity.json").read_text(encoding="utf-8"))
+        assert identity["run_id"] == run["id"] and identity["arm"] == run["arm"]
+        assert identity["software"]["commit"] == RUNS["upstream"]["fix_commit"]
+        assert identity["scenario"]["commanded_m_per_s"] == 0.2
+        if run["arm"] == "fix":
+            assert identity["software"]["tree_dirty"] is False  # (written before changed_files existed)
+        else:  # the pre-fix arm says that its tree was not the commit, and which files differ
+            assert identity["software"]["tree_dirty"] is True
+            assert identity["software"]["changed_files"] == [
+                "ros2/src/openamrobot_gazebo/config/gz_bridge.yaml",
+                "ros2/src/openamrobot_gazebo/launch/gz_simulator.launch.py",
+            ]
+            assert identity["software"]["diff_sha256"] and "origin/main" in identity["software"]["note"]
+        summary = json.loads((d / "bag-summary.json").read_text(encoding="utf-8"))
+        assert summary["schema"] == "pap.ros.bag-summary/1" and summary["identity"] == identity
+        mcap = next(f for f in summary["files"] if f["name"].endswith(".mcap"))
+        assert hashlib.sha256((d / "bag" / mcap["name"]).read_bytes()).hexdigest() == mcap["sha256"]
+        assert {t["name"] for t in summary["topics"]} >= {"/clock", "/cmd_vel", "/odom"}
+        # the recorded travel against upstream's limit, from the same run: the arm's whole story
+        assert (recorded(run) <= LIMIT_M) == (run["arm"] == "fix")
+        if run["arm"] == "fix":
+            assert summary["clock"]["monotonic"]
+        else:  # found in this recording: two /clock sources interleaved; the summary says so instead of hiding it
+            assert summary["clock"]["monotonic"] is False and summary["clock"]["backward_jumps"] > 0
 
 
 def test_the_threshold_is_upstreams_own() -> None:
@@ -99,7 +113,7 @@ def test_the_real_engine_judges_each_recorded_run_and_says_insufficient_evidence
     out = run_pipeline(omhs, inp, tmp_path)
     assert sum(x["rejected"] for x in out.validation["artifacts"]) == 0
     by_id = {e.mapped.episode.episode_key: e for e in out.episodes}
-    assert len(by_id) == 11
+    assert len(by_id) == 12
     # Independent expectation from the recorded files and upstream's limit, not from the pipeline.
     for run in RUNS["runs"]:
         over = recorded(run) > LIMIT_M
@@ -107,7 +121,7 @@ def test_the_real_engine_judges_each_recorded_run_and_says_insufficient_evidence
     assert {r["arm"] for r in RUNS["runs"] if recorded(r) > LIMIT_M} == {"main"}  # only the unfixed base runs on
     # With 4 and 7 recorded runs the engine does not claim a verdict, and neither do we.
     assert out.verified is not None and out.verified.verdict == "insufficient_evidence"
-    assert out.verified.a.failed == 4 and out.verified.b.failed == 0
+    assert out.verified.a.failed == 5 and out.verified.b.failed == 0
     assert any("fewer than 30" in r for r in out.verified.reasons)
     assert out.reported.verdict == "insufficient_evidence"  # no controller report exists for these runs: all unknown
     assert {e.outcome_class for e in out.episodes} == {"verified_failure", "verified_success"}
@@ -152,4 +166,4 @@ def test_the_report_is_reproducible_labelled_simulated_and_carries_the_run_ident
     versions = {c["version"] for r in releases.values() for c in r["manifest"]["components"]}
     assert {"69847ab", "505d17a"} <= versions  # the run identities are on the releases
     eps = ok(client.get(f"{p}/evaluations/{job['id']}/episodes?limit=50", headers=h))["items"]
-    assert len(eps) == 11 and {e["outcome_class"] for e in eps} == {"verified_failure", "verified_success"}
+    assert len(eps) == 12 and {e["outcome_class"] for e in eps} == {"verified_failure", "verified_success"}

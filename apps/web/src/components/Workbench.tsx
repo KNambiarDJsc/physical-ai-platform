@@ -128,7 +128,10 @@ function Workbench() {
           </button>
         )}
         {start.error && <span className="text-[13px] text-bad">{start.error.message}</span>}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
+          <Link className="text-[12px] text-accent hover:underline" href={`/twin?org=${org}`}>
+            Digital twin
+          </Link>
           <OrgSelect orgs={orgs} org={org} select={select} />
         </div>
       </div>

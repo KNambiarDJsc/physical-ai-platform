@@ -855,15 +855,17 @@
         "infrastructure/observability/",
         "docker-compose.yml"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-22",
         "evidence": [
-          "Written: Compose profile `observability` (OpenTelemetry Collector 0.164.0 and Prometheus v3.15.1, pinned by digest), configs, scripts/check_observability.py, smoke.sh --observability, and CI's Compose job now runs it."
+          "GitHub Actions run 44988534994 on 688914d (pushed 2026-11-22), all four jobs success: gate+smoke+browser suites (local stack), trial dry run, secret/code/dependency scans (Trivy over the new lock files, Semgrep), Docker Compose stack.",
+          "Compose job, `bash scripts/smoke.sh --compose --e2e --observability` (otel-collector 0.164.0 and prometheus v3.15.1 pulled by digest, both healthy): scripts/check_observability.py printed ok for: Prometheus scrapes pap-api (up == 1), Prometheus scrapes pap-worker (up == 1), the worker's engine invocations are counted (pap_engine_invocations_total > 0), and the collector received spans named 'engine <command>' from a real evaluation.",
+          "Local-stack job: verify.sh full gate passed (244 pytest, engine required; 21 web unit tests; Semgrep) and e2e/ros.spec.ts ran against the recorded replay (7 tests including axe)."
         ]
       },
       "limitations": [
-        "Not exercised yet: Docker is not running on this machine (B-001). It is verified only when CI runs on an approved push."
+        "Only run in CI (Docker is not run on the development machine, B-001). The collector exports to its debug exporter and Prometheus keeps its data in a volume: no long-term backend, dashboards or alerting. The Compose job does not offer a ROS replay, so ros.spec is skipped there (it runs in the local-stack job)."
       ]
     },
     {
@@ -1374,6 +1376,184 @@
       },
       "limitations": [
         "No language model is integrated or was run; the investigation is rule-based and says so. MCP is a minimal hand-written stdio server (tools capability only), not the official SDK (D-031)."
+      ]
+    },
+    {
+      "id": "TWN-001",
+      "title": "Versioned robot model registry (URDF and meshes) with provenance",
+      "priority": 3,
+      "depends_on": [
+        "EVID-001",
+        "ROS-003"
+      ],
+      "description": "Robot models per project, each an immutable numbered version: one URDF plus the mesh files it references, stored content-addressed, with the upstream repository, commit, path and licence recorded. Models are imported from upstream files byte for byte, never redrawn.",
+      "acceptance": [
+        "A version is created from a manifest (URDF path, file paths with sha256, source repository and commit, SPDX licence) and the files; every package:// or relative mesh reference in the URDF must resolve to a file in the version or the upload is refused (422).",
+        "Paths are validated (relative, no '..', allowed extensions .urdf/.stl), STL and URDF content is checked (binary STL length or ASCII 'solid'; URDF parses as a robot), sizes are bounded; the same manifest uploaded twice returns the same version; a changed file makes a new version.",
+        "Files are served back byte-identical with their sha256; another workspace gets 404; viewers read, engineers create.",
+        "The OpenAMRobot platform base is imported from openamr-platform-sw at a pinned commit by expanding upstream's xacro and copying the referenced meshes unchanged, with the licence (CERN-OHL-P-2.0 for the CAD-derived files) and upstream NOTICE attribution kept beside them."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_twin_models.py"
+      ],
+      "paths": [
+        "services/api/app/twin/",
+        "scripts/import_robot_model.py",
+        "examples/openamr-cmd-timeout/model/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_twin_models.py: 6 passed. The real OpenAMRobot model (upstream openAMRobot/openamr-platform-sw 505d17a, xacro expanded by upstream's tool, 10 STL files copied byte for byte) is stored with repository, commit, CERN-OHL-P-2.0 and NOTICE; 25 links, 2 continuous wheel joints with axes, the DiffDrive controller plugin and 9 sensors are extracted; named materials resolve to colours; every file is served back identical to upstream's with its digest as ETag; the same manifest is the same version, a changed byte is version 2 and version 1 is untouched.",
+          "Refused with the right code (nothing stored): path leaving the model, wrong file type, missing mesh, file:// http:// and package:// .. references, DOCTYPE/ENTITY, non-robot root, two roots, non-STL bytes, digest mismatch, unreferenced file, files/manifest mismatch. Viewers read and cannot write (403); another workspace gets 404; traversal forms never serve a file.",
+          "examples/openamr-cmd-timeout/model/build.py --check (also in verify.sh) proves the committed files match their manifest. The migration drift test caught my constraint names; they were fixed.",
+          "Full gate on the final tree (2026-11-22): pytest with the real engine required 259 passed, 4 skipped (S3 needs a SeaweedFS binary); web typecheck, lint, unit tests, API-client check and production build pass; Semgrep clean; ruff and mypy clean; browser suite via scripts/smoke.sh --e2e: 40 passed, 13 skipped (OIDC and trial modes, live-ROS-only tests), including the twin spec and axe on /twin in both themes."
+        ]
+      },
+      "limitations": [
+        "Only the platform base model is imported; the OpenAMRobot upper-body repository uses primitives and is not a registered model. 12 collision STLs upstream are not stored (the expanded URDF does not reference them; listed as omitted). Limits: 32 MiB per version, 64 files."
+      ]
+    },
+    {
+      "id": "TWN-002",
+      "title": "Recordings: MCAP playback track decoded by the platform",
+      "priority": 3,
+      "depends_on": [
+        "TWN-001",
+        "ROS-003"
+      ],
+      "description": "An MCAP recording is attached to a project with the observer's bag summary and the run identity, linked to a robot model version and optionally to an episode. The API decodes it (mcap-ros2-support, no ROS needed) into a deterministic playback track: base pose from /tf (and /odom), joint positions, commanded and applied velocities, plus derived events with the rule that produced them.",
+      "acceptance": [
+        "Upload checks the MCAP magic, size, and that the summary's recorded sha256 equals the file's; the identity is stored as given and shown as reported.",
+        "The track is deterministic (byte-identical twice), carries per-channel message counts that equal the bag summary's, and times on the recording's own clock (simulation time when /clock exists).",
+        "Events (last command received, applied command reaching zero, stale intervals from the summary) each state their rule and source topic; nothing is inferred that the messages do not contain.",
+        "A recording linked to an episode exposes the engine's verdict for that episode, not a recomputed one."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_twin_recordings.py"
+      ],
+      "paths": [
+        "services/api/app/twin/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_twin_recordings.py: 8 passed (engine required). Two REAL Gazebo recordings decode (fix 505d17a: base stops 0.58 s after the last command, 0.08 m; pre-fix wiring, recorded 2026-11-22: still moving at 0.2 m/s 5.04 s later, 1.008 m by /tf against Gazebo's own world-pose measurement of 1.003 m in probe.json, which the track builder never reads). Message counts equal the bag summary's; the track is byte-identical on every decode and its digest is the ETag.",
+          "Found in the data and reported, not hidden: the pre-fix bag's /clock moves backwards (916 times against the running maximum; the summary counts 551 against the previous message): playback follows the running maximum and a warning event says so; both bags hold wheel joint positions constant at 0 rad while the base drives, reported as warning events (no spin is invented).",
+          "Linked to real engine-verified episodes (evaluation run through API, worker and engine): the pre-fix recording shows verified_failure / violated, the fix recording verified_success; an episode of another project cannot be linked (404). Refusals (not MCAP, garbage MCAP, wrong summary digest, bad JSON or identity, bad model or episode reference) store nothing. Synthetic MCAPs written with the same library cover no-/clock, topic-less and backwards-clock cases.",
+          "test_isolation.py now also attacks the twin and assistant routes (4 passed).",
+          "Full gate on the final tree (2026-11-22): pytest with the real engine required 259 passed, 4 skipped (S3 needs a SeaweedFS binary); web typecheck, lint, unit tests, API-client check and production build pass; Semgrep clean; ruff and mypy clean; browser suite via scripts/smoke.sh --e2e: 40 passed, 13 skipped (OIDC and trial modes, live-ROS-only tests), including the twin spec and axe on /twin in both themes."
+        ]
+      },
+      "limitations": [
+        "Recordings are limited to 96 MiB and decoded in memory. Only /clock, /tf, /odom, /joint_states, /cmd_vel and /sim/base_cmd_vel are read; other topics are counted, not decoded. The event rules (stopped at or below 0.02 m/s, grace 1 s) are this reader's thresholds, shown in every event, not a contract."
+      ]
+    },
+    {
+      "id": "TWN-003",
+      "title": "Digital twin viewport in the Workbench: model, modes, synchronized timeline",
+      "priority": 3,
+      "depends_on": [
+        "TWN-002",
+        "WB-001"
+      ],
+      "description": "The Workbench centre shows the robot model in an interactive 3D viewport (Three.js through React Three Fiber, URDF loaded with urdf-loader from the registry's files). It is animated by recorded /tf and /joint_states, or by an observer's joints when connected; the mode (live, recorded, simulated, disconnected) is always stated. The bottom timeline plays the recording with telemetry and evidence events on one clock.",
+      "acceptance": [
+        "The mode badge is one of live, recorded, simulated or disconnected and follows the source: a recording is 'recorded'; an observer in a simulated environment is 'simulated'; a physical observer is 'live'; an unreachable or never-connected source is 'disconnected' and the model does not move.",
+        "Playback (play, pause, step, seek by keyboard and pointer) moves the model, the telemetry cursor and the evidence list together; selecting an event seeks to it.",
+        "Selecting a link shows its name, parent joint, joint type, limits and current position, the controller that claims the joint (from the URDF's ros2_control) and sensors attached to it.",
+        "The viewport has an accessible name and a text equivalent (current time, pose, joints, commands); axe WCAG 2.2 A/AA passes in both themes; nothing autoplays (playback starts only when the user presses Play)."
+      ],
+      "tests": [
+        "npm --prefix apps/web run test",
+        "npx playwright test e2e/twin.spec.ts"
+      ],
+      "paths": [
+        "apps/web/src/components/twin/",
+        "apps/web/src/components/Workbench.tsx"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "apps/web/src/lib/twin.test.ts: 16 unit tests on the real tracks and the real observer snapshot (interpolation, held commands, event stepping, link/controller/sensor lookup, observer mode rules). e2e/twin.spec.ts against the real stack: 10 passed, 1 skipped (the live-graph Simulated mode needs scripts/ros_stack.sh).",
+          "In a real browser the upstream model loads from the registry (18 mesh visuals from 10 files), the scene's own root position moves with the recording (x from 0 to over 1.3 m for the pre-fix run) and agrees with the readout text, pausing stops it, End/Home keys seek. Clicking the robot in the 3D view selects the link under the pointer. Mode badge: a recording is Recorded; an observer replaying a snapshot is Recorded although its environment is 'simulated'; blocking the observer's reads turns it Disconnected and the pose becomes 'no pose'.",
+          "The first axe runs found real defects, fixed: event markers were below the 24 px target size (now 24 px hit areas laid out in non-overlapping lanes) and a nav hint broke the palette test's search. /twin is in the a11y page list (both themes, with data) and is audited again with the explanation open.",
+          "Full gate on the final tree (2026-11-22): pytest with the real engine required 259 passed, 4 skipped (S3 needs a SeaweedFS binary); web typecheck, lint, unit tests, API-client check and production build pass; Semgrep clean; ruff and mypy clean; browser suite via scripts/smoke.sh --e2e: 40 passed, 13 skipped (OIDC and trial modes, live-ROS-only tests), including the twin spec and axe on /twin in both themes."
+        ]
+      },
+      "limitations": [
+        "Live and Simulated modes are covered by unit tests on the real observer snapshot and by an e2e that is skipped unless a live graph is offered; no live graph was attached in the final run. The observer's joint names (upper-body mock) match none of the platform model's joints, which the UI states; wheel angles in these recordings are constant, so wheels do not spin. The viewport is software-rendered in CI; no frame-rate claim."
+      ]
+    },
+    {
+      "id": "TWN-004",
+      "title": "Engineering assistant in the twin, through the existing typed tools",
+      "priority": 3,
+      "depends_on": [
+        "TWN-002",
+        "AGT-001"
+      ],
+      "description": "A panel beside the viewport that answers about the current selection by calling the platform's typed tools (the same allowlist and schemas as the MCP server) with the viewer's own credential, and shows every call. New read-only tools list recordings and explain an event in a recording by citing the evidence behind it. Rule-based; no language model.",
+      "acceptance": [
+        "The web reaches the tools through one API route that runs only allowlisted tools with the caller's own Authorization; roles and workspace isolation apply unchanged; the call trace (tool, arguments, result ids) is shown.",
+        "Explaining a failure event cites: the recording and its sha256, the run identity (commit, tree state), the event's rule and topic, stale intervals from the summary, the contract and the engine's verdict for the linked episode, and states what is not known.",
+        "The MCP server lists the new tools; the official MCP SDK client (mcp 2.3.0) interoperates with it (scripts/mcp_sdk_interop.py)."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_twin_assistant.py services/api/tests/test_agent_tools.py"
+      ],
+      "paths": [
+        "packages/agent-tools/",
+        "services/api/app/twin/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "services/api/tests/test_twin_assistant.py: 4 passed against real uvicorn, worker and engine. The assistant endpoint runs only the 15 read-only tools of the existing registry as the caller; propose_experiment and unknown tools are 404, no credential is 401, another workspace 404, naming another workspace 422, an unknown project is a refused tool call shown as text.",
+          "Explaining the pre-fix failure event cites the recording and its sha256, the event and its rule, the run identity (modified tree, the two wiring files, 'as reported'), the stored data-quality events, the engine's verdict (violated), contract stops-after-command-loss v0.1 (sha prefix), the observed 1.003 m and evidence class simulated; it keeps the recording's measurement apart from the engine's and lists what is not known. The fix recording is explained as stopping promptly, satisfied, clean checkout, no problem finding. The HTTP answer and the MCP answer are byte-identical.",
+          "scripts/mcp_sdk_interop.py: the official mcp 2.3.0 client (isolated environment) negotiates with our server, lists all 16 tools, sees one write tool, and gets errors for bad input and unknown tools; it found the protocol-version echo defect, fixed and tested (D-033).",
+          "Full gate on the final tree (2026-11-22): pytest with the real engine required 259 passed, 4 skipped (S3 needs a SeaweedFS binary); web typecheck, lint, unit tests, API-client check and production build pass; Semgrep clean; ruff and mypy clean; browser suite via scripts/smoke.sh --e2e: 40 passed, 13 skipped (OIDC and trial modes, live-ROS-only tests), including the twin spec and axe on /twin in both themes."
+        ]
+      },
+      "limitations": [
+        "Rule-based, no language model; the explanation covers events of recordings only. Free-text questions are not offered."
+      ]
+    },
+    {
+      "id": "TWN-005",
+      "title": "Twin linked from Release Intelligence and experiments; milestone",
+      "priority": 3,
+      "depends_on": [
+        "TWN-003",
+        "TWN-004"
+      ],
+      "description": "An episode with a recording links to the twin at that run; the twin links back to the evaluation and episode. A real recorded OpenAMRobot Gazebo run on the pre-fix release (main) shows the command-loss failure: the user plays it in 3D, selects the failure on the timeline and the assistant explains the supporting evidence.",
+      "acceptance": [
+        "Episode detail shows 'Open in Workbench' when a recording exists for that episode key; the Workbench shows the evaluation, release and engine verdict with links back.",
+        "End to end in a browser against the real API, worker and engine: open the main-arm recording, the model moves, select the failure event, the assistant's explanation cites the recording, identity, contract and verdict; axe passes on the page."
+      ],
+      "tests": [
+        "npx playwright test e2e/twin.spec.ts"
+      ],
+      "paths": [
+        "apps/web/",
+        "examples/openamr-cmd-timeout/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "e2e/twin.spec.ts, the milestone group (4 tests), against the real API, worker and engine: open the real pre-fix OpenAMRobot recording on upstream's model, play and scrub it, select 'Base still moving after the last command' on the timeline, press 'Explain this event', and the assistant cites the recording, identity, contract, verdict, 1.003 m and the clock anomaly; the Episode link opens Release Intelligence with that episode selected and 'Open in Workbench' returns to the twin. The fix arm's recording raises no problem.",
+          "The Workbench links to the twin and the nav has a Digital twin page (DESIGN.md 6b).",
+          "Full gate on the final tree (2026-11-22): pytest with the real engine required 259 passed, 4 skipped (S3 needs a SeaweedFS binary); web typecheck, lint, unit tests, API-client check and production build pass; Semgrep clean; ruff and mypy clean; browser suite via scripts/smoke.sh --e2e: 40 passed, 13 skipped (OIDC and trial modes, live-ROS-only tests), including the twin spec and axe on /twin in both themes."
+        ]
+      },
+      "limitations": [
+        "The comparison between arms (5 vs 7 runs) remains insufficient evidence in the engine; the twin shows each recording and verdict, not a statistical claim."
       ]
     }
   ]

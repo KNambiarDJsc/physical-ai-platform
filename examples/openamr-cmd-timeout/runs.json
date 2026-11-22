@@ -56,6 +56,21 @@
       "file": "probe.json"
     },
     {
+      "id": "main_20261122T053012Z",
+      "arm": "main",
+      "procedure": "publisher_kill",
+      "software_state": "fix commit 505d17a with gz_bridge.yaml and gz_simulator.launch.py put back to origin/main 69847ab (pre-fix wiring) for the run; MCAP bag recorded. The identity says tree_dirty and names the two files.",
+      "software_exact": true,
+      "labelled_by": "pap-run-identity.json written by scenario/run_scenario.sh via scenario/run_main.sh",
+      "file": "probe.json",
+      "source_dir": "main_1",
+      "extras": [
+        "pap-run-identity.json",
+        "bag",
+        "bag-summary.json"
+      ]
+    },
+    {
       "id": "fix_all_122407",
       "arm": "fix",
       "procedure": "publisher_kill",
@@ -201,6 +216,13 @@
       "sha256": "88e77a63fec04e71e2e9a5b1ec2343ec424564eeb1ce7cbf310294f533bf89a1",
       "bytes": 35475,
       "ended_utc": "2026-11-21T18:59:22Z",
+      "ended_utc_basis": "modification time of the result file (1 s resolution)"
+    },
+    "main_20261122T053012Z": {
+      "file": "recorded/main_20261122T053012Z/probe.json",
+      "sha256": "6a5e1e8c5a980bdcacdcd31def4baada218e8ab30dbff60dce22dca4b9fc38ed",
+      "bytes": 35517,
+      "ended_utc": "2026-11-22T05:30:44Z",
       "ended_utc_basis": "modification time of the result file (1 s resolution)"
     }
   }

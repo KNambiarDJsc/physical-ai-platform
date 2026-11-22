@@ -49,6 +49,8 @@ python_gates() {
   step "contract schemas up to date" bash -c "cd services/api && uv run python -m app.contracts.export --check"
   step "openapi document up to date" uv run python scripts/export_openapi.py --check
   step "demo dataset reproducible" uv run python examples/manipulation-demo/generate.py --check
+  step "twin track fixtures up to date" uv run python scripts/export_track_fixtures.py --check
+  step "robot model files match their manifest" python examples/openamr-cmd-timeout/model/build.py --check
   if [ "$MODE" = "quick" ]; then
     step "pytest" uv run pytest -q
   else

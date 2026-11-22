@@ -294,3 +294,28 @@ document). Starlette warns that httpx TestClient support is deprecated (harmless
 - `UV_CACHE_DIR=D:/uv-cache`; C: has under 4 GB free.
 - Gotcha: writing `"\x00"` through a bash heredoc into Python source produced a literal NUL byte; use `chr(0)`
   or the file tools.
+
+## 2026-11-22 - Session 8: Digital Twin Workbench (TWN-001..005), OBS-002 verified
+
+**Done, with evidence (see harness/features.json)**
+- CI run 44988534994 on 688914d (pushed with approval): all four jobs green, including the Compose job that ran the new
+  observability profile (Prometheus scrapes API and worker, engine counters, collector spans). OBS-002 verified.
+- Robot model registry (immutable versions, upstream's own URDF and STL meshes byte for byte, provenance and licence),
+  MCAP recording decoder, /twin page (React Three Fiber + urdf-loader), evidence events with rules, inspector,
+  rule-based assistant over the existing typed tools, Release Intelligence deep links. D-033..D-035.
+- A new real Gazebo run of the PRE-FIX wiring (travel after kill 1.003 m, upstream limit 0.15 m) with an MCAP bag, summary
+  and identity (scenario/run_main.sh edits two wiring files of the local checkout for one run and restores them; the
+  identity records the dirty tree). Imported as the 12th run; the evaluation is still insufficient evidence (5 vs 7).
+- The official MCP SDK 2.3.0 client was run against our server: one real defect fixed; not adopted (D-033).
+
+**Found by the gates, fixed**
+- Migration constraint names did not follow the naming convention (drift test); event markers below the 24 px target size
+  (axe); a nav hint that the palette test matched; export_openapi waited 4 minutes for Windows to refuse a database
+  connection (now a closed port with a 1 s timeout); ruff and mypy findings.
+
+**Gotchas**
+- The tool transport can turn escape sequences such as backslash-x00 in a command into raw bytes inside files: build
+  such strings with chr() and check files for control bytes.
+- WSL kills background processes when the wsl.exe session ends (run the scenario in a foreground session).
+- Windows takes about 2 s to refuse a localhost connection: anything that probes a default database URL is slow.
+

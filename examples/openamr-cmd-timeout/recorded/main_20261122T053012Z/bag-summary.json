@@ -1,0 +1,153 @@
+{
+ "bag": "bag",
+ "clock": {
+  "backward_jumps": 551,
+  "largest_backward_s": 0.979,
+  "messages": 11288,
+  "monotonic": false,
+  "real_time_factor": 0.6329,
+  "recorder_wall_span_s": 17.833875,
+  "sim_first_s": 4.8149999999999995,
+  "sim_last_s": 16.102,
+  "sim_span_s": 11.287,
+  "state": "recorded"
+ },
+ "expected_topics": [],
+ "files": [
+  {
+   "bytes": 1272995,
+   "name": "bag_0.mcap",
+   "sha256": "8cfb92a7324da91c5ca58ddc1cb9ed0e322ad88cf4f2e6a3af2d4ed260ca882f"
+  },
+  {
+   "bytes": 4695,
+   "name": "metadata.yaml",
+   "sha256": "0817421a77eb0718549e7653d39eed998e83488211905b11ee73bc15b49e89fe"
+  }
+ ],
+ "identity": {
+  "arm": "main",
+  "configuration": {
+   "launch": "openamrobot_gazebo gz_simulator.launch.py gui:=false",
+   "sim_cmd_vel_timeout.yaml": "# Simulation-only command timeout for the Gazebo base (#79), node sim_cmd_vel_timeout.\n# 0.2 s matches the real base controllers: the Teensy firmware stops after 200 ms without a fresh\n# /cmd_vel, and the Build 1 STM32 replaces a /cmd_vel older than 200 ms with zero, non-latching\n# (platform-fw docs/safety/motion-safety.md; platform-fw #17, T11). Not a safety function.\nsim_cmd_vel_timeout:\n  ros__parameters:\n    timeout_s: 0.2\n    tick_period_s: 0.02\n"
+  },
+  "environment": {
+   "gz_partition": "p79",
+   "host": "DESKTOP-I31D6VO",
+   "rmw": "default",
+   "ros_distro": "jazzy",
+   "ros_domain_id": "79"
+  },
+  "run_id": "main_20261122T053012Z",
+  "scenario": {
+   "commanded_m_per_s": 0.2,
+   "kill_after_sim_s": 4.0,
+   "name": "command_loss_stop",
+   "procedure": "publisher_kill",
+   "upstream_test": "test_sim_cmd_vel_timeout_gazebo.py",
+   "watch_sim_s": 5.0
+  },
+  "schema": "pap.ros.run-identity/1",
+  "software": {
+   "branch": "fix/79-sim-base-command-timeout",
+   "changed_files": [
+    "ros2/src/openamrobot_gazebo/config/gz_bridge.yaml",
+    "ros2/src/openamrobot_gazebo/launch/gz_simulator.launch.py"
+   ],
+   "commit": "505d17ae71c9705878b9245ac237f3f581db7143",
+   "diff_sha256": "8219764e28d4da8e342dfc4475cfeb17b417b6e90a1b36de735b050d592cc012",
+   "note": "pre-fix arm: gz_bridge.yaml and gz_simulator.launch.py taken from origin/main (69847ab) over the fix commit; the new node and its config are installed but not launched",
+   "origin_main": "69847ab7c9c6cd49b3022dc1a62f86c044ba10ff",
+   "repository": "openAMRobot/openamr-platform-sw",
+   "tree_dirty": true
+  },
+  "started_utc": "2026-11-22T05:30:12.227797+00:00"
+ },
+ "log_time_note": "log time is the recorder's wall clock at receipt, not the message stamp or the sim clock",
+ "recording": {
+  "duration_s": 17.833875,
+  "first_log_ns": 1795325425692574540,
+  "last_log_ns": 1795325443526449085,
+  "messages": 12717,
+  "topics": 5
+ },
+ "schema": "pap.ros.bag-summary/1",
+ "storage": "mcap",
+ "topics": [
+  {
+   "duration_s": 17.833875,
+   "first_log_ns": 1795325425692574540,
+   "last_log_ns": 1795325443526449085,
+   "max_gap_s": 0.073381,
+   "messages": 11288,
+   "name": "/clock",
+   "rate_hz": 1006.079,
+   "silent_after_last_s": 0.0,
+   "silent_before_first_s": 0.0,
+   "stale_after_s": 2.0,
+   "stale_intervals": [],
+   "state": "recorded",
+   "type": "rosgraph_msgs/msg/Clock"
+  },
+  {
+   "duration_s": 3.599567,
+   "first_log_ns": 1795325431019542615,
+   "last_log_ns": 1795325434619109627,
+   "max_gap_s": 0.055107,
+   "messages": 73,
+   "name": "/cmd_vel",
+   "rate_hz": 19.992,
+   "silent_after_last_s": 8.907339,
+   "silent_before_first_s": 5.326968,
+   "stale_after_s": 2.0,
+   "stale_intervals": [],
+   "state": "recorded",
+   "type": "geometry_msgs/msg/Twist"
+  },
+  {
+   "duration_s": 17.723559,
+   "first_log_ns": 1795325425801730665,
+   "last_log_ns": 1795325443525290027,
+   "max_gap_s": 0.244837,
+   "messages": 113,
+   "name": "/joint_states",
+   "rate_hz": 5.975,
+   "silent_after_last_s": 0.001159,
+   "silent_before_first_s": 0.109156,
+   "stale_after_s": 2.0,
+   "stale_intervals": [],
+   "state": "recorded",
+   "type": "sensor_msgs/msg/JointState"
+  },
+  {
+   "duration_s": 17.826992,
+   "first_log_ns": 1795325425697870740,
+   "last_log_ns": 1795325443524862327,
+   "max_gap_s": 0.092421,
+   "messages": 565,
+   "name": "/odom",
+   "rate_hz": 48.927,
+   "silent_after_last_s": 0.001587,
+   "silent_before_first_s": 0.005296,
+   "stale_after_s": 2.0,
+   "stale_intervals": [],
+   "state": "recorded",
+   "type": "nav_msgs/msg/Odometry"
+  },
+  {
+   "duration_s": 17.827649,
+   "first_log_ns": 1795325425697960548,
+   "last_log_ns": 1795325443525609502,
+   "max_gap_s": 0.092433,
+   "messages": 678,
+   "name": "/tf",
+   "rate_hz": 49.888,
+   "silent_after_last_s": 0.00084,
+   "silent_before_first_s": 0.005386,
+   "stale_after_s": 2.0,
+   "stale_intervals": [],
+   "state": "recorded",
+   "type": "tf2_msgs/msg/TFMessage"
+  }
+ ]
+}

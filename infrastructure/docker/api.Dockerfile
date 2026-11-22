@@ -50,6 +50,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY packages/openmhs-bridge packages/openmhs-bridge
 COPY packages/device-sdk packages/device-sdk
+COPY packages/agent-tools packages/agent-tools
 COPY services/api services/api
 RUN uv sync --frozen --no-dev --package pap-api
 

@@ -6,6 +6,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
   "openmhs-bridge",
   "pap-device-sdk",
+  "pap-agent-tools",
   "fastapi>=0.115,<1",
   "uvicorn>=0.32,<1",
   "pydantic>=2.11,<3",
@@ -21,6 +22,8 @@ dependencies = [
   "opentelemetry-exporter-otlp-proto-http>=1.45.2,<1.46",
   "boto3==1.43.123",
   "botocore==1.43.123",
+  "mcap>=1.6,<2",
+  "mcap-ros2-support>=0.6,<1",
 ]
 
 [dependency-groups]

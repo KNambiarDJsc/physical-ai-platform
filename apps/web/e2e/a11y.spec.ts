@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type APIResponse, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { seedModel, seedRecording } from "./support/twin-seed";
 
 /**
  * Accessibility gate (DESIGN.md §11): axe-core's WCAG 2.0/2.1/2.2 A and AA rules on every page, in the dark and the
@@ -66,6 +67,9 @@ test.beforeAll(async ({ playwright, baseURL }) => {
   }
   expect(r.state).toBe("succeeded");
   // A proposal, so the proposals table is audited with content.
+  // Digital twin: upstream's robot model and one real recording, so the viewer is audited with content.
+  await seedModel(api, P);
+  await seedRecording(api, P, "fix_20261121T185851Z", { model_slug: "openamrobot-platform", model_version: "1" });
   await ok(api.post(`${O}/experiment-proposals`, { data: { workflow: "dispense", rationale: "Repeat the run to confirm the result.", evidence_ids: [`run:${r.id}`] } }));
 });
 
@@ -93,6 +97,7 @@ const pages = () => [
   [`/workbench?org=${org}`, "Independently verified (OpenMHS engine)"],
   [`/hardware?org=${org}`, "Discover devices"],
   [`/workflows?org=${org}`, "Recent runs"],
+  [`/twin?org=${org}&project=reach`, "Events in the recording"],
 ];
 
 for (const theme of ["dark", "light"] as const) {
