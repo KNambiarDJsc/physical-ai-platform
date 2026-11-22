@@ -32,8 +32,10 @@ These apply to every agent (and every human) regardless of tool. CLAUDE.md adds 
 
 ## Safety
 
-- This platform observes. It never issues motion commands, never writes to industrial equipment, and is
-  never in a robot's real-time or safety path.
+- Commands go only to environments the operator configured `simulated` whose devices also report
+  `simulated=true` (D-026). Physical environments are discovered and read, never commanded. The platform is never in
+  a robot's real-time or safety path. An experiment approval applies to one exact checksum (D-037); simulation hosts
+  refuse rather than degrade (D-038); the agent harness can request, never approve (D-039).
 - Uploaded files and engine inputs are untrusted: size-limit, parse defensively, never pass them through a
   shell, never use a client filename as a path.
 - No credentials in code, fixtures, docs or logs. Configuration comes from the environment.
@@ -44,3 +46,15 @@ These apply to every agent (and every human) regardless of tool. CLAUDE.md adds 
 
 Every session ends with `harness/progress.md` stating: what changed, the evidence, what is next, and what
 is uncommitted. The next agent should not need the conversation.
+
+## Handoff (start here if you are new, including Codex)
+
+- `docs/HANDOFF.md`: what exists, where, the invariants, how to run, test and extend.
+- `docs/handoff/CODEX_HANDOFF.md`: the current state, the open work in priority order, and the pitfalls.
+- `docs/handoff/graphify/`: a code graph of this repository (GRAPH_REPORT.md for people, graph.json for tools).
+  Query it with `graphify query "<question>"`, `graphify explain "<symbol>"`, `graphify path "A" "B"`,
+  `graphify affected "<symbol>"`; refresh with `graphify update .` (AST only, no API key, nothing leaves the machine).
+  The graph is a map: read the source before relying on an answer.
+- `harness/features.json` (every feature, its acceptance criteria and evidence), `harness/decisions.md` (D-001..),
+  `harness/progress.md` (session log), `harness/blockers.md`.
+

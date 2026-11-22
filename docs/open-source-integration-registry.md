@@ -43,6 +43,10 @@ Status values: **adopted** (in a lock file), **dev-only** (tests/tooling, never 
 | urdf-loader (github.com/gkjohnson/urdf-loaders) | URDF to three.js scene, joint kinematics | 0.13.1 | Apache-2.0 (npm) | Permissive; keep NOTICE | Loads upstream's URDF unchanged |
 | OpenAMRobot platform model (openAMRobot/openamr-platform-sw, description package) | Robot URDF and meshes | commit 505d17a | CERN-OHL-P-2.0 (CAD-derived), MIT envelopes; see model/NOTICE.md | Names/logos not licensed; no endorsement implied | Imported unchanged by examples/openamr-cmd-timeout/model/build.py |
 | SQLite (sqlite.org) | Inside the engine only | bundled in OpenMHS (rusqlite) | Public domain (stated) | None | Engine's store |
+| jsonschema (github.com/python-jsonschema/jsonschema) | Validates experiment parameters against a simulation host's scenario schema before approval (SIM-002); also in runtimes/sim-host | 4.26.0 (with referencing 0.37.0, rpds-py) | MIT verified (metadata) | Permissive | The host and the API must refuse the same parameters; the reference implementation of JSON Schema (D-037) |
+| mcap, mcap-ros2-support (github.com/foxglove/mcap) | runtimes/sim-host only: the self-test drive scenario writes a real MCAP with the library the platform reads it with (the API already used both) | 1.6.0, 0.6.0 | MIT verified (metadata) | Permissive | Same library on both sides; no hand-written MCAP encoder (D-037) |
+| Strands Agents (github.com/strands-agents/sdk-python) | packages/agent-harness only (a separate uv project): the agent loop over the platform's permissioned tools; OpenAI-compatible client by default | 1.65.0 (with openai 3.57.0, mcp 2.3.0, boto3, opentelemetry) | Apache-2.0 verified (metadata) | Permissive; its dependency set stays out of the API's environment | Requested by the user for the agentic harness; model-independent providers, sessions, concurrent tools, cancellation (D-039) |
+| types-jsonschema | Dev only: type stubs for mypy | 4.26.0.20261006 | Apache-2.0 verified | Not shipped | mypy gate |
 
 ## Dev-only (never shipped)
 

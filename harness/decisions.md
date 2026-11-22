@@ -299,3 +299,12 @@ the two wiring files the fix changes taken from origin/main for one run (the exi
 names the commit, the dirty tree and the files, so it is never presented as a clean build of 69847ab. Real Gazebo tests are
 opt-in (PAP_REQUIRE_GAZEBO=1 or PAP_RUN_GAZEBO=1): a default full suite must not start simulations in a shared workspace.
 
+## D-039 (2026-11-23) The agentic harness is a Strands agent behind the platform's own permissions, in its own project
+AGENTS.md asks for a recorded decision before adopting an LLM framework. The user asked for a Strands-based harness.
+It lives in `packages/agent-harness`, a separate uv project, so Strands' dependency set (openai, mcp, boto3,
+opentelemetry) never enters the API's environment. It uses only the platform's agent tools (`pap_agent_tools`), runs as
+the caller, can record a run request or a proposal but never approve, start or command (D-026, D-037), and stops before
+a model call on a step limit, timeout, cancellation, session budget or per-experiment budget. Keys come from the
+environment and are never written. Its tests use a labelled scripted model and verify orchestration only; real-model
+quality is claimed only from real runs with the user's spending authorization.
+
