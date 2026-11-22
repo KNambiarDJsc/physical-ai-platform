@@ -1,6 +1,8 @@
 """The tools. Each has a typed input model (its JSON Schema is what the assistant sees), runs as the caller through
-PlatformClient, and is either read-only or the single write `propose_experiment`, which only records a proposal.
-There is deliberately no tool to approve, to create or edit a workflow, to start a run, or to command a device."""
+PlatformClient, and is either read-only or one of two writes that only record something for a person to decide:
+`propose_experiment` (a proposal to run an existing workflow) and `request_experiment_run` (a request to run one exact
+experiment version). There is deliberately no tool to approve, to create or edit a workflow or an experiment, to start
+a run, or to command a device: an engineer approves, and only simulated environments ever run."""
 
 from __future__ import annotations
 
@@ -32,8 +34,12 @@ READ_ONLY = (
     "list_recordings",
     "get_recording",
     "explain_recording_event",
+    "list_simulation_environments",
+    "list_experiments",
+    "get_experiment_run",
+    "list_release_verdicts",
 )
-WRITES = ("propose_experiment",)
+WRITES = ("propose_experiment", "request_experiment_run")
 ALLOWLIST = frozenset(READ_ONLY + WRITES)
 
 
@@ -88,6 +94,19 @@ class ProposeIn(Org):
         max_length=20,
         description="Ids of the evidence the rationale rests on, e.g. run:<id>, step:<id>/<n>.",
     )
+
+
+class ExperimentIn(Org):
+    experiment: str = Field(pattern=SLUG, description="Experiment slug from list_experiments.")
+
+
+class ExperimentRunIn(Org):
+    request_id: UUID = Field(description="A run (request) id from list_experiments.")
+
+
+class RequestRunIn(ExperimentIn):
+    version: int = Field(ge=1, description="The exact version to run. Approval applies to this version only.")
+    rationale: str = Field(min_length=10, max_length=2000, description="Why run it, in plain words, for the approver.")
 
 
 @dataclass(frozen=True)
@@ -169,6 +188,29 @@ def _explain(c: PlatformClient, a: EventIn) -> Any:
         from .client import ToolError
 
         raise ToolError(str(e)) from None
+
+
+def _experiments(c: PlatformClient, a: Org) -> Any:
+    """Experiments with their versions (scenario, setups, contract) and runs, without the bulky host listing."""
+    out = []
+    for e in c.get(f"{_o(a)}/experiments"):
+        out.append(
+            {
+                "slug": e["slug"],
+                "name": e["name"],
+                "description": e["description"],
+                "versions": [
+                    {k: v[k] for k in ("number", "spec", "spec_sha256", "environment", "created_by", "created_at")}
+                    for v in e["versions"]
+                ],
+                "runs": e["requests"],
+            }
+        )
+    return out
+
+
+def _request_run(c: PlatformClient, a: RequestRunIn) -> Any:
+    return c.post(f"{_o(a)}/experiments/{a.experiment}/versions/{a.version}/requests", {"note": a.rationale})
 
 
 def _propose(c: PlatformClient, a: ProposeIn) -> Any:
@@ -274,6 +316,40 @@ TOOLS: dict[str, Tool] = {
             "List experiment proposals and their state.",
             ProposalsIn,
             lambda c, a: c.get(f"{_o(a)}/experiment-proposals", state=a.state),
+        ),
+        Tool(
+            "list_simulation_environments",
+            "Simulated environments with a simulation host, what each host lists now (simulator, scenarios with their "
+            "parameter schemas, measurements and artifacts) and whether it is reachable.",
+            Org,
+            lambda c, a: c.get(f"{_o(a)}/simulation-environments"),
+        ),
+        Tool(
+            "list_experiments",
+            "Experiments: their immutable versions (scenario, setups, contract, checksum) and their runs with states.",
+            Org,
+            _experiments,
+        ),
+        Tool(
+            "get_experiment_run",
+            "One experiment run: every trial's measurements, the engine's verdict per trial, captured artifacts with "
+            "digests, the recording ids for the Digital twin, and raw values and verdict counts per setup.",
+            ExperimentRunIn,
+            lambda c, a: c.get(f"{_o(a)}/experiment-requests/{a.request_id}"),
+        ),
+        Tool(
+            "list_release_verdicts",
+            "The engine's release verdicts for an experiment's setups (regression, improvement, no change or "
+            "insufficient evidence) with its reasons. A violated trial is not a release regression.",
+            ExperimentIn,
+            lambda c, a: c.get(f"{_o(a)}/experiments/{a.experiment}/release-evaluations"),
+        ),
+        Tool(
+            "request_experiment_run",
+            "Record a REQUEST to run one exact experiment version. Nothing runs: an engineer other than the requester "
+            "must approve that exact version, and only simulated environments can run.",
+            RequestRunIn,
+            _request_run,
         ),
         Tool(
             "propose_experiment",

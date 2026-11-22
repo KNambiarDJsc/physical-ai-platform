@@ -403,3 +403,12 @@ runs, block on one command and print summary lines only.
 - npm audit 0 vulnerabilities; pip-audit no known vulnerabilities. Camera-comparison infrastructure check passes.
 - ~/p79 is shared with another session (r2_heavy.sh, #177 review commits): check it is idle and clean before runs.
 - To try it: uv run python scripts/dev_stack.py --sim-port 8867 --sim-catalog runtimes/sim-host/catalogs/gazebo-openamr.json
+
+## 2026-11-22 - Session 9 (cont.): pushed, CI green; SIM-007 and HAR-001 in progress
+- origin/main = 314f5a6, CI 45049232368 all four jobs green (Compose stack included). The one earlier CI failure was a
+  racy test (test_runs_are_serialised...): it now checks the host's own run times.
+- SIM-007 (judge setups as releases): API and tests done; the Studio panel's browser test still to run.
+- HAR-001 (Strands agentic harness, packages/agent-harness, docs/agent-harness.md): permissioned tools, spend cap,
+  traces; 6 tests with a scripted stand-in. Waits for the user's PAP_LLM_* environment variables for a real run.
+- Next: real-model run, SIM-007 e2e, then the UI pass over every page and the production items (OIDC default,
+  deployment and backup docs, security checklist).

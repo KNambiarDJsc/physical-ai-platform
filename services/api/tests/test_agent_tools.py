@@ -143,19 +143,23 @@ def contradiction_run(client: TestClient, lab: str) -> dict[str, Any]:
 
 
 def test_the_tool_list_is_exactly_the_allowlist_with_typed_schemas_and_honest_hints(viewer: Mcp) -> None:
-    from pap_agent_tools.tools import ALLOWLIST
+    from pap_agent_tools.tools import ALLOWLIST, WRITES
 
     tools = viewer.rpc("tools/list")["result"]["tools"]
-    assert {t["name"] for t in tools} == ALLOWLIST and len(tools) == 16
+    assert {t["name"] for t in tools} == ALLOWLIST and len(tools) == 21  # 16 + the 5 experiment tools (SIM-007)
     for t in tools:
         assert t["inputSchema"]["type"] == "object" and t["inputSchema"]["properties"] is not None, t["name"]
         assert t["description"]
-        assert t["annotations"]["readOnlyHint"] is (t["name"] != "propose_experiment"), t["name"]
+        assert t["annotations"]["readOnlyHint"] is (t["name"] not in WRITES), t["name"]
         assert t["annotations"]["destructiveHint"] is False
         assert not re.search(r"approve|reject|start|create|command|execute|reset|fault|delete|dispatch", t["name"]), t[
             "name"
         ]
     assert "org" in next(t for t in tools if t["name"] == "list_devices")["inputSchema"]["required"]
+    assert set(WRITES) == {
+        "propose_experiment",
+        "request_experiment_run",
+    }  # the only writes: both only record a request
     prop = next(t for t in tools if t["name"] == "propose_experiment")["inputSchema"]
     assert (
         set(prop["required"]) == {"org", "workflow", "rationale"} and prop["properties"]["rationale"]["minLength"] == 10

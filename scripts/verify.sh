@@ -36,6 +36,8 @@ python_gates() {
   step "mypy (bridge)" uv run mypy packages/openmhs-bridge/src
   step "mypy (device sdk)" uv run mypy packages/device-sdk/src
   step "mypy (sim host)" uv run --project runtimes/sim-host mypy runtimes/sim-host/src
+  step "mypy (agent harness)" uv run --project packages/agent-harness mypy packages/agent-harness/src
+  step "agent harness tests" bash -c "cd packages/agent-harness && uv run pytest -q"
   step "mypy (agent tools)" uv run mypy packages/agent-tools/src
   # The same project rules CI runs (a finding there blocked the 2026-11-21 checkpoint; it now fails here first).
   # Semgrep scans files git tracks: stage new files (git add -N) before relying on this step.

@@ -1816,6 +1816,40 @@
         ]
       },
       "limitations": []
+    },
+    {
+      "id": "HAR-001",
+      "title": "Agentic harness (Strands) over the platform's permissioned tools, with a spend cap and traces",
+      "priority": 3,
+      "depends_on": [
+        "SIM-007"
+      ],
+      "description": "packages/agent-harness: a Strands agent (OpenAI-compatible model from PAP_LLM_* env vars) that investigates through the platform's agent tools as the caller. It reads, explains, and only when allowed records a run request or a proposal; it can never approve, start a run or command a device. A hard spend cap stops the session before a call that would exceed it, and every model and tool call, permitted or refused, is written to a pap.agent-trace/1 file.",
+      "acceptance": [
+        "Tools are the platform's allowlist, run as the caller; write tools (request_experiment_run, propose_experiment) are offered only with --allow-requests, and any other or unknown tool call is refused and traced without reaching the platform; no tool can approve, start or command.",
+        "The session stops before a model call once the token cap (always) or the spend cap (when prices are set) is reached, and says so.",
+        "Every model call (tokens) and tool call (input, permitted, output digest, error) is in the trace; the API key is never in a trace, log or file.",
+        "With a real model (the user's key via environment variables), a session answers a question about a real experiment run, citing ids from the tool results, keeping contract violations and release regressions apart, within the cap."
+      ],
+      "tests": [
+        "cd packages/agent-harness && uv run pytest",
+        "pap-harness ask --org <org> --as <subject> \"<question>\" (real model, needs PAP_LLM_*)"
+      ],
+      "paths": [
+        "packages/agent-harness/",
+        "packages/agent-tools/src/pap_agent_tools/tools.py"
+      ],
+      "status": "in_progress",
+      "verification": {
+        "verified_at": null,
+        "evidence": [
+          "packages/agent-harness tests: 6 passed (scripted test model, labelled; an in-memory double of the platform API): a session reads through a tool and answers with a full trace (model, tool, model; output digest; usage); writes are refused and traced without reaching the platform unless requests are allowed, and an approve tool does not exist; the session stops before the model call that would exceed the token cap, and the spend cap raises at the priced limit; invalid tool input is answered, not raised; settings come from the environment and the key never appears in repr or the trace; the system prompt keeps violations and regressions apart. mypy clean; added to verify.sh. Platform side: 5 experiment tools added to pap_agent_tools (test_agent_tools.py and test_twin_assistant.py: 12 passed). NOT yet run with a real model: waits for the user's key in the environment."
+        ]
+      },
+      "limitations": [
+        "Real-model behaviour is not yet verified.",
+        "Traces are local files (var/agent-traces), not yet stored in or shown by the platform."
+      ]
     }
   ]
 }
