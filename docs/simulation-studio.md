@@ -86,7 +86,26 @@ visibility measurements and leaves recordings, and the same objects and conditio
 shown in the spec). The infrastructure for it is the arms, the pinned scenario schema, per-arm results and captured
 artifacts above; the camera scenario itself belongs to the simulation owners (OpenAMRobot #69, #97) and is not built here.
 
+## The Studio in the interface
+
+`/experiments` (nav: Lab automation). Engineers configure; everyone in the workspace can read and ask for a run. The
+journey: pick an environment and scenario the host lists, set the setups as columns of a comparison table (fields come
+from the scenario's JSON Schema and are checked in the browser and again by the API), say how often and what counts as a
+pass, what to keep and which robot model shows the recording, then save an immutable version. Someone other than the
+requester approves the exact checksum; trials run in the worker; results show each trial's measurement and the engine's
+verdict, setups side by side, downloadable files, and "Investigate in Digital twin" for each recording. The twin shows the
+trial's arm, seed, verdict and an "SIMULATED EVIDENCE" label, links back to all trials, and its assistant explains an event
+from the run's own verification and contract.
+
+## Architecture note
+
+Execution reaches a simulation host through the adapter SDK from the durable worker, as it reaches the virtual lab. It does
+not pass through a separate OpenMHS Gateway process; the verdict is the OpenMHS engine's. Hosts for Gazebo, MuJoCo and
+Isaac Sim implement the same `pap.simulation-host/1` contract; the platform does not know which is behind it.
+
 ## Not built yet
 
-MuJoCo and Isaac hosts (the contract is the same), an automatic evaluation of arms through Release Intelligence,
-cancellation of a running scenario, a progress stream, and policies or datasets.
+MuJoCo and Isaac hosts (the contract is the same), the Gazebo catalog entry (SIM-006), an automatic evaluation of arms
+through Release Intelligence (`ops compare`), cancellation of a running scenario, a progress stream from inside a running
+scenario, a twin view that plays a baseline and a candidate side by side, serving artifacts by streaming (they are bounded
+by the 96 MiB capture limit), and policies or datasets.

@@ -226,6 +226,70 @@
         "title": "Arm",
         "type": "object"
       },
+      "ArmSummaryOut": {
+        "description": "Raw values and verdict counts for one arm. No statistic: that is the engine's `ops compare`.",
+        "properties": {
+          "arm": {
+            "title": "Arm",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "role": {
+            "enum": [
+              "baseline",
+              "candidate"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "states": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "States",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          },
+          "values": {
+            "additionalProperties": {
+              "items": {},
+              "type": "array"
+            },
+            "title": "Values",
+            "type": "object"
+          },
+          "verdicts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Verdicts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "arm",
+          "title",
+          "role",
+          "parameters",
+          "trials",
+          "states",
+          "verdicts",
+          "values"
+        ],
+        "title": "ArmSummaryOut",
+        "type": "object"
+      },
       "ArtifactOut": {
         "properties": {
           "created_at": {
@@ -1051,6 +1115,24 @@
           "last_used_at"
         ],
         "title": "CredentialOut",
+        "type": "object"
+      },
+      "DecisionIn": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "DecisionIn",
         "type": "object"
       },
       "DeviceDetailOut": {
@@ -1993,7 +2075,7 @@
         "title": "EvaluationOut",
         "type": "object"
       },
-      "ExperimentIn": {
+      "ExperimentCreateIn": {
         "properties": {
           "description": {
             "default": "",
@@ -2017,7 +2099,28 @@
           "slug",
           "name"
         ],
-        "title": "ExperimentIn",
+        "title": "ExperimentCreateIn",
+        "type": "object"
+      },
+      "ExperimentDecisionIn": {
+        "properties": {
+          "note": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Note",
+            "type": "string"
+          },
+          "spec_sha256": {
+            "description": "The checksum of the version the decider reviewed.",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "spec_sha256"
+        ],
+        "title": "ExperimentDecisionIn",
         "type": "object"
       },
       "ExperimentOut": {
@@ -2041,7 +2144,7 @@
           },
           "requests": {
             "items": {
-              "$ref": "#/components/schemas/RequestOut"
+              "$ref": "#/components/schemas/ExperimentRequestOut"
             },
             "title": "Requests",
             "type": "array"
@@ -2052,7 +2155,7 @@
           },
           "versions": {
             "items": {
-              "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+              "$ref": "#/components/schemas/ExperimentVersionOut"
             },
             "title": "Versions",
             "type": "array"
@@ -2068,6 +2171,322 @@
           "requests"
         ],
         "title": "ExperimentOut",
+        "type": "object"
+      },
+      "ExperimentRequestDetail": {
+        "properties": {
+          "arms": {
+            "items": {
+              "$ref": "#/components/schemas/ArmSummaryOut"
+            },
+            "title": "Arms",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decision_note": {
+            "title": "Decision Note",
+            "type": "string"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "experiment": {
+            "title": "Experiment",
+            "type": "string"
+          },
+          "experiment_name": {
+            "title": "Experiment Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "requested_by_me": {
+            "title": "Requested By Me",
+            "type": "boolean"
+          },
+          "scenario": {
+            "additionalProperties": true,
+            "title": "Scenario",
+            "type": "object"
+          },
+          "spec": {
+            "additionalProperties": true,
+            "title": "Spec",
+            "type": "object"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "trial_results": {
+            "items": {
+              "$ref": "#/components/schemas/TrialResultOut"
+            },
+            "title": "Trial Results",
+            "type": "array"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          },
+          "trials_done": {
+            "title": "Trials Done",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "experiment",
+          "experiment_name",
+          "version",
+          "spec_sha256",
+          "state",
+          "requested_by",
+          "requested_by_me",
+          "note",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "created_at",
+          "trials",
+          "trials_done",
+          "spec",
+          "scenario",
+          "environment",
+          "arms",
+          "trial_results"
+        ],
+        "title": "ExperimentRequestDetail",
+        "type": "object"
+      },
+      "ExperimentRequestIn": {
+        "properties": {
+          "note": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "title": "ExperimentRequestIn",
+        "type": "object"
+      },
+      "ExperimentRequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decision_note": {
+            "title": "Decision Note",
+            "type": "string"
+          },
+          "experiment": {
+            "title": "Experiment",
+            "type": "string"
+          },
+          "experiment_name": {
+            "title": "Experiment Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "requested_by_me": {
+            "title": "Requested By Me",
+            "type": "boolean"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          },
+          "trials_done": {
+            "title": "Trials Done",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "experiment",
+          "experiment_name",
+          "version",
+          "spec_sha256",
+          "state",
+          "requested_by",
+          "requested_by_me",
+          "note",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "created_at",
+          "trials",
+          "trials_done"
+        ],
+        "title": "ExperimentRequestOut",
+        "type": "object"
+      },
+      "ExperimentVersionIn": {
+        "properties": {
+          "notes": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Notes",
+            "type": "string"
+          },
+          "spec": {
+            "additionalProperties": true,
+            "title": "Spec",
+            "type": "object"
+          }
+        },
+        "required": [
+          "spec"
+        ],
+        "title": "ExperimentVersionIn",
+        "type": "object"
+      },
+      "ExperimentVersionOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "scenario": {
+            "additionalProperties": true,
+            "title": "Scenario",
+            "type": "object"
+          },
+          "spec": {
+            "additionalProperties": true,
+            "title": "Spec",
+            "type": "object"
+          },
+          "spec_sha256": {
+            "title": "Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "spec",
+          "spec_sha256",
+          "scenario",
+          "notes",
+          "environment",
+          "created_by",
+          "created_at"
+        ],
+        "title": "ExperimentVersionOut",
         "type": "object"
       },
       "FileOut": {
@@ -3335,243 +3754,6 @@
         "title": "ReportedOutcome",
         "type": "object"
       },
-      "RequestDetail": {
-        "properties": {
-          "arms": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Arms",
-            "type": "array"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "decided_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided At"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By"
-          },
-          "decision_note": {
-            "title": "Decision Note",
-            "type": "string"
-          },
-          "environment": {
-            "title": "Environment",
-            "type": "string"
-          },
-          "experiment": {
-            "title": "Experiment",
-            "type": "string"
-          },
-          "experiment_name": {
-            "title": "Experiment Name",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "note": {
-            "title": "Note",
-            "type": "string"
-          },
-          "requested_by": {
-            "title": "Requested By",
-            "type": "string"
-          },
-          "scenario": {
-            "additionalProperties": true,
-            "title": "Scenario",
-            "type": "object"
-          },
-          "spec": {
-            "additionalProperties": true,
-            "title": "Spec",
-            "type": "object"
-          },
-          "spec_sha256": {
-            "title": "Spec Sha256",
-            "type": "string"
-          },
-          "state": {
-            "title": "State",
-            "type": "string"
-          },
-          "trial_results": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Trial Results",
-            "type": "array"
-          },
-          "trials": {
-            "title": "Trials",
-            "type": "integer"
-          },
-          "trials_done": {
-            "title": "Trials Done",
-            "type": "integer"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "experiment",
-          "experiment_name",
-          "version",
-          "spec_sha256",
-          "state",
-          "requested_by",
-          "note",
-          "decided_by",
-          "decided_at",
-          "decision_note",
-          "created_at",
-          "trials",
-          "trials_done",
-          "spec",
-          "scenario",
-          "environment",
-          "arms",
-          "trial_results"
-        ],
-        "title": "RequestDetail",
-        "type": "object"
-      },
-      "RequestIn": {
-        "properties": {
-          "note": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Note",
-            "type": "string"
-          }
-        },
-        "title": "RequestIn",
-        "type": "object"
-      },
-      "RequestOut": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "decided_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided At"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By"
-          },
-          "decision_note": {
-            "title": "Decision Note",
-            "type": "string"
-          },
-          "experiment": {
-            "title": "Experiment",
-            "type": "string"
-          },
-          "experiment_name": {
-            "title": "Experiment Name",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "note": {
-            "title": "Note",
-            "type": "string"
-          },
-          "requested_by": {
-            "title": "Requested By",
-            "type": "string"
-          },
-          "spec_sha256": {
-            "title": "Spec Sha256",
-            "type": "string"
-          },
-          "state": {
-            "title": "State",
-            "type": "string"
-          },
-          "trials": {
-            "title": "Trials",
-            "type": "integer"
-          },
-          "trials_done": {
-            "title": "Trials Done",
-            "type": "integer"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "experiment",
-          "experiment_name",
-          "version",
-          "spec_sha256",
-          "state",
-          "requested_by",
-          "note",
-          "decided_by",
-          "decided_at",
-          "decision_note",
-          "created_at",
-          "trials",
-          "trials_done"
-        ],
-        "title": "RequestOut",
-        "type": "object"
-      },
       "RunDetailOut": {
         "properties": {
           "attempts": {
@@ -4017,7 +4199,90 @@
         "title": "RunOut",
         "type": "object"
       },
-      "ScenarioOut": {
+      "SimEnvironmentOut": {
+        "properties": {
+          "last_discovered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Discovered At"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/SimScenarioOut"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "simulator": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulator"
+          },
+          "simulator_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulator Description"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ready",
+              "no_host",
+              "unreachable",
+              "unavailable",
+              "invalid"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "state"
+        ],
+        "title": "SimEnvironmentOut",
+        "type": "object"
+      },
+      "SimScenarioOut": {
         "properties": {
           "artifacts": {
             "items": {
@@ -4076,90 +4341,7 @@
           "max_duration_s",
           "definition_sha256"
         ],
-        "title": "ScenarioOut",
-        "type": "object"
-      },
-      "SimEnvironmentOut": {
-        "properties": {
-          "last_discovered_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Discovered At"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "scenarios": {
-            "items": {
-              "$ref": "#/components/schemas/ScenarioOut"
-            },
-            "title": "Scenarios",
-            "type": "array"
-          },
-          "simulator": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Simulator"
-          },
-          "simulator_description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Simulator Description"
-          },
-          "slug": {
-            "title": "Slug",
-            "type": "string"
-          },
-          "state": {
-            "enum": [
-              "ready",
-              "no_host",
-              "unreachable",
-              "unavailable",
-              "invalid"
-            ],
-            "title": "State",
-            "type": "string"
-          }
-        },
-        "required": [
-          "slug",
-          "name",
-          "state"
-        ],
-        "title": "SimEnvironmentOut",
+        "title": "SimScenarioOut",
         "type": "object"
       },
       "Source": {
@@ -4549,6 +4731,258 @@
         "title": "ToolDescriptor",
         "type": "object"
       },
+      "TrialArtifactOut": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "state": {
+            "enum": [
+              "stored",
+              "rejected"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "state"
+        ],
+        "title": "TrialArtifactOut",
+        "type": "object"
+      },
+      "TrialResultOut": {
+        "description": "One trial: what the host measured, the engine's verdict, and what was captured. Nothing is derived.",
+        "properties": {
+          "arm": {
+            "title": "Arm",
+            "type": "string"
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/TrialArtifactOut"
+            },
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "capture_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Error"
+          },
+          "capture_state": {
+            "title": "Capture State",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "host_run": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Run"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "measurements": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measurements"
+          },
+          "recording_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recording Id"
+          },
+          "repetition": {
+            "title": "Repetition",
+            "type": "integer"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "step_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step State"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          }
+        },
+        "required": [
+          "id",
+          "arm",
+          "repetition",
+          "seed",
+          "run_id",
+          "state",
+          "step_state",
+          "verdict",
+          "error",
+          "measurements",
+          "host_run",
+          "capture_state",
+          "capture_error",
+          "artifacts",
+          "recording_id",
+          "started_at",
+          "finished_at"
+        ],
+        "title": "TrialResultOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -4589,24 +5023,77 @@
         "title": "ValidationError",
         "type": "object"
       },
-      "VersionIn": {
+      "VersionOut": {
         "properties": {
-          "notes": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Notes",
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
             "type": "string"
           },
-          "spec": {
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/FileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "manifest_sha256": {
+            "title": "Manifest Sha256",
+            "type": "string"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "model_slug": {
+            "title": "Model Slug",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "omitted": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Omitted",
+            "type": "array"
+          },
+          "source": {
             "additionalProperties": true,
-            "title": "Spec",
+            "title": "Source",
             "type": "object"
+          },
+          "structure": {
+            "additionalProperties": true,
+            "title": "Structure",
+            "type": "object"
+          },
+          "urdf_path": {
+            "title": "Urdf Path",
+            "type": "string"
           }
         },
         "required": [
-          "spec"
+          "model_slug",
+          "model_name",
+          "number",
+          "manifest_sha256",
+          "urdf_path",
+          "source",
+          "files",
+          "omitted",
+          "structure",
+          "created_at",
+          "created_by"
         ],
-        "title": "VersionIn",
+        "title": "VersionOut",
         "type": "object"
       },
       "VersionSummary": {
@@ -4777,169 +5264,6 @@
           "created_at"
         ],
         "title": "WorkflowOut",
-        "type": "object"
-      },
-      "app__agent__routes__DecisionIn": {
-        "properties": {
-          "note": {
-            "anyOf": [
-              {
-                "maxLength": 1000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Note"
-          }
-        },
-        "title": "DecisionIn",
-        "type": "object"
-      },
-      "app__experiments__routes__DecisionIn": {
-        "properties": {
-          "note": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Note",
-            "type": "string"
-          },
-          "spec_sha256": {
-            "description": "The checksum of the version the decider reviewed.",
-            "pattern": "^sha256:[0-9a-f]{64}$",
-            "title": "Spec Sha256",
-            "type": "string"
-          }
-        },
-        "required": [
-          "spec_sha256"
-        ],
-        "title": "DecisionIn",
-        "type": "object"
-      },
-      "app__experiments__routes__VersionOut": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "created_by": {
-            "title": "Created By",
-            "type": "string"
-          },
-          "environment": {
-            "title": "Environment",
-            "type": "string"
-          },
-          "notes": {
-            "title": "Notes",
-            "type": "string"
-          },
-          "number": {
-            "title": "Number",
-            "type": "integer"
-          },
-          "scenario": {
-            "additionalProperties": true,
-            "title": "Scenario",
-            "type": "object"
-          },
-          "spec": {
-            "additionalProperties": true,
-            "title": "Spec",
-            "type": "object"
-          },
-          "spec_sha256": {
-            "title": "Spec Sha256",
-            "type": "string"
-          }
-        },
-        "required": [
-          "number",
-          "spec",
-          "spec_sha256",
-          "scenario",
-          "notes",
-          "environment",
-          "created_by",
-          "created_at"
-        ],
-        "title": "VersionOut",
-        "type": "object"
-      },
-      "app__twin__routes__VersionOut": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "created_by": {
-            "title": "Created By",
-            "type": "string"
-          },
-          "files": {
-            "items": {
-              "$ref": "#/components/schemas/FileOut"
-            },
-            "title": "Files",
-            "type": "array"
-          },
-          "manifest_sha256": {
-            "title": "Manifest Sha256",
-            "type": "string"
-          },
-          "model_name": {
-            "title": "Model Name",
-            "type": "string"
-          },
-          "model_slug": {
-            "title": "Model Slug",
-            "type": "string"
-          },
-          "number": {
-            "title": "Number",
-            "type": "integer"
-          },
-          "omitted": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Omitted",
-            "type": "array"
-          },
-          "source": {
-            "additionalProperties": true,
-            "title": "Source",
-            "type": "object"
-          },
-          "structure": {
-            "additionalProperties": true,
-            "title": "Structure",
-            "type": "object"
-          },
-          "urdf_path": {
-            "title": "Urdf Path",
-            "type": "string"
-          }
-        },
-        "required": [
-          "model_slug",
-          "model_name",
-          "number",
-          "manifest_sha256",
-          "urdf_path",
-          "source",
-          "files",
-          "omitted",
-          "structure",
-          "created_at",
-          "created_by"
-        ],
-        "title": "VersionOut",
         "type": "object"
       }
     }
@@ -5851,7 +6175,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__agent__routes__DecisionIn"
+                "$ref": "#/components/schemas/DecisionIn"
               }
             }
           },
@@ -5927,7 +6251,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/RequestOut"
+                    "$ref": "#/components/schemas/ExperimentRequestOut"
                   },
                   "title": "Response List Experiment Requests Api V1 Orgs  Org Slug  Experiment Requests Get",
                   "type": "array"
@@ -5983,7 +6307,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestDetail"
+                  "$ref": "#/components/schemas/ExperimentRequestDetail"
                 }
               }
             },
@@ -6036,7 +6360,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__experiments__routes__DecisionIn"
+                "$ref": "#/components/schemas/ExperimentDecisionIn"
               }
             }
           },
@@ -6047,7 +6371,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestDetail"
+                  "$ref": "#/components/schemas/ExperimentRequestDetail"
                 }
               }
             },
@@ -6099,7 +6423,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__experiments__routes__DecisionIn"
+                "$ref": "#/components/schemas/ExperimentDecisionIn"
               }
             }
           },
@@ -6110,7 +6434,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestDetail"
+                  "$ref": "#/components/schemas/ExperimentRequestDetail"
                 }
               }
             },
@@ -6259,7 +6583,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExperimentIn"
+                "$ref": "#/components/schemas/ExperimentCreateIn"
               }
             }
           },
@@ -6376,7 +6700,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/VersionIn"
+                "$ref": "#/components/schemas/ExperimentVersionIn"
               }
             }
           },
@@ -6390,7 +6714,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+                  "$ref": "#/components/schemas/ExperimentVersionOut"
                 }
               }
             },
@@ -6453,7 +6777,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__experiments__routes__VersionOut"
+                  "$ref": "#/components/schemas/ExperimentVersionOut"
                 }
               }
             },
@@ -6516,7 +6840,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RequestIn"
+                "$ref": "#/components/schemas/ExperimentRequestIn"
               }
             }
           },
@@ -6527,7 +6851,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestOut"
+                  "$ref": "#/components/schemas/ExperimentRequestOut"
                 }
               }
             },
@@ -8340,7 +8664,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__twin__routes__VersionOut"
+                  "$ref": "#/components/schemas/VersionOut"
                 }
               }
             },
@@ -8412,7 +8736,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__twin__routes__VersionOut"
+                  "$ref": "#/components/schemas/VersionOut"
                 }
               }
             },

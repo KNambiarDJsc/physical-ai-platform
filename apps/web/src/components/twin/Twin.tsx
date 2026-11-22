@@ -38,6 +38,7 @@ import { Notice } from "../AppShell";
 import { RequireIdentity } from "../Identity";
 import { Split } from "../Split";
 import { Badge, ClassBadge } from "../ui";
+import { VerdictBadge } from "../Workbench";
 import { OrgSelect, useDevices, useOrg } from "../Workspace";
 import { Assistant } from "./Assistant";
 import { Inspector } from "./Inspector";
@@ -353,6 +354,22 @@ function Twin() {
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line px-3 py-1.5 text-[12px]">
         <ModeBadge mode={mode} />
         <span className="text-muted" data-testid="mode-reason">{modeReason}</span>
+        {source.kind === "recording" && d?.run && (
+          <span className="ml-auto flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="trial-link">
+            <span className="text-muted">
+              Trial {d.run.arm ?? "run"}
+              {d.run.seed !== null && d.run.seed !== undefined ? ` · seed ${d.run.seed}` : ""}
+            </span>
+            <span className="text-muted">Engine verdict</span>
+            <VerdictBadge verdict={d.run.verdict} />
+            <Badge tone="warn">SIMULATED EVIDENCE</Badge>
+            {d.run.experiment && d.run.request_id && (
+              <Link className="text-accent hover:underline" href={`/experiments?org=${org}&exp=${d.run.experiment}&request=${d.run.request_id}`}>
+                {d.run.experiment_name} v{d.run.version}: all trials
+              </Link>
+            )}
+          </span>
+        )}
         {source.kind === "recording" && d?.episode && (
           <span className="ml-auto flex items-center gap-2">
             <span className="text-muted">Engine verdict</span>

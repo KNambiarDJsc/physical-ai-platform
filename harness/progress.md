@@ -384,3 +384,14 @@ runs, block on one command and print summary lines only.
 - The 96 MB MemoryError: root cause is read(limit + 1) reserving the limit up front (96.0 MiB measured for a 1.24 MiB
   file; now 3.0 MiB). Fixed, with a regression test. Not a flaky test.
 - Next: SIM-005 (Studio UI, e2e with the selftest host in dev_stack, design pass), then the full gate.
+
+## 2026-11-22 - Session 9 (cont.): SIM-005 verified; SIM-001..005 done, SIM-006 not started
+- Studio at /experiments (components/experiments/*, lib/experiments.ts), twin trial link, stack: dev_stack.py --sim-port
+  (smoke.sh passes it), API: requested_by_me, typed trial/arm models. Gate: verify.sh all passed (pytest 299 passed,
+  0 errors); smoke.sh --e2e 47 passed, 13 skipped.
+- The 96 MB MemoryError: fixed at its cause in SIM-004 and did not recur in the full gate.
+- Local commits (not pushed): 0e7e1f2 SIM-001, 854d3d2 SIM-002/003, 2e0e751 SIM-004, then SIM-005.
+- Next: SIM-006 (Gazebo #79, pre-fix and fix arms, through WSL; ~1.5 GB RAM, ~3 min a run; ASK before starting; this
+  machine had ~0.7-1.4 GB free during the gate, so close the browser first). Then the camera-comparison infrastructure
+  check, and the Strands-based agentic harness.
+- Not stopped here: dependency audit commands are not in verify.sh.

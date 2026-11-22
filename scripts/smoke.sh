@@ -130,7 +130,7 @@ fi
 echo "== starting stack (log: $LOG)"
 uv run python scripts/dev_stack.py --api-port "$API_PORT" --web-port "$WEB_PORT" \
   --lab-port "${PAP_SMOKE_LAB_PORT:-8865}" --ros-replay runtimes/ros-observer/tests/fixtures/openamr-upperbody-mock.snapshot.json \
-  --ros-replay-port "${PAP_SMOKE_ROS_PORT:-8866}" ${PAP_SMOKE_ROS_OBSERVER:+--ros-observer "$PAP_SMOKE_ROS_OBSERVER"} \
+  --ros-replay-port "${PAP_SMOKE_ROS_PORT:-8866}" --sim-port "${PAP_SMOKE_SIM_PORT:-8867}" ${PAP_SMOKE_ROS_OBSERVER:+--ros-observer "$PAP_SMOKE_ROS_OBSERVER"} \
   --state-dir "$STATE" --ready-file "$READY" --stop-file "$STOP" >"$LOG" 2>&1 &
 STACK=$!
 

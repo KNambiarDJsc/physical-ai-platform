@@ -93,12 +93,18 @@ def main() -> int:
         "--ros-replay", help="serve this RECORDED observer snapshot (needs no ROS) and offer it as an environment"
     )
     ap.add_argument("--ros-replay-port", type=int, default=8210)
+    ap.add_argument(
+        "--sim-port",
+        type=int,
+        default=0,
+        help="serve a simulation host with the self-test catalog (runtimes/sim-host; not a simulator) and offer it",
+    )
     ns = ap.parse_args()
     VAR = Path(ns.state_dir).resolve()
     stop = Path(ns.stop_file) if ns.stop_file else None
     if stop:
         stop.unlink(missing_ok=True)
-    ports = (ns.api_port, ns.web_port, ns.lab_port, ns.ros_replay_port if ns.ros_replay else 0)
+    ports = (ns.api_port, ns.web_port, ns.lab_port, ns.ros_replay_port if ns.ros_replay else 0, ns.sim_port)
     busy = [port for port in ports if port and not port_free(port)]
     if busy:  # a leftover server would answer the readiness checks below in place of ours
         print(f"port(s) {busy} already in use; stop whatever holds them first", file=sys.stderr)
@@ -136,7 +142,8 @@ def main() -> int:
     }
     lab_url = f"http://127.0.0.1:{ns.lab_port}" if ns.lab_port else None
     replay_url = f"http://127.0.0.1:{ns.ros_replay_port}" if ns.ros_replay else None
-    if (lab_url or ns.ros_observer or replay_url) and "PAP_ENVIRONMENTS" not in os.environ:
+    sim_url = f"http://127.0.0.1:{ns.sim_port}" if ns.sim_port else None
+    if (lab_url or ns.ros_observer or replay_url or sim_url) and "PAP_ENVIRONMENTS" not in os.environ:
         # The operator catalog of this local install (D-026): the simulated virtual laboratory, and a ROS observer
         # when one was named. Users choose from this list; they never type an endpoint.
         catalog = []
@@ -156,6 +163,11 @@ def main() -> int:
                 {"key": "openamr-recorded", "name": "OpenAMRobot upperbody (RECORDED snapshot, not live)", "kind": "simulated",
                  "endpoint": replay_url,
                  "description": "Observations recorded from a real ROS 2 graph and replayed unchanged. Ages do not advance. For trying the interface without ROS."}
+            )  # fmt: skip
+        if sim_url:
+            catalog.append(
+                {"key": "selftest-sim", "name": "Self-test simulation host", "kind": "simulated", "endpoint": sim_url,
+                 "description": "A simulation host with a small kinematic base model. Not a simulator and not Gazebo: it exercises the experiment pipeline without one."}
             )  # fmt: skip
         env["PAP_ENVIRONMENTS"] = json.dumps(catalog)
     run_dir = VAR / "dev-stack"
@@ -183,6 +195,12 @@ def main() -> int:
         lab_cmd = [uv, "run", "--quiet", "--project", str(ROOT / "runtimes" / "virtual-lab"), "python", "-m",
                    "pap_virtual_lab.server", "--port", str(ns.lab_port)]  # fmt: skip
         procs.append(subprocess.Popen(lab_cmd, env=env, **GROUP))
+    if sim_url:
+        uv = shutil.which("uv") or "uv"
+        sim_cmd = [uv, "run", "--quiet", "--project", str(ROOT / "runtimes" / "sim-host"), "python", "-m",
+                   "pap_sim_host.server", "--catalog", str(ROOT / "runtimes" / "sim-host" / "catalogs" / "selftest.json"),
+                   "--port", str(ns.sim_port), "--work", str(VAR / "sim-host")]  # fmt: skip
+        procs.append(subprocess.Popen(sim_cmd, env=env, **GROUP))
     if replay_url:
         obs_src = str(ROOT / "runtimes" / "ros-observer" / "src")
         replay_cmd = [
@@ -201,6 +219,8 @@ def main() -> int:
             wait(f"{replay_url}/thing_descriptions/", 30)
         if lab_url:
             wait(f"{lab_url}/thing_descriptions/", 180)
+        if sim_url:
+            wait(f"{sim_url}/thing_descriptions/", 180)
         wait(f"http://127.0.0.1:{ns.web_port}/")
         if any(p.poll() is not None for p in procs):
             print("a component exited during start-up; stopping", file=sys.stderr)
@@ -212,6 +232,7 @@ def main() -> int:
             "worker_pid_file": str(pid_file),
             "lab": lab_url,
             "ros_replay": replay_url,
+            "sim_host": sim_url,
         }
         print(json.dumps(info), flush=True)
         if ns.ready_file:

@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ..auth.deps import SLUG, EngineerDep, ViewerDep, audit_allow, error
+from ..auth.deps import SLUG, EngineerDep, OrgContext, ViewerDep, audit_allow, error
 from ..config import get_settings
 from ..db import get_session
 from ..evidence.storage import Storage, get_storage
@@ -23,7 +23,7 @@ from ..hardware.models import Device, Environment
 from ..workflows.models import WorkflowRun
 from .host import HOST, SpecError, read_listing, scenario_digest, simulator_ref
 from .models import Experiment, ExperimentRequest, ExperimentTrial, ExperimentVersion
-from .service import approve, arm_summary, create_version, reject, request_run, trial_view
+from .service import approve, arm_summary, create_version, principal_key, reject, request_run, trial_view
 from .spec import SHA, ExperimentSpec
 
 router = APIRouter(prefix="/api/v1/orgs/{org_slug}", tags=["experiments"])
@@ -38,7 +38,7 @@ def _raise(e: SpecError) -> Exception:
 # ------------------------------------------------------------------------------------------- environments
 
 
-class ScenarioOut(BaseModel):
+class SimScenarioOut(BaseModel):
     id: str
     version: str
     title: str
@@ -57,7 +57,7 @@ class SimEnvironmentOut(BaseModel):
     message: str | None = None
     simulator: dict[str, Any] | None = None
     simulator_description: str | None = None
-    scenarios: list[ScenarioOut] = Field(default_factory=list)
+    scenarios: list[SimScenarioOut] = Field(default_factory=list)
     last_discovered_at: datetime | None = None
 
 
@@ -78,7 +78,7 @@ def _sim_env(session: Session, env: Environment) -> SimEnvironmentOut:
         simulator=simulator_ref(listing.simulator),
         simulator_description=str(listing.simulator.get("description") or ""),
         scenarios=[
-            ScenarioOut(
+            SimScenarioOut(
                 id=s["id"],
                 version=s["version"],
                 title=s.get("title") or s["id"],
@@ -109,18 +109,18 @@ def list_sim_environments(ctx: ViewerDep, session: SessionDep) -> list[SimEnviro
 # ------------------------------------------------------------------------------------------- experiments
 
 
-class ExperimentIn(BaseModel):
+class ExperimentCreateIn(BaseModel):
     slug: str = Field(pattern=SLUG)
     name: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=2000)
 
 
-class VersionIn(BaseModel):
+class ExperimentVersionIn(BaseModel):
     spec: dict[str, Any]
     notes: str = Field(default="", max_length=2000)
 
 
-class VersionOut(BaseModel):
+class ExperimentVersionOut(BaseModel):
     number: int
     spec: dict[str, Any]
     spec_sha256: str
@@ -131,7 +131,7 @@ class VersionOut(BaseModel):
     created_at: datetime
 
 
-class RequestOut(BaseModel):
+class ExperimentRequestOut(BaseModel):
     id: uuid.UUID
     experiment: str
     experiment_name: str
@@ -139,6 +139,7 @@ class RequestOut(BaseModel):
     spec_sha256: str
     state: str
     requested_by: str
+    requested_by_me: bool
     note: str
     decided_by: str | None
     decided_at: datetime | None
@@ -154,31 +155,76 @@ class ExperimentOut(BaseModel):
     description: str
     created_by: str
     created_at: datetime
-    versions: list[VersionOut]
-    requests: list[RequestOut]
+    versions: list[ExperimentVersionOut]
+    requests: list[ExperimentRequestOut]
 
 
-class RequestIn(BaseModel):
+class ExperimentRequestIn(BaseModel):
     note: str = Field(default="", max_length=2000)
 
 
-class DecisionIn(BaseModel):
+class ExperimentDecisionIn(BaseModel):
     spec_sha256: str = Field(pattern=SHA, description="The checksum of the version the decider reviewed.")
     note: str = Field(default="", max_length=2000)
 
 
-class RequestDetail(RequestOut):
+class TrialArtifactOut(BaseModel):
+    name: str
+    state: Literal["stored", "rejected"]
+    filename: str | None = None
+    media_type: str | None = None
+    sha256: str | None = None
+    size_bytes: int | None = None
+    error: str | None = None
+
+
+class TrialResultOut(BaseModel):
+    """One trial: what the host measured, the engine's verdict, and what was captured. Nothing is derived."""
+
+    id: uuid.UUID
+    arm: str
+    repetition: int
+    seed: int | None
+    run_id: uuid.UUID
+    state: str
+    step_state: str | None
+    verdict: str | None
+    error: dict[str, Any] | None
+    measurements: dict[str, Any] | None
+    host_run: dict[str, Any] | None
+    capture_state: str
+    capture_error: str | None
+    artifacts: list[TrialArtifactOut]
+    recording_id: uuid.UUID | None
+    started_at: datetime | None
+    finished_at: datetime | None
+
+
+class ArmSummaryOut(BaseModel):
+    """Raw values and verdict counts for one arm. No statistic: that is the engine's `ops compare`."""
+
+    arm: str
+    title: str
+    role: Literal["baseline", "candidate"]
+    parameters: dict[str, Any]
+    trials: int
+    states: dict[str, int]
+    verdicts: dict[str, int]
+    values: dict[str, list[Any]]
+
+
+class ExperimentRequestDetail(ExperimentRequestOut):
     spec: dict[str, Any]
     scenario: dict[str, Any]
     environment: str
-    arms: list[dict[str, Any]]
-    trial_results: list[dict[str, Any]]
+    arms: list[ArmSummaryOut]
+    trial_results: list[TrialResultOut]
 
 
-def _version_out(session: Session, v: ExperimentVersion) -> VersionOut:
+def _version_out(session: Session, v: ExperimentVersion) -> ExperimentVersionOut:
     env = session.get(Environment, v.environment_id)
     assert env is not None
-    return VersionOut(
+    return ExperimentVersionOut(
         number=v.number,
         spec=v.spec,
         spec_sha256=v.spec_sha256,
@@ -190,7 +236,7 @@ def _version_out(session: Session, v: ExperimentVersion) -> VersionOut:
     )
 
 
-def _request_out(session: Session, r: ExperimentRequest) -> RequestOut:
+def _request_out(session: Session, r: ExperimentRequest, ctx: OrgContext) -> ExperimentRequestOut:
     v = session.get(ExperimentVersion, r.version_id)
     assert v is not None
     e = session.get(Experiment, v.experiment_id)
@@ -199,7 +245,7 @@ def _request_out(session: Session, r: ExperimentRequest) -> RequestOut:
     done = sum(
         1 for t in trials if (run := session.get(WorkflowRun, t.run_id)) is not None and run.finished_at is not None
     )
-    return RequestOut(
+    return ExperimentRequestOut(
         id=r.id,
         experiment=e.slug,
         experiment_name=e.name,
@@ -207,6 +253,7 @@ def _request_out(session: Session, r: ExperimentRequest) -> RequestOut:
         spec_sha256=r.spec_sha256,
         state=r.state,
         requested_by=r.requested_by,
+        requested_by_me=r.requested_by_id == principal_key(ctx),
         note=r.note,
         decided_by=r.decided_by,
         decided_at=r.decided_at,
@@ -243,7 +290,7 @@ def _request(session: Session, org_id: uuid.UUID, rid: uuid.UUID) -> ExperimentR
 
 
 @router.post("/experiments", status_code=201)
-def create_experiment(body: ExperimentIn, ctx: EngineerDep, session: SessionDep) -> ExperimentOut:
+def create_experiment(body: ExperimentCreateIn, ctx: EngineerDep, session: SessionDep) -> ExperimentOut:
     e = Experiment(
         organization_id=ctx.org.id,
         slug=body.slug,
@@ -290,7 +337,7 @@ def get_experiment(
         created_by=e.created_by,
         created_at=e.created_at,
         versions=[_version_out(session, v) for v in versions],
-        requests=[_request_out(session, r) for r in reqs],
+        requests=[_request_out(session, r, ctx) for r in reqs],
     )
 
 
@@ -301,11 +348,11 @@ def get_experiment(
 )
 def create_experiment_version(
     experiment_slug: Annotated[str, Path(pattern=SLUG)],
-    body: VersionIn,
+    body: ExperimentVersionIn,
     ctx: EngineerDep,
     session: SessionDep,
     response: Response,
-) -> VersionOut:
+) -> ExperimentVersionOut:
     """Validate a spec against what the host lists now and store it as an immutable version (checksum computed here)."""
     e = _experiment(session, ctx.org.id, experiment_slug)
     try:
@@ -326,7 +373,7 @@ def get_experiment_version(
     number: Annotated[int, Path(ge=1)],
     ctx: ViewerDep,
     session: SessionDep,
-) -> VersionOut:
+) -> ExperimentVersionOut:
     return _version_out(session, _version(session, _experiment(session, ctx.org.id, experiment_slug), number))
 
 
@@ -334,16 +381,16 @@ def get_experiment_version(
 def request_experiment_run(
     experiment_slug: Annotated[str, Path(pattern=SLUG)],
     number: Annotated[int, Path(ge=1)],
-    body: RequestIn,
+    body: ExperimentRequestIn,
     ctx: ViewerDep,
     session: SessionDep,
-) -> RequestOut:
+) -> ExperimentRequestOut:
     """Ask for a run of one version. This queues nothing: an approval of this exact checksum does."""
     v = _version(session, _experiment(session, ctx.org.id, experiment_slug), number)
     r = request_run(session, ctx, v, body.note)
     audit_allow(session, ctx, "experiment.request", f"experiment_request:{r.id}", sha256=v.spec_sha256)
     session.commit()
-    return _request_out(session, r)
+    return _request_out(session, r, ctx)
 
 
 @router.get("/experiment-requests")
@@ -351,16 +398,16 @@ def list_experiment_requests(
     ctx: ViewerDep,
     session: SessionDep,
     state: Annotated[Literal["awaiting_approval", "approved", "rejected"] | None, Query()] = None,
-) -> list[RequestOut]:
+) -> list[ExperimentRequestOut]:
     q = select(ExperimentRequest).where(ExperimentRequest.organization_id == ctx.org.id)
     if state:
         q = q.where(ExperimentRequest.state == state)
     rows = session.scalars(q.order_by(ExperimentRequest.created_at.desc()).limit(200)).all()
-    return [_request_out(session, r) for r in rows]
+    return [_request_out(session, r, ctx) for r in rows]
 
 
 @router.get("/experiment-requests/{request_id}")
-def get_experiment_request(request_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) -> RequestDetail:
+def get_experiment_request(request_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) -> ExperimentRequestDetail:
     r = _request(session, ctx.org.id, request_id)
     v = session.get(ExperimentVersion, r.version_id)
     assert v is not None
@@ -373,8 +420,8 @@ def get_experiment_request(request_id: uuid.UUID, ctx: ViewerDep, session: Sessi
     views = [trial_view(session, t, spec) for t in trials]
     order = {a.key: i for i, a in enumerate(spec.arms)}
     views.sort(key=lambda t: (order.get(t["arm"], 99), t["repetition"]))
-    base = _request_out(session, r)
-    return RequestDetail(
+    base = _request_out(session, r, ctx)
+    return ExperimentRequestDetail(
         **base.model_dump(),
         spec=v.spec,
         scenario=v.scenario,
@@ -386,8 +433,8 @@ def get_experiment_request(request_id: uuid.UUID, ctx: ViewerDep, session: Sessi
 
 @router.post("/experiment-requests/{request_id}/approve")
 def approve_experiment_request(
-    request_id: uuid.UUID, body: DecisionIn, ctx: EngineerDep, session: SessionDep
-) -> RequestDetail:
+    request_id: uuid.UUID, body: ExperimentDecisionIn, ctx: EngineerDep, session: SessionDep
+) -> ExperimentRequestDetail:
     """Approve the exact checksum reviewed: re-check against the host, compile to workflows, queue every trial."""
     r = _request(session, ctx.org.id, request_id)
     try:
@@ -404,8 +451,8 @@ def approve_experiment_request(
 
 @router.post("/experiment-requests/{request_id}/reject")
 def reject_experiment_request(
-    request_id: uuid.UUID, body: DecisionIn, ctx: EngineerDep, session: SessionDep
-) -> RequestDetail:
+    request_id: uuid.UUID, body: ExperimentDecisionIn, ctx: EngineerDep, session: SessionDep
+) -> ExperimentRequestDetail:
     r = _request(session, ctx.org.id, request_id)
     try:
         reject(session, ctx, r, body.spec_sha256, body.note)

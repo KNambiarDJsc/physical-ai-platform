@@ -96,7 +96,7 @@ Each module gets the pattern that fits its job, not a grid of cards.
 | Workbench | Instruments, observed robots, run, inspector, timeline; resizable | Built |
 | Digital twin | Model viewport, mode badge, MCAP playback, evidence events, inspector, assistant | Built (recordings and read-only observers; no simulator connector yet) |
 | Proposed experiments | Table on the Workflows page; engineers approve or reject | Built (proposals come from people or the tool layer) |
-| Experiments / simulation | Viewport, scenario controls, synchronized telemetry | Viewport and telemetry built (Digital twin); scenario controls not built |
+| Experiments / simulation | Guided journey: environment and scenario from the host's own listing, setups as a comparison table, approval of one exact checksum, live trial progress, results beside the Digital twin | Built (Experiment Studio, `/experiments`); a viewport with scenario controls inside the twin is not built |
 | Datasets, policies, deployments | Episode browser, version history, approvals | Not built |
 
 ## 6a. Observations
@@ -159,3 +159,21 @@ shimmer. Respect `prefers-reduced-motion`.
 Purple or blue gradients, glass effects, glowing borders, nested rounded cards, large hero headings inside the
 app, decorative charts or fake data, generic robot illustrations, marketing copy, a chatbot that takes over the
 page, navigation entries for unbuilt modules, more than one accent colour.
+
+## 6c. Experiment Studio
+
+The page is a journey, not a dashboard: Experiments list (with what waits for a decision) → configure → one
+experiment (its setup in words, its runs) → one run (review, progress, results). The state is in the URL, so every
+step has a link and the browser's Back works. A stage rail (Configured, Approved, Run, Results) says where a run is.
+
+- Words before identifiers: parameters and measurements lose their unit suffix (`speed_mps` is "Speed (m/s)"); people
+  are shown by name, never by their identity provider's label; the checksum and the stored specification sit under
+  "Technical details".
+- The setups are columns of one table, so what differs is visible at a glance and is listed first; what is the same
+  in every setup is kept as a shared condition by the page, not by the user.
+- Every control works for the person looking at it: a requester who may not approve their own run sees why, not a
+  disabled button; a viewer sees no decision controls and is told who decides.
+- Verdicts are the engine's; the page shows counts and the host's raw values per setup and says it is not a
+  statistical comparison. Simulated evidence is labelled wherever a result appears, including in the twin.
+- Errors say what happened and offer the way forward (reload, check again, make a changed version, open the Hardware Hub).
+

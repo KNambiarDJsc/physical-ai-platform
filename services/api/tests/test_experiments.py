@@ -255,6 +255,8 @@ def test_only_an_approval_of_the_exact_checksum_by_someone_else_queues_trials(cl
     req = request(client, headers=ADA)  # anyone in the workspace may ask; ada asks, so ada may not approve
     assert req["state"] == "awaiting_approval" and req["trials"] == 0 and runs(client) == []
     rid = req["id"]
+    assert req["requested_by_me"] is True  # the API says who asked, relative to the caller
+    assert ok(client.get(f"{ORG}/experiment-requests/{rid}", headers=BOB))["requested_by_me"] is False
     assert (
         client.post(
             f"{ORG}/experiment-requests/{rid}/approve", json={"spec_sha256": v["spec_sha256"]}, headers=VIC

@@ -1728,12 +1728,22 @@
         "apps/web/src/components/experiments/",
         "apps/web/e2e/experiments.spec.ts"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
-        "evidence": []
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "apps/web/e2e/experiments.spec.ts, 7 tests in a real browser against the real API, worker, pinned engine and a real simulation host (self-test catalog, started by scripts/dev_stack.py --sim-port): (1) an engineer picks the host-listed environment and scenario, sees every incomplete field refused in words next to it (name, software revision, rule value) and a speed of 9 refused with 'At most 1.' before anything is sent, then saves version 1; the setups table marks only the parameter that differs. (2) The requester sees why they cannot approve their own run and no Approve control; a second engineer reviews the checksum and approves 4 trials, progress is shown and the run finishes. (3) Results: for every one of the 4 trials the engine's verdict equals satisfied iff the host's measured travel <= the typed rule limit (the relation, not a fixed outcome); setups side by side; a recording downloads as .mcap. (4) A violated trial opens in the Digital twin on upstream's OpenAMRobot model (18 meshes, mode Recorded) with the trial's engine verdict, SIMULATED EVIDENCE, and the assistant's explanation cites verification:, workflow-run: and 'Evidence class: simulated'; the link back lists all trials. (5) A viewer sees no New experiment link, no Approve or Reject, and is told only an engineer decides. (6, 7) axe WCAG 2.0-2.2 A/AA passes on the list, configure, experiment, edit, finished-run and review views in dark and light themes; /experiments is also in a11y.spec.ts.",
+          "Defects found by this spec and fixed: an error message inside the Name label made the field's accessible name include the error; a requester who is a viewer was told 'someone else must approve' instead of 'only an engineer can approve'. Found by looking at real screenshots and fixed: raw principal labels (user:dev|ada-...), unit suffixes in labels ('Speed mps'), 'Baseline (baseline)', differing parameters not first, raw environment slug.",
+          "apps/web unit tests (vitest): 13 for the Studio logic (schema-derived fields and limits, refusal messages, spec building with shared conditions and per-seed trials, round trip of a stored spec to a changed version, results in words, names for people); 50 in the web unit step overall.",
+          "Full gate on the final tree (2026-11-22): bash scripts/verify.sh: all gates passed (ruff, ruff format, mypy for bridge, device SDK, sim host, agent tools and api, Semgrep and its rule self-test, secrets scan, contract/OpenAPI/demo/fixture/model checks, openmhs audit 11/11, web typecheck, lint, unit, API client, production build) with pytest (real engine required) 299 passed, 4 skipped (S3 needs a SeaweedFS binary), 0 errors: the MemoryError of the earlier gate did not recur and its cause is fixed (SIM-004). Browser suite via scripts/smoke.sh --e2e: 47 passed, 13 skipped (OIDC, live-ROS and trial modes)."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "Run against the self-test host (a kinematic model that is not a simulator); the Gazebo host is SIM-006 and was not run.",
+        "The twin shows one recording at a time: baseline and candidate are compared side by side in the Studio, not in a split 3D view.",
+        "Counts and raw values only; no statistic and no automatic comparison verdict (ops compare) yet.",
+        "Dependency audit commands (npm audit, pip-audit) are not part of verify.sh and were not run for the two added dependencies (jsonschema, types-jsonschema); Semgrep and the secrets scan are."
+      ]
     },
     {
       "id": "SIM-006",

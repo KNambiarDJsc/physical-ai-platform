@@ -1215,6 +1215,39 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /**
+         * ArmSummaryOut
+         * @description Raw values and verdict counts for one arm. No statistic: that is the engine's `ops compare`.
+         */
+        ArmSummaryOut: {
+            /** Arm */
+            arm: string;
+            /** Parameters */
+            parameters: {
+                [key: string]: unknown;
+            };
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "baseline" | "candidate";
+            /** States */
+            states: {
+                [key: string]: number;
+            };
+            /** Title */
+            title: string;
+            /** Trials */
+            trials: number;
+            /** Values */
+            values: {
+                [key: string]: unknown[];
+            };
+            /** Verdicts */
+            verdicts: {
+                [key: string]: number;
+            };
+        };
         /** ArtifactOut */
         ArtifactOut: {
             /**
@@ -1521,6 +1554,11 @@ export interface components {
             role: string;
             /** Token Prefix */
             token_prefix: string;
+        };
+        /** DecisionIn */
+        DecisionIn: {
+            /** Note */
+            note?: string | null;
         };
         /** DeviceDetailOut */
         DeviceDetailOut: {
@@ -1920,8 +1958,8 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
-        /** ExperimentIn */
-        ExperimentIn: {
+        /** ExperimentCreateIn */
+        ExperimentCreateIn: {
             /**
              * Description
              * @default
@@ -1931,6 +1969,19 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+        };
+        /** ExperimentDecisionIn */
+        ExperimentDecisionIn: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Spec Sha256
+             * @description The checksum of the version the decider reviewed.
+             */
+            spec_sha256: string;
         };
         /** ExperimentOut */
         ExperimentOut: {
@@ -1946,11 +1997,149 @@ export interface components {
             /** Name */
             name: string;
             /** Requests */
-            requests: components["schemas"]["RequestOut"][];
+            requests: components["schemas"]["ExperimentRequestOut"][];
             /** Slug */
             slug: string;
             /** Versions */
-            versions: components["schemas"]["app__experiments__routes__VersionOut"][];
+            versions: components["schemas"]["ExperimentVersionOut"][];
+        };
+        /** ExperimentRequestDetail */
+        ExperimentRequestDetail: {
+            /** Arms */
+            arms: components["schemas"]["ArmSummaryOut"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By */
+            decided_by: string | null;
+            /** Decision Note */
+            decision_note: string;
+            /** Environment */
+            environment: string;
+            /** Experiment */
+            experiment: string;
+            /** Experiment Name */
+            experiment_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string;
+            /** Requested By */
+            requested_by: string;
+            /** Requested By Me */
+            requested_by_me: boolean;
+            /** Scenario */
+            scenario: {
+                [key: string]: unknown;
+            };
+            /** Spec */
+            spec: {
+                [key: string]: unknown;
+            };
+            /** Spec Sha256 */
+            spec_sha256: string;
+            /** State */
+            state: string;
+            /** Trial Results */
+            trial_results: components["schemas"]["TrialResultOut"][];
+            /** Trials */
+            trials: number;
+            /** Trials Done */
+            trials_done: number;
+            /** Version */
+            version: number;
+        };
+        /** ExperimentRequestIn */
+        ExperimentRequestIn: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** ExperimentRequestOut */
+        ExperimentRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By */
+            decided_by: string | null;
+            /** Decision Note */
+            decision_note: string;
+            /** Experiment */
+            experiment: string;
+            /** Experiment Name */
+            experiment_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string;
+            /** Requested By */
+            requested_by: string;
+            /** Requested By Me */
+            requested_by_me: boolean;
+            /** Spec Sha256 */
+            spec_sha256: string;
+            /** State */
+            state: string;
+            /** Trials */
+            trials: number;
+            /** Trials Done */
+            trials_done: number;
+            /** Version */
+            version: number;
+        };
+        /** ExperimentVersionIn */
+        ExperimentVersionIn: {
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /** Spec */
+            spec: {
+                [key: string]: unknown;
+            };
+        };
+        /** ExperimentVersionOut */
+        ExperimentVersionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Environment */
+            environment: string;
+            /** Notes */
+            notes: string;
+            /** Number */
+            number: number;
+            /** Scenario */
+            scenario: {
+                [key: string]: unknown;
+            };
+            /** Spec */
+            spec: {
+                [key: string]: unknown;
+            };
+            /** Spec Sha256 */
+            spec_sha256: string;
         };
         /** FileOut */
         FileOut: {
@@ -2442,106 +2631,6 @@ export interface components {
                 [key: string]: "succeeded" | "failed" | "aborted" | "canceled" | "timeout" | "unknown";
             };
         };
-        /** RequestDetail */
-        RequestDetail: {
-            /** Arms */
-            arms: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Decided At */
-            decided_at: string | null;
-            /** Decided By */
-            decided_by: string | null;
-            /** Decision Note */
-            decision_note: string;
-            /** Environment */
-            environment: string;
-            /** Experiment */
-            experiment: string;
-            /** Experiment Name */
-            experiment_name: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Note */
-            note: string;
-            /** Requested By */
-            requested_by: string;
-            /** Scenario */
-            scenario: {
-                [key: string]: unknown;
-            };
-            /** Spec */
-            spec: {
-                [key: string]: unknown;
-            };
-            /** Spec Sha256 */
-            spec_sha256: string;
-            /** State */
-            state: string;
-            /** Trial Results */
-            trial_results: {
-                [key: string]: unknown;
-            }[];
-            /** Trials */
-            trials: number;
-            /** Trials Done */
-            trials_done: number;
-            /** Version */
-            version: number;
-        };
-        /** RequestIn */
-        RequestIn: {
-            /**
-             * Note
-             * @default
-             */
-            note: string;
-        };
-        /** RequestOut */
-        RequestOut: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Decided At */
-            decided_at: string | null;
-            /** Decided By */
-            decided_by: string | null;
-            /** Decision Note */
-            decision_note: string;
-            /** Experiment */
-            experiment: string;
-            /** Experiment Name */
-            experiment_name: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Note */
-            note: string;
-            /** Requested By */
-            requested_by: string;
-            /** Spec Sha256 */
-            spec_sha256: string;
-            /** State */
-            state: string;
-            /** Trials */
-            trials: number;
-            /** Trials Done */
-            trials_done: number;
-            /** Version */
-            version: number;
-        };
         /** RunDetailOut */
         RunDetailOut: {
             /** Attempts */
@@ -2673,8 +2762,32 @@ export interface components {
             /** Workflow Name */
             workflow_name: string;
         };
-        /** ScenarioOut */
-        ScenarioOut: {
+        /** SimEnvironmentOut */
+        SimEnvironmentOut: {
+            /** Last Discovered At */
+            last_discovered_at?: string | null;
+            /** Message */
+            message?: string | null;
+            /** Name */
+            name: string;
+            /** Scenarios */
+            scenarios?: components["schemas"]["SimScenarioOut"][];
+            /** Simulator */
+            simulator?: {
+                [key: string]: unknown;
+            } | null;
+            /** Simulator Description */
+            simulator_description?: string | null;
+            /** Slug */
+            slug: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "ready" | "no_host" | "unreachable" | "unavailable" | "invalid";
+        };
+        /** SimScenarioOut */
+        SimScenarioOut: {
             /** Artifacts */
             artifacts: {
                 [key: string]: unknown;
@@ -2699,30 +2812,6 @@ export interface components {
             title: string;
             /** Version */
             version: string;
-        };
-        /** SimEnvironmentOut */
-        SimEnvironmentOut: {
-            /** Last Discovered At */
-            last_discovered_at?: string | null;
-            /** Message */
-            message?: string | null;
-            /** Name */
-            name: string;
-            /** Scenarios */
-            scenarios?: components["schemas"]["ScenarioOut"][];
-            /** Simulator */
-            simulator?: {
-                [key: string]: unknown;
-            } | null;
-            /** Simulator Description */
-            simulator_description?: string | null;
-            /** Slug */
-            slug: string;
-            /**
-             * State
-             * @enum {string}
-             */
-            state: "ready" | "no_host" | "unreachable" | "unavailable" | "invalid";
         };
         /**
          * Source
@@ -2864,6 +2953,78 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** TrialArtifactOut */
+        TrialArtifactOut: {
+            /** Error */
+            error?: string | null;
+            /** Filename */
+            filename?: string | null;
+            /** Media Type */
+            media_type?: string | null;
+            /** Name */
+            name: string;
+            /** Sha256 */
+            sha256?: string | null;
+            /** Size Bytes */
+            size_bytes?: number | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "stored" | "rejected";
+        };
+        /**
+         * TrialResultOut
+         * @description One trial: what the host measured, the engine's verdict, and what was captured. Nothing is derived.
+         */
+        TrialResultOut: {
+            /** Arm */
+            arm: string;
+            /** Artifacts */
+            artifacts: components["schemas"]["TrialArtifactOut"][];
+            /** Capture Error */
+            capture_error: string | null;
+            /** Capture State */
+            capture_state: string;
+            /** Error */
+            error: {
+                [key: string]: unknown;
+            } | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Host Run */
+            host_run: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Measurements */
+            measurements: {
+                [key: string]: unknown;
+            } | null;
+            /** Recording Id */
+            recording_id: string | null;
+            /** Repetition */
+            repetition: number;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Seed */
+            seed: number | null;
+            /** Started At */
+            started_at: string | null;
+            /** State */
+            state: string;
+            /** Step State */
+            step_state: string | null;
+            /** Verdict */
+            verdict: string | null;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -2877,17 +3038,39 @@ export interface components {
             /** Error Type */
             type: string;
         };
-        /** VersionIn */
-        VersionIn: {
+        /** VersionOut */
+        VersionOut: {
             /**
-             * Notes
-             * @default
+             * Created At
+             * Format: date-time
              */
-            notes: string;
-            /** Spec */
-            spec: {
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Files */
+            files: components["schemas"]["FileOut"][];
+            /** Manifest Sha256 */
+            manifest_sha256: string;
+            /** Model Name */
+            model_name: string;
+            /** Model Slug */
+            model_slug: string;
+            /** Number */
+            number: number;
+            /** Omitted */
+            omitted: {
+                [key: string]: unknown;
+            }[];
+            /** Source */
+            source: {
                 [key: string]: unknown;
             };
+            /** Structure */
+            structure: {
+                [key: string]: unknown;
+            };
+            /** Urdf Path */
+            urdf_path: string;
         };
         /** VersionSummary */
         VersionSummary: {
@@ -2963,84 +3146,6 @@ export interface components {
             slug: string;
             /** Template */
             template: string | null;
-        };
-        /** DecisionIn */
-        app__agent__routes__DecisionIn: {
-            /** Note */
-            note?: string | null;
-        };
-        /** DecisionIn */
-        app__experiments__routes__DecisionIn: {
-            /**
-             * Note
-             * @default
-             */
-            note: string;
-            /**
-             * Spec Sha256
-             * @description The checksum of the version the decider reviewed.
-             */
-            spec_sha256: string;
-        };
-        /** VersionOut */
-        app__experiments__routes__VersionOut: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Created By */
-            created_by: string;
-            /** Environment */
-            environment: string;
-            /** Notes */
-            notes: string;
-            /** Number */
-            number: number;
-            /** Scenario */
-            scenario: {
-                [key: string]: unknown;
-            };
-            /** Spec */
-            spec: {
-                [key: string]: unknown;
-            };
-            /** Spec Sha256 */
-            spec_sha256: string;
-        };
-        /** VersionOut */
-        app__twin__routes__VersionOut: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Created By */
-            created_by: string;
-            /** Files */
-            files: components["schemas"]["FileOut"][];
-            /** Manifest Sha256 */
-            manifest_sha256: string;
-            /** Model Name */
-            model_name: string;
-            /** Model Slug */
-            model_slug: string;
-            /** Number */
-            number: number;
-            /** Omitted */
-            omitted: {
-                [key: string]: unknown;
-            }[];
-            /** Source */
-            source: {
-                [key: string]: unknown;
-            };
-            /** Structure */
-            structure: {
-                [key: string]: unknown;
-            };
-            /** Urdf Path */
-            urdf_path: string;
         };
     };
     responses: never;
@@ -3599,7 +3704,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__agent__routes__DecisionIn"];
+                "application/json": components["schemas"]["DecisionIn"];
             };
         };
         responses: {
@@ -3642,7 +3747,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestOut"][];
+                    "application/json": components["schemas"]["ExperimentRequestOut"][];
                 };
             };
             /** @description Validation Error */
@@ -3674,7 +3779,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestDetail"];
+                    "application/json": components["schemas"]["ExperimentRequestDetail"];
                 };
             };
             /** @description Validation Error */
@@ -3700,7 +3805,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__experiments__routes__DecisionIn"];
+                "application/json": components["schemas"]["ExperimentDecisionIn"];
             };
         };
         responses: {
@@ -3710,7 +3815,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestDetail"];
+                    "application/json": components["schemas"]["ExperimentRequestDetail"];
                 };
             };
             /** @description Validation Error */
@@ -3736,7 +3841,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__experiments__routes__DecisionIn"];
+                "application/json": components["schemas"]["ExperimentDecisionIn"];
             };
         };
         responses: {
@@ -3746,7 +3851,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestDetail"];
+                    "application/json": components["schemas"]["ExperimentRequestDetail"];
                 };
             };
             /** @description Validation Error */
@@ -3835,7 +3940,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ExperimentIn"];
+                "application/json": components["schemas"]["ExperimentCreateIn"];
             };
         };
         responses: {
@@ -3903,7 +4008,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VersionIn"];
+                "application/json": components["schemas"]["ExperimentVersionIn"];
             };
         };
         responses: {
@@ -3920,7 +4025,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__experiments__routes__VersionOut"];
+                    "application/json": components["schemas"]["ExperimentVersionOut"];
                 };
             };
             /** @description Validation Error */
@@ -3953,7 +4058,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__experiments__routes__VersionOut"];
+                    "application/json": components["schemas"]["ExperimentVersionOut"];
                 };
             };
             /** @description Validation Error */
@@ -3980,7 +4085,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RequestIn"];
+                "application/json": components["schemas"]["ExperimentRequestIn"];
             };
         };
         responses: {
@@ -3990,7 +4095,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestOut"];
+                    "application/json": components["schemas"]["ExperimentRequestOut"];
                 };
             };
             /** @description Validation Error */
@@ -4969,7 +5074,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__twin__routes__VersionOut"];
+                    "application/json": components["schemas"]["VersionOut"];
                 };
             };
             /** @description Validation Error */
@@ -5003,7 +5108,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__twin__routes__VersionOut"];
+                    "application/json": components["schemas"]["VersionOut"];
                 };
             };
             /** @description Validation Error */

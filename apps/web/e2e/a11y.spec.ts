@@ -98,6 +98,7 @@ const pages = () => [
   [`/hardware?org=${org}`, "Discover devices"],
   [`/workflows?org=${org}`, "Recent runs"],
   [`/twin?org=${org}&project=reach`, "Events in the recording"],
+  [`/experiments?org=${org}`, "No experiments yet."],
 ];
 
 for (const theme of ["dark", "light"] as const) {
