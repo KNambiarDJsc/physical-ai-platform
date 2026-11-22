@@ -24,6 +24,7 @@ dependencies = [
   "botocore==1.43.123",
   "mcap>=1.6,<2",
   "mcap-ros2-support>=0.6,<1",
+  "jsonschema>=4.23,<5",
 ]
 
 [dependency-groups]

@@ -368,3 +368,11 @@ runs, block on one command and print summary lines only.
 - Gate: test_sim_host.py 9 passed; verify.sh --python all ok except one MemoryError in test_twin_assistant.py (96 MB
   upload, ~2.4 GB RAM free); that file passes alone. Recorded in features.json.
 - Next: SIM-002 (experiments package, migration 0008, spec validation against the host's `scenarios`).
+
+## 2026-11-22 - Session 9 (cont.): SIM-002 and SIM-003 verified
+- app/experiments: spec (pap.experiment-spec/1, canonical checksum), host (live listing, validation, pins simulator and
+  scenario digest), compile (one workflow per arm and seed), service (versions, requests, approve/reject on an exact
+  checksum, distinct approver, results per arm with no statistic), routes. Migration 0008. Workflows: StepDef.timeout_s,
+  executor heartbeat on wait, dotted output_field. Selftest host gains selftest-drive (a stated kinematic model that
+  writes a real MCAP). D-037. sim-host is in the verify.sh type-check gate. test_isolation.py extended for the new routes.
+- Next: SIM-004 (capture and recording, bounded-memory uploads: the 96 MB MemoryError), then SIM-005 (Studio UI + e2e).

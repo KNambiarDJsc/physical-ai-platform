@@ -277,3 +277,16 @@ Because the host's claim ("the run completed") is not the robot's claim, the exp
 (satisfied/violated) and never the 'contradiction' class an instrument report would imply. Camera-configuration
 comparisons are experiments with several arms; the scenario that measures visibility belongs to the simulation owners.
 
+
+## D-037 (2026-11-22) Experiment specs pin what can change underneath them; approval names a checksum
+The spec (`pap.experiment-spec/1`) records the simulator identity and a digest of the scenario's listed definition as the
+host reported them when the version was created, so an operator who edits a scenario without bumping its version, or
+swaps the simulator, invalidates approval instead of silently changing what runs. The approver sends the checksum they
+reviewed; the platform accepts the decision only for that exact checksum. Seeds are trial inputs (a scenario declares an
+integer `seed` parameter to accept them), so trials with different seeds are separate workflows (one per arm and seed)
+rather than one workflow per arm: a workflow's definition is its exact input. Time limits the platform can enforce are
+budgets checked before approval (trials, wall time from the scenario's own maximum); the step timeout during a run is
+the scenario's maximum plus a margin, because only the host can stop a running simulator (D-036). The selftest host
+gains a kinematic `selftest-drive` scenario (a point base integrating its last command; labelled not a simulator) so the
+whole journey, including a recording in the twin, is tested without Gazebo; its telemetry is computed by that stated
+model, not replayed from another run. `jsonschema` is added to the API to validate parameters before approval.

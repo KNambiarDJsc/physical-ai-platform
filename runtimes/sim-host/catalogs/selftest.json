@@ -13,20 +13,131 @@
       "parameters": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["a", "b"],
+        "required": [
+          "a",
+          "b"
+        ],
         "properties": {
-          "a": {"type": "number", "minimum": -1000, "maximum": 1000, "description": "First addend."},
-          "b": {"type": "number", "minimum": -1000, "maximum": 1000, "description": "Second addend."},
-          "rows": {"type": "integer", "minimum": 1, "maximum": 100, "default": 10, "description": "Rows of telemetry to write."}
+          "a": {
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000,
+            "description": "First addend."
+          },
+          "b": {
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000,
+            "description": "Second addend."
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 10,
+            "description": "Rows of telemetry to write."
+          }
         }
       },
       "outputs": [
-        {"name": "sum", "unit": "units", "description": "a + b"},
-        {"name": "rows", "description": "Rows written"}
+        {
+          "name": "sum",
+          "unit": "units",
+          "description": "a + b"
+        },
+        {
+          "name": "rows",
+          "description": "Rows written"
+        }
       ],
-      "artifacts": [{"name": "telemetry", "media_type": "text/csv", "description": "i,value rows"}],
+      "artifacts": [
+        {
+          "name": "telemetry",
+          "media_type": "text/csv",
+          "description": "i,value rows"
+        }
+      ],
       "max_duration_s": 60,
-      "command": ["{python}", "{catalog_dir}/../selftest/scenario.py", "sum", "{run_dir}", "{params_file}"]
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "sum",
+        "{run_dir}",
+        "{params_file}"
+      ]
+    },
+    {
+      "id": "selftest-drive",
+      "version": "1",
+      "title": "Self-test: base stop on command loss",
+      "description": "A kinematic point base (no dynamics, not a simulator) follows its last velocity command; the command source stops after drive_s. With stop_on_command_loss the base stops once commands are older than command_timeout_s. The seed shifts the moment of command loss by up to 0.2 s. Records /clock, /tf, /odom, /joint_states and /cmd_vel as MCAP.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stop_on_command_loss"
+        ],
+        "properties": {
+          "stop_on_command_loss": {
+            "type": "boolean",
+            "description": "Stop the base when commands stop arriving (the fix)."
+          },
+          "speed_mps": {
+            "type": "number",
+            "minimum": 0.05,
+            "maximum": 1.0,
+            "default": 0.3,
+            "description": "Commanded forward speed, m/s."
+          },
+          "drive_s": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 10,
+            "default": 2,
+            "description": "Seconds of commands before the loss."
+          },
+          "command_timeout_s": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 2,
+            "default": 0.5,
+            "description": "Command age that stops the base, s."
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Shifts the moment of command loss by up to 0.2 s."
+          }
+        }
+      },
+      "outputs": [
+        {
+          "name": "travel_after_kill_m",
+          "unit": "m",
+          "description": "Base travel from the command loss to the end of the recording"
+        },
+        {
+          "name": "driven_before_kill_m",
+          "unit": "m",
+          "description": "Base travel before the command loss"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "recording",
+          "media_type": "application/x-mcap",
+          "description": "MCAP: /clock, /tf, /odom, /joint_states, /cmd_vel"
+        }
+      ],
+      "max_duration_s": 30,
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "drive",
+        "{run_dir}",
+        "{params_file}"
+      ]
     },
     {
       "id": "selftest-sleep",
@@ -36,46 +147,113 @@
       "parameters": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["seconds"],
-        "properties": {"seconds": {"type": "number", "minimum": 0, "maximum": 30}}
+        "required": [
+          "seconds"
+        ],
+        "properties": {
+          "seconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 30
+          }
+        }
       },
-      "outputs": [{"name": "slept_s", "unit": "s", "description": "Measured wait"}],
+      "outputs": [
+        {
+          "name": "slept_s",
+          "unit": "s",
+          "description": "Measured wait"
+        }
+      ],
       "artifacts": [],
       "max_duration_s": 5,
-      "command": ["{python}", "{catalog_dir}/../selftest/scenario.py", "sleep", "{run_dir}", "{params_file}"]
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "sleep",
+        "{run_dir}",
+        "{params_file}"
+      ]
     },
     {
       "id": "selftest-fail",
       "version": "1",
       "title": "Self-test: command failure",
       "description": "Exits with an error and leaves no result.",
-      "parameters": {"type": "object", "additionalProperties": false, "properties": {}},
-      "outputs": [{"name": "sum"}],
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputs": [
+        {
+          "name": "sum"
+        }
+      ],
       "artifacts": [],
       "max_duration_s": 10,
-      "command": ["{python}", "{catalog_dir}/../selftest/scenario.py", "fail", "{run_dir}", "{params_file}"]
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "fail",
+        "{run_dir}",
+        "{params_file}"
+      ]
     },
     {
       "id": "selftest-no-measurement",
       "version": "1",
       "title": "Self-test: result without its declared measurement",
       "description": "Writes a result that omits a declared measurement.",
-      "parameters": {"type": "object", "additionalProperties": false, "properties": {}},
-      "outputs": [{"name": "sum"}],
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputs": [
+        {
+          "name": "sum"
+        }
+      ],
       "artifacts": [],
       "max_duration_s": 10,
-      "command": ["{python}", "{catalog_dir}/../selftest/scenario.py", "no-measurement", "{run_dir}", "{params_file}"]
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "no-measurement",
+        "{run_dir}",
+        "{params_file}"
+      ]
     },
     {
       "id": "selftest-escape",
       "version": "1",
       "title": "Self-test: artifact path outside the run directory",
       "description": "Names an artifact outside its run directory; the host must refuse it.",
-      "parameters": {"type": "object", "additionalProperties": false, "properties": {}},
-      "outputs": [{"name": "sum"}],
-      "artifacts": [{"name": "telemetry", "media_type": "text/csv"}],
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputs": [
+        {
+          "name": "sum"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "telemetry",
+          "media_type": "text/csv"
+        }
+      ],
       "max_duration_s": 10,
-      "command": ["{python}", "{catalog_dir}/../selftest/scenario.py", "escape", "{run_dir}", "{params_file}"]
+      "command": [
+        "{python}",
+        "{catalog_dir}/../selftest/scenario.py",
+        "escape",
+        "{run_dir}",
+        "{params_file}"
+      ]
     }
   ]
 }

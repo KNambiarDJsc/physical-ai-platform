@@ -1603,7 +1603,9 @@
       "acceptance": [
         "A version is refused unless the environment is simulated and hosts a simulation-host, the scenario and its version are listed, every arm's parameters satisfy the scenario's schema, every condition names a declared measurement and every captured artifact is one the scenario leaves.",
         "The same specification is the same version (digest); a change is a new version; versions are never edited.",
-        "Another workspace gets 404; viewers read, engineers create."
+        "Another workspace gets 404; viewers read, engineers create.",
+        "A version holds the environment and the simulator identity the host reports, the robot or instrument model version (when given, an existing registered version), the controller and software revisions, the scenario (id, version and the digest of its listed definition), shared initial conditions and per-trial seeds, per-arm execution parameters, resource and time limits, required observations, the evaluation contract and the approval requirements; its checksum (sha256 of the canonical spec) is computed by the platform, never taken from the client.",
+        "A version whose simulator identity or scenario digest differs from the host's listing, whose seeds do not match its repetitions or a scenario without an integer seed parameter, whose arms redefine a shared initial condition, or whose trials exceed its limits (arms x repetitions above max_trials, or arms x repetitions x the scenario's maximum duration above max_wall_time_s) is refused with the reason."
       ],
       "tests": [
         "uv run pytest services/api/tests/test_experiments.py"
@@ -1611,10 +1613,14 @@
       "paths": [
         "services/api/app/experiments/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
-        "evidence": []
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "uv run pytest services/api/tests/test_experiments.py (real simulation host subprocess, real adapter and discovery, no mocks): 24 passed. SIM-002 part: a version is the canonical pap.experiment-spec/1 and its checksum equals sha256 of that canonical JSON computed independently in the test; the same spec returns the same version (200), a change is version 2, PUT/PATCH/DELETE on a version are 405, a client-supplied spec_sha256 is rejected (422 experiment.invalid).",
+          "15 refusals each with its code and reason, from the host's live listing: physical environment, unknown scenario, arm parameters outside the scenario's JSON Schema (value and undeclared option-like key), simulator identity changed (409), scenario definition digest changed (409), seeds not one per repetition, arm redefining a shared initial condition, unknown measurement/artifact/contract measurement, trial count and wall-time budgets, recording without a model, unknown model version; seeds refused when the scenario has no integer seed parameter. Viewers get 403 creating a version; another workspace gets 404; the environment list never offers an environment configured as physical.",
+          "Migration 0008 matches the models (tests/test_scaffold.py passes in the same run)."
+        ]
       },
       "limitations": []
     },
@@ -1630,22 +1636,32 @@
       "acceptance": [
         "A request does nothing; approval by a viewer is 403; a rejected request never runs; a physical environment is never queued (the executor's check still applies).",
         "Each trial is an ordinary workflow run whose evidence is the scenario's measurements and whose verdict is the engine's over the spec's contract; a long step does not lose its lease (heartbeat while waiting) and has the scenario's own timeout.",
-        "Arms with different parameters become separate workflows and results are grouped by arm without computing a statistic: this is the infrastructure for controlled camera-configuration comparisons."
+        "Arms with different parameters become separate workflows and results are grouped by arm without computing a statistic: this is the infrastructure for controlled camera-configuration comparisons.",
+        "Approval applies to one exact version: the approver sends the checksum they reviewed and any other checksum is 409; a version whose host listing changed since it was created (simulator or scenario digest) cannot be approved; the spec's approval requirements (minimum role, a different person from the requester) are enforced.",
+        "When seeds are given there is one workflow per arm and seed (the seed is part of the step input); every trial records its arm, repetition, seed and run."
       ],
       "tests": [
         "uv run pytest services/api/tests/test_experiments.py"
       ],
       "paths": [
+        "packages/device-sdk/",
         "services/api/app/experiments/",
-        "services/api/app/workflows/",
-        "packages/device-sdk/"
+        "services/api/app/workflows/"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
-        "evidence": []
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "test_experiments.py (24 passed, real worker functions claim/execute_run, real pinned engine PAP_REQUIRE_ENGINE=1): a request queues nothing (no runs exist); approval by a viewer 403; the requester approving their own request 403 (experiment.self_approval); approving a different checksum than the request's version 409 and queues nothing; approving the exact checksum queues 4 trials (2 arms x 2 seeds) as 4 workflows (one per arm and seed, the seed in the step input) and a second approval is 409; a rejected request never runs; a physical environment is refused at version creation and the executor's D-026 check is unchanged.",
+          "The 4 trials ran through the worker: each is an ordinary workflow run whose evidence is the host's measurements (dotted output_field measurements.<name>) and whose verdict is the engine's over the spec's contract; the test asserts the relation verdict == SATISFIED iff measured travel <= 0.15 m for every trial, that the contract the engine received carries the spec's operator, value and unit, and that provenance.evidence_class is 'simulated'. Results are grouped per arm with raw values and verdict counts and no statistic (no mean, CI or difference keys).",
+          "A 4 s scenario with a 5 s lease: the lease expiry was observed advancing while the host was still running (executor heartbeat via invoke_action on_wait), the run succeeded in one attempt. A catalog edited without a version bump (same endpoint key) makes approval 409 experiment.scenario_changed and queues nothing.",
+          "services/api/tests/test_isolation.py extended (new POST bodies, victim experiment, request, trial and a service-credential approver; membership assertion unchanged): 4 passed, so every new route is covered by the cross-workspace isolation check. test_workflows.py, test_hardware.py, test_sim_host.py, test_scaffold.py pass after the executor changes (StepDef.timeout_s, heartbeat, dotted output_field)."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "The recording-upload, artifact capture and twin link are SIM-004; trials of a request are queued with capture_state 'pending' until then.",
+        "The executor reaches the host through the adapter SDK like every other device; it does not pass through a separate OpenMHS Gateway process."
+      ]
     },
     {
       "id": "SIM-004",
@@ -1659,15 +1675,18 @@
       "acceptance": [
         "An artifact whose bytes do not match the reported digest is not stored and the trial says so; unlisted artifacts are never fetched.",
         "A captured MCAP appears as a recording linked to the workflow run (model version, run identity and bag summary stored as reported); the twin shows the run's verdict and the assistant's explanation cites the run's verification and contract.",
-        "Artifacts are served to workspace members only."
+        "Artifacts are served to workspace members only.",
+        "Recording uploads and artifact captures are processed in bounded memory: bytes are streamed in chunks, hashed while streamed, and spooled to disk beyond a small threshold; no request reserves a buffer the size of the upload limit (the 96 MB MemoryError seen in the 2026-11-22 gate).",
+        "The Digital Twin shows, for a recording linked to a trial, the run's state, the engine's verdict and contract, and the experiment arm; a trial that failed or has no recording says so instead of showing a track."
       ],
       "tests": [
         "uv run pytest services/api/tests/test_experiments.py services/api/tests/test_twin_assistant.py"
       ],
       "paths": [
+        "packages/agent-tools/",
+        "packages/device-sdk/",
         "services/api/app/experiments/",
-        "services/api/app/twin/",
-        "packages/agent-tools/"
+        "services/api/app/twin/"
       ],
       "status": "unstarted",
       "verification": {
@@ -1687,7 +1706,9 @@
       "acceptance": [
         "Environments, scenarios and their parameter forms come from the host's own listing; the form refuses values outside the schema before submission and the API refuses them again.",
         "The approval queue shows who requested and who decided; a viewer sees no approve control.",
-        "Results show measurements, the engine's verdict, artifacts with digests and 'Open in Digital twin'; axe WCAG 2.2 A/AA passes in both themes."
+        "Results show measurements, the engine's verdict, artifacts with digests and 'Open in Digital twin'; axe WCAG 2.2 A/AA passes in both themes.",
+        "End-to-end with the selftest host and the real worker: an engineer selects an environment and scenario, configures a baseline and a candidate arm, requests; a second engineer reviews the checksum and approves; trials run and show their live state; the failing trial opens in the Digital Twin with its verdict and the assistant's explanation cites the run's verification; results compare the baseline and candidate arms side by side (raw values and verdict counts, no statistic).",
+        "Every error from the API is shown in words with a recovery action (retry, rediscover, edit as a new version); there is no control without a working action."
       ],
       "tests": [
         "npx playwright test e2e/experiments.spec.ts"

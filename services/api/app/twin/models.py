@@ -61,6 +61,9 @@ class Recording(IdMixin, CreatedMixin, Base):
     episode_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("episodes.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    workflow_run_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("workflow_runs.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     track: Mapped[dict[str, Any]] = mapped_column(JSONB)
     track_sha256: Mapped[str] = mapped_column(String(71))
     created_by: Mapped[str] = mapped_column(String(300))

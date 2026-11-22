@@ -10,6 +10,7 @@ def register(app: FastAPI) -> None:
     from .agent.routes import router as agent
     from .evaluations.routes import router as evaluations
     from .evidence.routes import router as evidence
+    from .experiments.routes import router as experiments
     from .hardware.routes import router as hardware
     from .ingestion.routes import router as mappings
     from .organizations.routes import router as organizations
@@ -27,6 +28,7 @@ def register(app: FastAPI) -> None:
         evaluations,
         hardware,
         workflows,
+        experiments,
         agent,
         twin,
         assistant,

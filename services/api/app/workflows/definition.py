@@ -24,13 +24,18 @@ class StepDef(BaseModel):
     action: str = Field(min_length=1, max_length=128)
     input: dict[str, Any] = Field(default_factory=dict)
     title: str = ""
+    timeout_s: float | None = Field(
+        default=None, gt=0, le=6 * 3600, description="How long to wait for this step (default: the worker's setting)."
+    )
 
 
 class EvidenceDef(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=KEY)
     step: str = Field(pattern=KEY)
-    output_field: str = Field(min_length=1, max_length=128)
+    output_field: str = Field(
+        min_length=1, max_length=128, description="A field of the step's output; dots reach into nested objects."
+    )
     signal: str = Field(min_length=1, max_length=128)
     unit: str | None = None
     kind: Literal["independent_sensor", "device_state"] = "independent_sensor"

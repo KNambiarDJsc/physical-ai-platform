@@ -10,6 +10,7 @@ The victim's data is checked unchanged afterwards. Needs the engine (the victim 
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -21,7 +22,7 @@ from helpers import as_user, bearer, make_org, ok
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
 ID_PARAMS = {
     "user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id",
-    "device_id", "run_id", "proposal_id", "recording_id",
+    "device_id", "run_id", "proposal_id", "recording_id", "request_id", "trial_id",
 }  # fmt: skip
 pytestmark = pytest.mark.engine
 
@@ -80,6 +81,11 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
             "data": {"label": "planted"},
             "files": {"file": ("planted.mcap", b"\x89MCAP0\r\n", "application/octet-stream")},
         },
+        ("POST", f"{o}/experiments"): {"json": {"slug": "planted", "name": "planted"}},
+        ("POST", f"{o}/experiments/{{experiment_slug}}/versions"): {"json": {"spec": {}}},
+        ("POST", f"{o}/experiments/{{experiment_slug}}/versions/{{number}}/requests"): {"json": {"note": "planted"}},
+        ("POST", f"{o}/experiment-requests/{{request_id}}/approve"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
+        ("POST", f"{o}/experiment-requests/{{request_id}}/reject"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
         ("POST", f"{o}/assistant/tools/{{tool_name}}"): {"json": {"arguments": {}}},
         ("POST", f"{o}/experiment-proposals"): {"json": {"workflow": "dispense", "rationale": "planted proposal text"}},
         ("POST", f"{o}/experiment-proposals/{{proposal_id}}/approve"): {},
@@ -134,7 +140,9 @@ def test_every_route_with_a_body_has_one_here() -> None:
 
 
 @pytest.fixture
-def world(client: TestClient, omhs: Any, with_lab: str) -> dict[str, Any]:
+def world(
+    client: TestClient, omhs: Any, with_lab: str, sim_host: str, monkeypatch: pytest.MonkeyPatch
+) -> dict[str, Any]:
     from test_jobs import P, work_once
 
     h = as_user("alice")
@@ -216,13 +224,58 @@ def world(client: TestClient, omhs: Any, with_lab: str) -> dict[str, Any]:
     v["recording_id"] = ok(rec, 201)["id"]
     v["model_slug"], v["number"], v["file_path"] = "victim-model", 1, "robot.urdf"
     v["tool_name"] = "list_workspaces"
+    # Experiments: the victim's environment with a simulation host, an experiment, a version, an approved request and
+    # its trials (so the artifact route has a real trial to refuse).
+    from app.config import get_settings
+
+    cat = json.loads(os.environ["PAP_ENVIRONMENTS"])
+    cat.append({"key": "selftest-sim", "name": "Self-test host", "kind": "simulated", "endpoint": sim_host})
+    monkeypatch.setenv("PAP_ENVIRONMENTS", json.dumps(cat))
+    get_settings.cache_clear()
+    ok(client.post("/api/v1/orgs/acme/environments", json={"config_key": "selftest-sim"}, headers=h), 201)
+    ok(client.post("/api/v1/orgs/acme/environments/selftest-sim/discover", headers=h))
+    ok(
+        client.post(
+            "/api/v1/orgs/acme/experiments", json={"slug": "victim-exp", "name": "victim-experiment"}, headers=h
+        ),
+        201,
+    )
+    sims = {e["slug"]: e for e in ok(client.get("/api/v1/orgs/acme/simulation-environments", headers=h))}
+    sc = next(s for s in sims["selftest-sim"]["scenarios"] if s["id"] == "selftest-drive")
+    spec = {
+        "environment": "selftest-sim",
+        "simulator": sims["selftest-sim"]["simulator"],
+        "scenario": {"id": "selftest-drive", "version": "1", "definition_sha256": sc["definition_sha256"]},
+        "software": [{"name": "victim-controller", "revision": "1"}],
+        "arms": [{"key": "only", "parameters": {"stop_on_command_loss": True}}],
+        "limits": {"max_trials": 1, "max_wall_time_s": 60},
+        "observations": {"measurements": ["travel_after_kill_m"], "artifacts": []},
+        "contract": {"name": "victim-contract", "version": "1", "conditions": [
+            {"name": "victim condition", "measurement": "travel_after_kill_m", "op": "le", "value": 1}]},
+    }  # fmt: skip
+    ver = ok(client.post("/api/v1/orgs/acme/experiments/victim-exp/versions", json={"spec": spec}, headers=h), 201)
+    # a second principal for the approval that is not a member (membership is asserted unchanged below)
+    cred = {"name": "victim-reviewer", "role": "engineer"}
+    reviewer = ok(client.post("/api/v1/orgs/acme/service-credentials", json=cred, headers=h), 201)
+    req = ok(client.post("/api/v1/orgs/acme/experiments/victim-exp/versions/1/requests", json={}, headers=h), 201)
+    appr = ok(
+        client.post(
+            f"/api/v1/orgs/acme/experiment-requests/{req['id']}/approve",
+            json={"spec_sha256": ver["spec_sha256"]},
+            headers=bearer(reviewer["token"]),
+        )
+    )
+    v["experiment_slug"], v["request_id"] = "victim-exp", req["id"]
+    v["trial_id"] = appr["trial_results"][0]["id"]
     secrets = {
         v[k]
         for k in ("user_id", "credential_id", "baseline", "candidate", "baseline_art", "candidate_art", "mapping_id",
-                  "job_id", "episode_id", "device_id", "run_id", "proposal_id", "recording_id")
+                  "job_id", "episode_id", "device_id", "run_id", "proposal_id", "recording_id", "request_id",
+                  "trial_id")
     } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate",
          "victim-proposal-rationale",
-         "victim-workflow", "victim-recording", "victim-model"}  # fmt: skip
+         "victim-workflow", "victim-recording", "victim-model", "victim-experiment", "victim-controller",
+         "victim-contract", "victim condition", "victim-reviewer"}  # fmt: skip
     make_org(client, "mallory", "mallory-co", "mallory-proj")
     mcred = ok(
         client.post("/api/v1/orgs/mallory-co/service-credentials", json={"name": "m", "role": "admin"},

@@ -88,10 +88,9 @@ def build_verifier_input(
     ]
     for e in v.evidence:
         st = by_key[e.step]
-        out = st.output if isinstance(st.output, dict) else {}
-        if st.state != "completed" or e.output_field not in out:
+        value: Any = output_value(st.output, e.output_field) if st.state == "completed" else _ABSENT
+        if value is _ABSENT:
             continue  # no record: the engine reports evidence.missing, which is the honest answer
-        value: Any = out[e.output_field]
         records.append(
             {
                 "id": e.name,
@@ -103,6 +102,19 @@ def build_verifier_input(
             }
         )
     return contract, records, reported
+
+
+_ABSENT = object()
+
+
+def output_value(output: Any, field: str) -> Any:
+    """The value at a dotted path of a step's output, or ``_ABSENT`` (never a default: missing stays missing)."""
+    cur = output
+    for part in field.split("."):
+        if not isinstance(cur, dict) or part not in cur:
+            return _ABSENT
+        cur = cur[part]
+    return cur
 
 
 def _digest(x: Any) -> str:
@@ -127,6 +139,7 @@ def execute_run(run_id: uuid.UUID, worker: str) -> str:
             s.scalars(select(WorkflowStep).where(WorkflowStep.run_id == run_id).order_by(WorkflowStep.position))
         )
         wf = WorkflowDef.model_validate(run.definition)
+        step_defs = {d.id: d for d in wf.steps}
 
         def stop(state: str, code: str, message: str, **values: Any) -> str:
             service.finish(s, run_id, worker, state, error={"code": code, "message": message}, **values)
@@ -167,9 +180,20 @@ def execute_run(run_id: uuid.UUID, worker: str) -> str:
             payload = dict(step.input)
             if step.idempotent:
                 payload["request_id"] = step.request_id
+            timeout_s = step_defs[step.step_key].timeout_s or settings.workflow_step_timeout_s
+
+            def keep_lease() -> None:
+                service.heartbeat(s, run_id, worker, settings.worker_lease_s)
+
             try:
+                # A long step (a simulation) keeps the lease while it waits, so no other worker resumes the run.
                 inv = adapter.invoke_action(
-                    step.device_key, step.action, payload, timeout_s=settings.workflow_step_timeout_s
+                    step.device_key,
+                    step.action,
+                    payload,
+                    timeout_s=timeout_s,
+                    on_wait=keep_lease,
+                    on_wait_every_s=max(1.0, settings.worker_lease_s / 3),
                 )
             except AdapterError as e:
                 # Unknown whether the command arrived. The step stays `dispatching`; the next attempt decides.
@@ -195,7 +219,7 @@ def execute_run(run_id: uuid.UUID, worker: str) -> str:
                     state="outcome_unknown",
                     invocation_id=inv.invocation_id,
                     finished_at=utcnow(),
-                    error=f"no answer within {settings.workflow_step_timeout_s:g} s; it may still be running",
+                    error=f"no answer within {timeout_s:g} s; it may still be running",
                 )
                 return stop("outcome_unknown", "step.timeout", f"step {step.step_key} did not finish in time")
             state = "refused" if not inv.accepted else "failed"

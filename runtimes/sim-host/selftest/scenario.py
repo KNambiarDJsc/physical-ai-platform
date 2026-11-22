@@ -30,6 +30,11 @@ def main() -> int:
         t0 = time.monotonic()
         time.sleep(float(p["seconds"]))
         result = {"measurements": {"slept_s": round(time.monotonic() - t0, 3)}, "artifacts": {}}
+    elif mode == "drive":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from drive import run as drive
+
+        result = drive(p, run_dir)
     elif mode == "fail":
         print("the self-test scenario was asked to fail", file=sys.stderr)
         return 3

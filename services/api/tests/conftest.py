@@ -86,6 +86,18 @@ def virtual_lab() -> Iterator[str]:
         yield url
 
 
+@pytest.fixture(scope="session")
+def sim_host(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
+    """The real simulation host (runtimes/sim-host) with its selftest catalog, started once per session. No mocks."""
+    from pap_device_sdk.testing import run_sim_host
+
+    root = Path(__file__).resolve().parents[3]
+    with run_sim_host(
+        root, root / "runtimes" / "sim-host" / "catalogs" / "selftest.json", work=tmp_path_factory.mktemp("simhost")
+    ) as url:
+        yield url
+
+
 @pytest.fixture
 def with_lab(settings_env: None, virtual_lab: str, monkeypatch: pytest.MonkeyPatch) -> str:
     """The operator catalog: the virtual lab as a simulated environment, and the same endpoint configured as a
