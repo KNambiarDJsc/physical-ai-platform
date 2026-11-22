@@ -5,8 +5,10 @@ labelled as such in every trace; it is never presented as a language model's ans
 from __future__ import annotations
 
 import json
+import threading
+import time
 import uuid
-from collections.abc import AsyncGenerator, AsyncIterable
+from collections.abc import AsyncGenerator, AsyncIterable, Callable
 from typing import Any
 
 from strands.models import Model
@@ -16,9 +18,29 @@ from .budget import Budget
 from .trace import Trace
 
 
+class StopSession(RuntimeError):
+    """The session must stop before the next model call (step limit, deadline, cancellation, a spent budget)."""
+
+
 class CappedModel(Model):
-    def __init__(self, inner: Model, budget: Budget, trace: Trace) -> None:
+    """Wraps any Strands model. Before every call: the session's budget, the experiment's budget, the step limit, the
+    deadline and cancellation are checked, and the call is not made if any of them says stop."""
+
+    def __init__(
+        self,
+        inner: Model,
+        budget: Budget,
+        trace: Trace,
+        *,
+        max_calls: int = 12,
+        deadline: float | None = None,
+        cancel: threading.Event | None = None,
+        before_call: Callable[[], None] | None = None,
+        progress: Callable[[str], None] | None = None,
+    ) -> None:
         self.inner, self.budget, self.trace = inner, budget, trace
+        self.max_calls, self.deadline, self.cancel = max_calls, deadline, cancel
+        self.before_call, self.progress = before_call, progress
 
     def update_config(self, **model_config: Any) -> None:
         self.inner.update_config(**model_config)
@@ -29,14 +51,31 @@ class CappedModel(Model):
     def structured_output(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError("the harness does not use structured output")
 
+    def _gate(self) -> None:
+        if self.cancel is not None and self.cancel.is_set():
+            raise StopSession("cancelled")
+        if self.deadline is not None and time.monotonic() >= self.deadline:
+            raise StopSession("timed out")
+        if self.budget.calls >= self.max_calls:
+            raise StopSession(f"step limit reached: {self.budget.calls} model calls")
+        self.budget.check()
+        if self.before_call:
+            self.before_call()
+
     async def stream(self, *args: Any, **kwargs: Any) -> AsyncGenerator[StreamEvent, None]:
-        self.budget.check()  # raises BudgetExceeded before any call that would go over
+        self._gate()  # raises before any call that must not be made
+        if self.progress:
+            self.progress(f"model call {self.budget.calls + 1}")
         inp = out = 0
         events: AsyncIterable[StreamEvent] = self.inner.stream(*args, **kwargs)
         async for ev in events:
             if "metadata" in ev:
                 usage: dict[str, Any] = dict(ev["metadata"].get("usage") or {})
                 inp, out = int(usage.get("inputTokens", 0)), int(usage.get("outputTokens", 0))
+            elif self.progress and "contentBlockDelta" in ev:
+                text = ev["contentBlockDelta"].get("delta", {}).get("text")
+                if text:
+                    self.progress(f"text:{text}")
             yield ev
         self.budget.add(inp, out)
         self.trace.model_call(inp, out)

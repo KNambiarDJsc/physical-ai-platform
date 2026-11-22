@@ -1829,7 +1829,10 @@
         "Tools are the platform's allowlist, run as the caller; write tools (request_experiment_run, propose_experiment) are offered only with --allow-requests, and any other or unknown tool call is refused and traced without reaching the platform; no tool can approve, start or command.",
         "The session stops before a model call once the token cap (always) or the spend cap (when prices are set) is reached, and says so.",
         "Every model call (tokens) and tool call (input, permitted, output digest, error) is in the trace; the API key is never in a trace, log or file.",
-        "With a real model (the user's key via environment variables), a session answers a question about a real experiment run, citing ids from the tool results, keeping contract violations and release regressions apart, within the cap."
+        "With a real model (the user's key via environment variables), a session answers a question about a real experiment run, citing ids from the tool results, keeping contract violations and release regressions apart, within the cap.",
+        "Provider is configuration (openai-compatible, anthropic, bedrock, ollama, litellm through Strands); routine questions (run status, list experiments, release verdicts) are answered by deterministic fast paths with no model call.",
+        "Tool discovery is scoped to the caller's membership; independent reads in one turn run in parallel; transient platform failures of reads are retried a bounded number of times; writes run one at a time and each needs the operator's approval.",
+        "Sessions persist and resume; planning is bounded by a step limit; a per-experiment budget holds across sessions; a timeout or cancellation stops the session cleanly; answers are checked for citations that tool outputs support."
       ],
       "tests": [
         "cd packages/agent-harness && uv run pytest",
@@ -1843,7 +1846,8 @@
       "verification": {
         "verified_at": null,
         "evidence": [
-          "packages/agent-harness tests: 6 passed (scripted test model, labelled; an in-memory double of the platform API): a session reads through a tool and answers with a full trace (model, tool, model; output digest; usage); writes are refused and traced without reaching the platform unless requests are allowed, and an approve tool does not exist; the session stops before the model call that would exceed the token cap, and the spend cap raises at the priced limit; invalid tool input is answered, not raised; settings come from the environment and the key never appears in repr or the trace; the system prompt keeps violations and regressions apart. mypy clean; added to verify.sh. Platform side: 5 experiment tools added to pap_agent_tools (test_agent_tools.py and test_twin_assistant.py: 12 passed). NOT yet run with a real model: waits for the user's key in the environment."
+          "packages/agent-harness tests: 14 passed, with a SCRIPTED stand-in model (labelled in every trace) and an in-memory double of the platform API. They verify orchestration only, NOT the quality of a real model's investigation: reads through tools with a full trace and a grounded citation; an answer citing an id no tool returned is flagged unsupported; fast paths answer run status / experiment lists with no model call; a non-member gets no tools and no model call; writes are refused unless allowed, need the operator's approval per call (declined: nothing sent), and an approve tool does not exist; three 0.4 s reads in one turn completed in < 1.0 s (parallel); 503s are retried twice then reported; a 3-call step limit stops a looping script; the token cap stops before the call that would exceed it and the priced cap raises; an experiment's token budget holds across three sessions (the third refused before any call); a pre-set cancel and a 0.3 s timeout stop cleanly with no answer; a resumed session's model sees the earlier exchange; providers build from configuration and the key is in no written file (traces, sessions). ruff and mypy clean; harness tests and mypy are in verify.sh.",
+          "NOT run with a real language model: no spending authorization or key in the environment yet."
         ]
       },
       "limitations": [

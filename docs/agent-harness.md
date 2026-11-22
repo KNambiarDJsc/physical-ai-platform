@@ -15,10 +15,30 @@ separate uv project (Strands brings its own dependency set) and is checked by `s
 - Its instructions require it to cite the ids it relies on, say what is not known, label simulated evidence, and never
   call a violated trial a release regression (only the engine's release comparison can say that).
 
+## Orchestration
+
+- **Providers** are configuration: `PAP_LLM_PROVIDER` = `openai` (any OpenAI-compatible endpoint, the default),
+  `anthropic`, `bedrock`, `ollama` or `litellm` (install that provider's Strands extra).
+- **Fast paths**: "status of run <id>", "list experiments", "verdicts for <experiment>" are answered by fixed tool calls
+  and a template, with no model call and no cost. `--no-fast-paths` sends everything to the model.
+- **Discovery** is scoped to the caller: a non-member gets no tools; writes are offered only with `--allow-requests`.
+- **Parallel reads**: independent read tools in one turn run concurrently; writes run one at a time.
+- **Recovery**: a read that fails transiently (no answer, HTTP 5xx) is retried twice with backoff; any tool error is
+  returned to the model as text, never ends the session.
+- **Bounds**: a step limit (`--max-steps`, model calls), a timeout (`--timeout-s`), Ctrl-C cancels cleanly; each stops
+  before the next model call and is written to the trace.
+- **Approval**: each write asks the person running the session to confirm before it is sent (refused when there is no
+  terminal); an engineer then decides on the platform.
+- **Grounding**: after an answer, every id it cites is checked against the tool outputs of the session; unsupported ids,
+  or an answer without citations after tool use, are reported.
+- **Sessions** persist under `var/agent/sessions` (Strands file sessions) and resume with `--session <id>`.
+
 ## Spend and secrets
 
 - The model is any OpenAI-compatible endpoint: `PAP_LLM_API_KEY`, `PAP_LLM_BASE_URL`, `PAP_LLM_MODEL` as **environment
   variables**. The key is never written to a file, a log or a trace.
+- A per-experiment budget (`--experiment <slug> --experiment-max-usd/--experiment-max-tokens`) is kept in
+  `var/agent/ledger.json` across sessions; a session is refused before it starts once it is spent.
 - A hard cap per session: tokens always (`PAP_LLM_MAX_TOKENS`, default 200 000), and dollars when prices are set
   (`PAP_LLM_USD_PER_M_INPUT`, `PAP_LLM_USD_PER_M_OUTPUT`; cap `--max-usd` or `PAP_LLM_MAX_USD`, default 0.50). The session
   stops before the model call that would go over, and the trace says so.
@@ -31,9 +51,14 @@ uv run pap-harness ask --org demo --as ada "Why did the pre-fix arm of the comma
 uv run pap-harness ask --org demo --as ada --allow-requests --max-usd 0.20 "Is there enough evidence to call it a regression?"
 ```
 
-Each session writes `var/agent-traces/<id>.json` (`pap.agent-trace/1`): the question, the model, every model call with
+Each session writes `var/agent/traces/<id>.json` (`pap.agent-trace/1`): the question, the model, every model call with
 its tokens, every tool call with its input, whether it was permitted, a digest of its output and any error, the answer,
 why it stopped, and the usage.
+
+## What the tests do and do not show
+
+The tests run the orchestration with a scripted stand-in model. They show the guarantees above hold; they say nothing
+about how well a real model investigates. That is measured only with a real model run, recorded with its trace.
 
 ## Not built yet
 

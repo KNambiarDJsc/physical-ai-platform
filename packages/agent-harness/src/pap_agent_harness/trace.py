@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -29,6 +30,9 @@ class Trace:
     steps: list[dict[str, Any]] = field(default_factory=list)
     answer: str | None = None
     stop: str | None = None
+    route: str = "agent"  # or "fast:<name>" when answered without a model
+    grounding: dict[str, Any] | None = None
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     def _t(self) -> float:
         return round(time.time() - self.started, 3)
@@ -36,6 +40,10 @@ class Trace:
     def tool(
         self, name: str, args: dict[str, Any], *, permitted: bool, output: Any = None, error: str | None = None
     ) -> None:
+        with self._lock:
+            self._append_tool(name, args, permitted, output, error)
+
+    def _append_tool(self, name: str, args: dict[str, Any], permitted: bool, output: Any, error: str | None) -> None:
         self.steps.append(
             {
                 "n": len(self.steps) + 1,
@@ -67,6 +75,8 @@ class Trace:
             "steps": self.steps,
             "answer": self.answer,
             "stop": self.stop,
+            "route": self.route,
+            "grounding": self.grounding,
             "usage": usage,
             "duration_s": self._t(),
         }
