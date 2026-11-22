@@ -152,6 +152,19 @@ test.describe("the journey: configure, approve, run, inspect, investigate, revie
     expect(download.suggestedFilename()).toMatch(/\.mcap$/);
   });
 
+  test("the two setups are judged as releases: the engine's release verdict, not a count of violations", async ({ page }) => {
+    test.skip(!simOffered, "no self-test simulation host");
+    await signAs(page, BOB);
+    await page.goto(`/experiments?org=${org}&exp=stop-on-command-loss`);
+    await expect(page.getByText("Whether a setup is a regression is a statistical question")).toBeVisible();
+    await page.getByRole("button", { name: "Judge version 1 as releases" }).click();
+    const verdicts = page.getByRole("table", { name: "Release verdicts" });
+    await expect(verdicts.getByText("Insufficient evidence")).toBeVisible({ timeout: 120_000 }); // 2 trials per setup
+    await expect(verdicts.getByText(/fewer than 30/)).toBeVisible(); // the engine's reason, verbatim
+    await verdicts.getByRole("link", { name: "Open in Releases" }).click();
+    await expect(page).toHaveURL(/\/o\/[^/]+\/p\/robots\/e\//);
+  });
+
   test("a failed trial opens in the Digital twin on the robot model, with the trial's verdict, and the assistant explains it from the run's evidence", async ({ page }) => {
     test.skip(!simOffered, "no self-test simulation host");
     await signAs(page, BOB);

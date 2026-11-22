@@ -174,25 +174,31 @@ def test_only_listed_artifacts_of_recorded_runs_are_served(adapter: WotHttpAdapt
 
 
 def test_runs_are_serialised_one_scenario_at_a_time(host: str) -> None:
-    """Two simultaneous requests: the second waits for the first instead of sharing the simulator."""
-    stamps: dict[str, tuple[float, float]] = {}
+    """Two simultaneous requests: the second waits for the first instead of sharing the simulator. Checked on the host's
+    own start and finish times of each run, not on the callers' clocks: which caller reaches the host first is a race
+    (on CI the second thread sometimes did), but the two runs must never overlap."""
+    from datetime import datetime
+
+    runs: dict[str, dict[str, Any]] = {}
 
     def go(tag: str) -> None:
-        a = WotHttpAdapter(host)
-        t0 = time.monotonic()
-        inv = run(a, "selftest-sleep", {"seconds": 1.5}, rid(tag), timeout=60)
+        inv = run(WotHttpAdapter(host), "selftest-sleep", {"seconds": 1.5}, rid(tag), timeout=60)
         assert inv.status == "completed", inv
-        stamps[tag] = (t0, time.monotonic())
+        runs[tag] = inv.output
 
     threads = [threading.Thread(target=go, args=(t,)) for t in ("one", "two")]
     for t in threads:
         t.start()
     for t in threads:
         t.join(timeout=90)
-    assert set(stamps) == {"one", "two"}
-    (a0, a1), (b0, b1) = sorted(stamps.values())
-    assert b1 - a0 >= 2.9  # about 1.5 s each, back to back: never overlapping
-    assert abs(a1 - b0) < 5  # sanity: they did start together
+    assert set(runs) == {"one", "two"}
+    spans = sorted(
+        (datetime.fromisoformat(r["started_at"]), datetime.fromisoformat(r["finished_at"])) for r in runs.values()
+    )
+    (a0, a1), (b0, b1) = spans
+    assert all(r["repeated"] is False for r in runs.values()) and runs["one"]["run_id"] != runs["two"]["run_id"]
+    assert b0 >= a1  # the second run started only after the first had finished
+    assert (a1 - a0).total_seconds() >= 1.4 and (b1 - b0).total_seconds() >= 1.4  # each really waited its 1.5 s
 
 
 def test_on_wait_is_called_repeatedly_while_a_long_action_runs(adapter: WotHttpAdapter) -> None:

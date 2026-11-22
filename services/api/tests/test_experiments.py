@@ -14,6 +14,7 @@ import json
 import shutil
 import threading
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -711,3 +712,62 @@ def test_a_configuration_comparison_has_what_a_camera_comparison_needs(client: T
     for t in d["trial_results"]:
         rec = ok(client.get(f"{PROJECT}/twin/recordings/{t['recording_id']}", headers=VIC))
         assert rec["run"]["arm"] in {"profile-a", "profile-b", "profile-c"}
+
+
+# ---------------------------------------------------------------------- SIM-007: setups judged as releases
+
+
+def test_two_setups_are_judged_as_releases_by_the_engine_over_every_finished_trial(
+    client: TestClient, lab: str
+) -> None:
+    """From contract violations to a release verdict: the trials of every approved run of a version accumulate into two
+    evidence files, the setups become releases, and an ordinary evaluation job gives the engine's comparison."""
+    from test_jobs import work_once as evaluate_once
+
+    ok(client.post(f"{ORG}/projects", json={"slug": "robots", "name": "Robots"}, headers=ADA), 201)
+    rid1, v = approved(client, drive_spec(client))
+    rid2 = request(client)["id"]  # the same version again: evidence accumulates
+    decide(client, rid2, "approve", v["spec_sha256"])
+    assert work_all() == ["succeeded"] * 8
+    trials = trials_of(client, rid1) + trials_of(client, rid2)
+
+    url = f"{ORG}/experiments/stop/release-evaluations"
+    body = {"version": 1, "baseline_arm": "pre-fix", "candidate_arm": "fix", "project": "robots"}
+    assert client.post(url, json=body, headers=VIC).status_code == 403
+    bad = client.post(url, json={**body, "candidate_arm": "pre-fix"}, headers=ADA)
+    assert bad.status_code == 422 and bad.json()["detail"]["code"] == "experiment.arms"
+    ev = ok(client.post(url, json=body, headers=ADA), 201)
+    assert ev["trials"] == {"baseline": 4, "candidate": 4} and ev["state"] == "queued" and ev["verdict"] is None
+
+    # The evidence files hold exactly the trials' own measurements, one row per trial, nothing derived.
+    arts = {a["filename"]: a for a in ok(client.get(f"{ORG}/projects/robots/artifacts", headers=ADA))}
+    import csv as _csv
+    import io as _io
+
+    for arm, fname in (("pre-fix", "stop-v1-pre-fix.csv"), ("fix", "stop-v1-fix.csv")):
+        from app.db import session_factory
+        from app.evidence.models import Artifact
+        from app.evidence.storage import get_storage
+
+        with session_factory()() as s:
+            a = s.get(Artifact, uuid.UUID(arts[fname]["id"]))
+            assert a is not None
+            rows = list(_csv.DictReader(_io.StringIO(get_storage().get(a.storage_key).decode())))
+        mine = {t["run_id"]: t for t in trials if t["arm"] == arm}
+        assert {r["episode_id"] for r in rows} == set(mine)
+        for r in rows:
+            assert float(r["travel_after_kill_m"]) == mine[r["episode_id"]]["measurements"]["travel_after_kill_m"]
+    rels = {r["label"]: r for r in ok(client.get(f"{ORG}/projects/robots/releases", headers=VIC))}
+    assert {"stop-v1-pre-fix", "stop-v1-fix"} <= set(rels)
+
+    assert evaluate_once() == "succeeded"  # the evaluation worker with the pinned engine, as for uploaded evidence
+    ev = ok(client.get(url, headers=VIC))[0]
+    assert ev["state"] == "succeeded" and ev["verdict"]["basis"] == "compare_verified"
+    verdict, reasons = ev["verdict"]["verdict"], " ".join(ev["verdict"]["reasons"])
+    # The engine's own rule: fewer known outcomes per arm than its min_known (default 30) is insufficient evidence.
+    assert verdict == "insufficient_evidence" and "fewer than 30" in reasons, ev["verdict"]
+    # Judging the same trials again is the same evaluation (the job is content-addressed by its inputs).
+    again = ok(client.post(url, json=body, headers=ADA), 200)
+    assert again["id"] == ev["id"] and len(ok(client.get(url, headers=VIC))) == 1
+    make_org(client, "eve", "other")
+    assert client.get(url, headers=as_user("eve")).status_code == 404

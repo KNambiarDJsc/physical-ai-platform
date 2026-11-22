@@ -8,7 +8,13 @@ from .auth.models import User
 from .db import Base
 from .evaluations.models import EpisodeRecord, EvaluationJob, EvaluationResult, JobArtifact
 from .evidence.models import Artifact
-from .experiments.models import Experiment, ExperimentRequest, ExperimentTrial, ExperimentVersion
+from .experiments.models import (
+    Experiment,
+    ExperimentEvaluation,
+    ExperimentRequest,
+    ExperimentTrial,
+    ExperimentVersion,
+)
 from .hardware.models import Capability, Device, Environment
 from .ingestion.models import MappingRevision
 from .organizations.models import Membership, Organization, ServiceCredential
@@ -28,6 +34,7 @@ __all__ = [
     "EvaluationJob",
     "EvaluationResult",
     "Experiment",
+    "ExperimentEvaluation",
     "ExperimentProposal",
     "ExperimentRequest",
     "ExperimentTrial",

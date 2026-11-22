@@ -422,6 +422,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}/release-evaluations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Experiment Release Evaluations */
+        get: operations["list_experiment_release_evaluations_api_v1_orgs__org_slug__experiments__experiment_slug__release_evaluations_get"];
+        put?: never;
+        /**
+         * Judge Experiment Setups
+         * @description Judge a baseline and a candidate setup as releases with the engine's comparison (queued for the worker).
+         */
+        post: operations["judge_experiment_setups_api_v1_orgs__org_slug__experiments__experiment_slug__release_evaluations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_slug}/experiments/{experiment_slug}/versions": {
         parameters: {
             query?: never;
@@ -2574,6 +2595,61 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
         };
+        /** ReleaseEvaluationIn */
+        ReleaseEvaluationIn: {
+            /** Baseline Arm */
+            baseline_arm: string;
+            /** Candidate Arm */
+            candidate_arm: string;
+            /**
+             * Project
+             * @description Default: the project of the spec's model.
+             */
+            project?: string | null;
+            /** Version */
+            version: number;
+        };
+        /**
+         * ReleaseEvaluationOut
+         * @description The engine's release verdict for two setups of one version, over every finished trial of its approved runs.
+         */
+        ReleaseEvaluationOut: {
+            /** Baseline Arm */
+            baseline_arm: string;
+            /** Candidate Arm */
+            candidate_arm: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Project */
+            project: string;
+            /** State */
+            state: string;
+            /** Trials */
+            trials: {
+                [key: string]: number;
+            };
+            /** Verdict */
+            verdict: {
+                [key: string]: unknown;
+            } | null;
+            /** Version */
+            version: number;
+        };
         /** ReleaseIn */
         ReleaseIn: {
             /** Components */
@@ -3983,6 +4059,81 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExperimentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_experiment_release_evaluations_api_v1_orgs__org_slug__experiments__experiment_slug__release_evaluations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseEvaluationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    judge_experiment_setups_api_v1_orgs__org_slug__experiments__experiment_slug__release_evaluations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_slug: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReleaseEvaluationIn"];
+            };
+        };
+        responses: {
+            /** @description these trials were already judged: the same evaluation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseEvaluationOut"];
                 };
             };
             /** @description Validation Error */

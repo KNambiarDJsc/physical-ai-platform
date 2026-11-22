@@ -84,3 +84,19 @@ class ExperimentTrial(IdMixin, CreatedMixin, Base):
     recording_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("recordings.id", ondelete="SET NULL"), nullable=True
     )
+
+
+class ExperimentEvaluation(IdMixin, CreatedMixin, Base):
+    """Two setups of one version judged as releases by the engine (an ordinary evaluation job in a project)."""
+
+    __tablename__ = "experiment_evaluations"
+
+    experiment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("experiments.id", ondelete="CASCADE"), index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)
+    version_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("experiment_versions.id", ondelete="CASCADE"))
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    evaluation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("evaluation_jobs.id", ondelete="CASCADE"))
+    baseline_arm: Mapped[str] = mapped_column(String(64))
+    candidate_arm: Mapped[str] = mapped_column(String(64))
+    trials: Mapped[dict[str, Any]] = mapped_column(JSONB, doc="trials per role at the time of submission")
+    created_by: Mapped[str] = mapped_column(String(300))

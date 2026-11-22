@@ -27,6 +27,7 @@ import {
 import { Notice, PageHeader, Panel } from "../AppShell";
 import { Badge, Table, Td, Time } from "../ui";
 import { VerdictBadge } from "../Workbench";
+import { ReleaseVerdict } from "./ReleaseVerdict";
 import { Crumbs, ErrorNotice, Progress, SimulatedBadge, StageRail, useExperiments, useRequest, useSimEnvs } from "./common";
 
 type Spec = {
@@ -325,6 +326,7 @@ export function ExperimentView({ org, role, slug, onRequested }: { org: string; 
             </div>
           </Panel>
         )}
+        {version && <ReleaseVerdict org={org} exp={exp} version={version} canJudge={canEdit} />}
         <Panel title="Runs">
           {exp.requests.length === 0 ? (
             <p className="text-[13px] text-muted">Not run yet. Ask for a run above; an engineer will review it.</p>

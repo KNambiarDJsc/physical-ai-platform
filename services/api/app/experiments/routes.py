@@ -22,7 +22,8 @@ from ..evidence.storage import Storage, get_storage
 from ..hardware.models import Device, Environment
 from ..workflows.models import WorkflowRun
 from .host import HOST, SpecError, read_listing, scenario_digest, simulator_ref
-from .models import Experiment, ExperimentRequest, ExperimentTrial, ExperimentVersion
+from .models import Experiment, ExperimentEvaluation, ExperimentRequest, ExperimentTrial, ExperimentVersion
+from .releases import judge_as_releases, verdict_of
 from .service import approve, arm_summary, create_version, principal_key, reject, request_run, trial_view
 from .spec import SHA, ExperimentSpec
 
@@ -485,3 +486,115 @@ def get_trial_artifact(
             "Content-Disposition": f'attachment; filename="{a.get("filename") or name}"',
         },
     )
+
+
+# ------------------------------------------------------------------------------- setups judged as releases (SIM-007)
+
+
+class ReleaseEvaluationIn(BaseModel):
+    version: int = Field(ge=1)
+    baseline_arm: str = Field(min_length=1, max_length=64)
+    candidate_arm: str = Field(min_length=1, max_length=64)
+    project: str | None = Field(default=None, pattern=SLUG, description="Default: the project of the spec's model.")
+
+
+class ReleaseEvaluationOut(BaseModel):
+    """The engine's release verdict for two setups of one version, over every finished trial of its approved runs."""
+
+    id: uuid.UUID
+    version: int
+    baseline_arm: str
+    candidate_arm: str
+    project: str
+    evaluation_id: uuid.UUID
+    state: str
+    trials: dict[str, int]
+    verdict: dict[str, Any] | None
+    created_by: str
+    created_at: datetime
+
+
+def _release_eval_out(session: Session, ev: ExperimentEvaluation) -> ReleaseEvaluationOut:
+    from ..evaluations.models import EvaluationJob
+    from ..projects.models import Project
+
+    job = session.get(EvaluationJob, ev.evaluation_id)
+    v = session.get(ExperimentVersion, ev.version_id)
+    p = session.get(Project, ev.project_id)
+    assert job is not None and v is not None and p is not None
+    return ReleaseEvaluationOut(
+        id=ev.id,
+        version=v.number,
+        baseline_arm=ev.baseline_arm,
+        candidate_arm=ev.candidate_arm,
+        project=p.slug,
+        evaluation_id=job.id,
+        state=job.state,
+        trials=ev.trials,
+        verdict=verdict_of(session, job),
+        created_by=ev.created_by,
+        created_at=ev.created_at,
+    )
+
+
+@router.post(
+    "/experiments/{experiment_slug}/release-evaluations",
+    status_code=201,
+    responses={200: {"description": "these trials were already judged: the same evaluation"}},
+)
+def judge_experiment_setups(
+    experiment_slug: Annotated[str, Path(pattern=SLUG)],
+    body: ReleaseEvaluationIn,
+    ctx: EngineerDep,
+    session: SessionDep,
+    storage: StorageDep,
+    response: Response,
+) -> ReleaseEvaluationOut:
+    """Judge a baseline and a candidate setup as releases with the engine's comparison (queued for the worker)."""
+    e = _experiment(session, ctx.org.id, experiment_slug)
+    v = _version(session, e, body.version)
+    try:
+        job, _, counts = judge_as_releases(
+            session, get_settings(), storage, ctx, e, v, body.baseline_arm, body.candidate_arm, body.project
+        )
+    except SpecError as ex:
+        session.rollback()
+        raise _raise(ex) from ex
+    same = session.scalar(
+        select(ExperimentEvaluation).where(
+            ExperimentEvaluation.experiment_id == e.id, ExperimentEvaluation.evaluation_id == job.id
+        )
+    )
+    if same is not None:  # the same trials judged again: the same content-addressed evaluation
+        session.commit()
+        response.status_code = 200
+        return _release_eval_out(session, same)
+    ev = ExperimentEvaluation(
+        experiment_id=e.id,
+        organization_id=ctx.org.id,
+        version_id=v.id,
+        project_id=job.project_id,
+        evaluation_id=job.id,
+        baseline_arm=body.baseline_arm,
+        candidate_arm=body.candidate_arm,
+        trials=counts,
+        created_by=ctx.principal.label,
+    )
+    session.add(ev)
+    session.flush()
+    audit_allow(session, ctx, "experiment.judge", f"experiment:{e.id}", evaluation=str(job.id), trials=counts)
+    session.commit()
+    return _release_eval_out(session, ev)
+
+
+@router.get("/experiments/{experiment_slug}/release-evaluations")
+def list_experiment_release_evaluations(
+    experiment_slug: Annotated[str, Path(pattern=SLUG)], ctx: ViewerDep, session: SessionDep
+) -> list[ReleaseEvaluationOut]:
+    e = _experiment(session, ctx.org.id, experiment_slug)
+    rows = session.scalars(
+        select(ExperimentEvaluation)
+        .where(ExperimentEvaluation.experiment_id == e.id)
+        .order_by(ExperimentEvaluation.created_at.desc())
+    ).all()
+    return [_release_eval_out(session, ev) for ev in rows]

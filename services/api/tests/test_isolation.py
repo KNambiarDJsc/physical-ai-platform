@@ -84,6 +84,9 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
         ("POST", f"{o}/experiments"): {"json": {"slug": "planted", "name": "planted"}},
         ("POST", f"{o}/experiments/{{experiment_slug}}/versions"): {"json": {"spec": {}}},
         ("POST", f"{o}/experiments/{{experiment_slug}}/versions/{{number}}/requests"): {"json": {"note": "planted"}},
+        ("POST", f"{o}/experiments/{{experiment_slug}}/release-evaluations"): {
+            "json": {"version": 1, "baseline_arm": "a", "candidate_arm": "b"}
+        },
         ("POST", f"{o}/experiment-requests/{{request_id}}/approve"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
         ("POST", f"{o}/experiment-requests/{{request_id}}/reject"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
         ("POST", f"{o}/assistant/tools/{{tool_name}}"): {"json": {"arguments": {}}},

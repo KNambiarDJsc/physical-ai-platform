@@ -1785,6 +1785,37 @@
         "The browser journey on Gazebo was not automated in Playwright (the API acceptance test drives it; the Studio journey is automated on the self-test host). The stack can serve the Gazebo host for a manual run (dev_stack.py --sim-catalog).",
         "Real Gazebo tests are opt-in; the default full suite skips them."
       ]
+    },
+    {
+      "id": "SIM-007",
+      "title": "Experiment setups judged as releases by the engine (contract violations to a release verdict)",
+      "priority": 3,
+      "depends_on": [
+        "SIM-004"
+      ],
+      "description": "An engineer asks the engine to judge two setups of one experiment version as releases: every finished trial of the version's approved runs becomes one row of a CSV evidence file per setup (the host's raw measurements), the setups become releases, the mapping is generated from the spec's own contract, and an ordinary evaluation job gives the engine's comparison verdict in Release Intelligence.",
+      "acceptance": [
+        "The evidence files hold exactly one row per finished trial with the host's measurements (a failed trial is a row with blank measurements, unknown to the engine); nothing is derived or computed by the platform.",
+        "The verdict and its reasons are the engine's (ops compare via the existing evaluation worker), shown verbatim in the Studio with a link to the evaluation in Releases; with fewer known outcomes than its min_known it is insufficient evidence.",
+        "Judging the same trials again returns the same evaluation; viewers cannot judge; another workspace gets 404; the isolation test covers the route.",
+        "The Studio's Release verdict panel works end to end in the browser (e2e)."
+      ],
+      "tests": [
+        "uv run pytest services/api/tests/test_experiments.py -k releases_by_the_engine",
+        "npx playwright test e2e/experiments.spec.ts"
+      ],
+      "paths": [
+        "services/api/app/experiments/releases.py",
+        "apps/web/src/components/experiments/ReleaseVerdict.tsx"
+      ],
+      "status": "in_progress",
+      "verification": {
+        "verified_at": null,
+        "evidence": [
+          "API: test_two_setups_are_judged_as_releases_by_the_engine_over_every_finished_trial passes (8 real trials over two approved runs; CSV rows equal the trials' measurements; engine verdict insufficient_evidence with its 'fewer than 30' reason; repeat returns the same evaluation; viewer 403; other workspace 404). test_isolation.py 4 passed with the new route. Browser e2e for the panel NOT yet run (the run was interrupted)."
+        ]
+      },
+      "limitations": []
     }
   ]
 }
