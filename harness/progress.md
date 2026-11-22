@@ -395,3 +395,11 @@ runs, block on one command and print summary lines only.
   machine had ~0.7-1.4 GB free during the gate, so close the browser first). Then the camera-comparison infrastructure
   check, and the Strands-based agentic harness.
 - Not stopped here: dependency audit commands are not in verify.sh.
+
+## 2026-11-22 - Session 9 (cont.): SIM-006 verified (49/49)
+- Gazebo host: runtimes/sim-host/catalogs/gazebo-openamr.json + examples/openamr-cmd-timeout/scenario/platform_run.py
+  (preflight refuses on memory, disk, a running Gazebo or a dirty ~/p79 checkout; restores the checkout; bag summary).
+- Real runs through the platform: pre-fix 1.0028 m VIOLATED, fix 0.0799 m SATISFIED (commit d6f810f). D-038.
+- npm audit 0 vulnerabilities; pip-audit no known vulnerabilities. Camera-comparison infrastructure check passes.
+- ~/p79 is shared with another session (r2_heavy.sh, #177 review commits): check it is idle and clean before runs.
+- To try it: uv run python scripts/dev_stack.py --sim-port 8867 --sim-catalog runtimes/sim-host/catalogs/gazebo-openamr.json

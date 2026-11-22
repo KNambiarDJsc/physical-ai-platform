@@ -290,3 +290,12 @@ the scenario's maximum plus a margin, because only the host can stop a running s
 gains a kinematic `selftest-drive` scenario (a point base integrating its last command; labelled not a simulator) so the
 whole journey, including a recording in the twin, is tested without Gazebo; its telemetry is computed by that stated
 model, not replayed from another run. `jsonschema` is added to the API to validate parameters before approval.
+
+## D-038 (2026-11-22) The Gazebo host refuses rather than degrades, and its pre-fix arm is a described working tree
+A real Gazebo run needs memory this machine often lacks and shares a ROS workspace with other work. The host's command
+checks before starting anything (memory inside WSL and on Windows, disk, no Gazebo running, a clean checkout) and refuses
+with the reason; the platform shows that as a failed trial with nothing measured. The pre-fix arm is the fix commit with
+the two wiring files the fix changes taken from origin/main for one run (the existing `run_main.sh`); the run identity
+names the commit, the dirty tree and the files, so it is never presented as a clean build of 69847ab. Real Gazebo tests are
+opt-in (PAP_REQUIRE_GAZEBO=1 or PAP_RUN_GAZEBO=1): a default full suite must not start simulations in a shared workspace.
+

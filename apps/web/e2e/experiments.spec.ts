@@ -131,6 +131,9 @@ test.describe("the journey: configure, approve, run, inspect, investigate, revie
     const side = await rows(page, "Setups side by side");
     await expect(side).toHaveCount(2);
     await expect(page.getByText(/not a statistical comparison/)).toBeVisible();
+    // a contract violation is never presented as a release regression
+    await expect(page.getByTestId("violation-vs-regression")).toContainText("It is not a release regression");
+    await expect(page.getByTestId("violation-vs-regression")).toContainText("2 trials per setup, so no regression is claimed");
 
     const trials = await rows(page, "Every trial");
     await expect(trials).toHaveCount(4);

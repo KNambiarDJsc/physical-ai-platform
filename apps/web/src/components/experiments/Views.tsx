@@ -493,6 +493,15 @@ function Results({ org, d, spec, sc, onAgain, againBusy }: { org: string; d: Exp
         <p className="mb-3 max-w-3xl text-[12px] text-muted">
           The verdicts are the engine&apos;s, over the measurements the host reported. These are counts and raw values, not a statistical comparison: with few trials a difference may be chance.
         </p>
+        <p className="mb-3 max-w-3xl text-[12px] text-muted" data-testid="violation-vs-regression">
+          A violated trial is one run breaking the contract. It is not a release regression: that is a statistical claim the engine makes in{" "}
+          <Link className="text-accent underline" href={`/releases?org=${org}`}>
+            Releases
+          </Link>{" "}
+          from enough known outcomes per release. This run has {Math.min(...d.arms.map((a) => a.trials))}
+          {new Set(d.arms.map((a) => a.trials)).size > 1 ? ` to ${Math.max(...d.arms.map((a) => a.trials))}` : ""} trial
+          {Math.max(...d.arms.map((a) => a.trials)) === 1 ? "" : "s"} per setup, so no regression is claimed here.
+        </p>
         <Table head={["Setup", "Engine verdicts", ...spec.observations.measurements.map((m) => `${measureLabel(m)}${unitOf(sc, m) ? ` (${unitOf(sc, m)})` : ""}`)]} caption="Setups side by side">
           {d.arms.map((a) => {
             const c = verdictCounts(a, total(a.arm));

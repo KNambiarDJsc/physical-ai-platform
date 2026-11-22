@@ -43,6 +43,16 @@ def configure(monkeypatch: pytest.MonkeyPatch, endpoint: str) -> None:
     get_settings.cache_clear()
 
 
+def configure_env(monkeypatch: pytest.MonkeyPatch, endpoint: str, key: str, name: str) -> None:
+    """The operator catalog with one simulated environment at ``endpoint``."""
+    from app.config import get_settings
+
+    monkeypatch.setenv(
+        "PAP_ENVIRONMENTS", json.dumps([{"key": key, "name": name, "kind": "simulated", "endpoint": endpoint}])
+    )
+    get_settings.cache_clear()
+
+
 @pytest.fixture
 def lab(client: TestClient, sim_host: str, omhs: Any, monkeypatch: pytest.MonkeyPatch) -> str:
     configure(monkeypatch, sim_host)
@@ -435,9 +445,13 @@ def approved(client: TestClient, spec: dict[str, Any]) -> tuple[str, dict[str, A
 
 
 def capture() -> int:
+    """Capture every finished trial, as the worker does across its idle polls (five per call)."""
     from app.experiments.capture import capture_ready
 
-    return capture_ready()
+    total = 0
+    while n := capture_ready():
+        total += n
+    return total
 
 
 def trials_of(client: TestClient, rid: str) -> list[dict[str, Any]]:
@@ -658,3 +672,42 @@ def test_a_recording_upload_is_processed_in_bounded_memory(client: TestClient, l
     assert r.status_code == 413 and r.json()["detail"]["code"] == "twin.too_large"
     assert peak < 24 * 1024 * 1024
     assert len(ok(client.get(f"{ORG}/projects/arm/twin/recordings", headers=ADA))) == 1  # nothing was stored for it
+
+
+# ------------------------------------------------------------------------- camera-comparison infrastructure check
+
+
+def test_a_configuration_comparison_has_what_a_camera_comparison_needs(client: TestClient, lab: str) -> None:
+    """The infrastructure a camera-configuration comparison will use, checked without building a camera scenario: three
+    configuration arms of one pinned scenario, the same fixed conditions in every trial, one workflow and one captured
+    recording per trial, results grouped per arm. (The configurations here are speeds of the self-test base; a camera
+    scenario would vary a camera profile parameter and output visibility measurements instead.)"""
+    spec = recording_spec(
+        client,
+        seeds=[],
+        repetitions=2,
+        initial_conditions={"drive_s": 1.0, "stop_on_command_loss": True},
+        arms=[
+            {"key": "profile-a", "title": "Profile A", "role": "baseline", "parameters": {"speed_mps": 0.2}},
+            {"key": "profile-b", "title": "Profile B", "parameters": {"speed_mps": 0.4}},
+            {"key": "profile-c", "title": "Profile C", "parameters": {"speed_mps": 0.6}},
+        ],
+        limits={"max_trials": 6, "max_wall_time_s": 600},
+    )
+    rid, _ = approved(client, spec)
+    assert work_all() == ["succeeded"] * 6 and capture() == 6
+    wfs = [w for w in ok(client.get(f"{ORG}/workflows", headers=VIC)) if w["template"] == "experiment"]
+    assert len(wfs) == 3  # one workflow per configuration (no seeds: repetitions are runs of the same workflow)
+    inputs = {w["parameters"]["arm"]: w["definition"]["steps"][0]["input"]["parameters"] for w in wfs}
+    for arm, p in inputs.items():  # the fixed conditions are identical in every arm; only the configuration differs
+        assert {k: v for k, v in p.items() if k != "speed_mps"} == {"drive_s": 1.0, "stop_on_command_loss": True}, arm
+    assert sorted(p["speed_mps"] for p in inputs.values()) == [0.2, 0.4, 0.6]
+    d = ok(client.get(f"{ORG}/experiment-requests/{rid}", headers=VIC))
+    assert [a["arm"] for a in d["arms"]] == ["profile-a", "profile-b", "profile-c"]
+    assert all(a["trials"] == 2 and len(a["values"]["travel_after_kill_m"]) == 2 for a in d["arms"])
+    recs = {t["recording_id"] for t in d["trial_results"]}
+    assert None not in recs and len({t["artifacts"][0]["sha256"] for t in d["trial_results"]}) >= 3
+    # Each trial's recording is its own run's, linked to that run and arm in the twin.
+    for t in d["trial_results"]:
+        rec = ok(client.get(f"{PROJECT}/twin/recordings/{t['recording_id']}", headers=VIC))
+        assert rec["run"]["arm"] in {"profile-a", "profile-b", "profile-c"}

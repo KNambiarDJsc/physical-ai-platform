@@ -103,6 +103,37 @@ Execution reaches a simulation host through the adapter SDK from the durable wor
 not pass through a separate OpenMHS Gateway process; the verdict is the OpenMHS engine's. Hosts for Gazebo, MuJoCo and
 Isaac Sim implement the same `pap.simulation-host/1` contract; the platform does not know which is behind it.
 
+## SIM-006: the #79 regression run by the platform on Gazebo
+
+Catalog `runtimes/sim-host/catalogs/gazebo-openamr.json` (scenario `openamr-command-loss-stop`, parameter `wiring`:
+`main` or `fix`). The host runs `examples/openamr-cmd-timeout/scenario/platform_run.py`, which:
+
+- refuses, starting nothing, unless the machine can take a run: 1.5 GB available inside WSL, 1 GB free on Windows,
+  1 GB of disk, no Gazebo already running, and a clean `~/p79` checkout (so a run is always of a known revision);
+- starts the repository's own scripts in WSL (`run_scenario.sh fix` for the fix, `run_main.sh` for the pre-fix wiring,
+  which swaps in `gz_bridge.yaml` and `gz_simulator.launch.py` from origin/main for one run and restores them);
+- checks afterwards that the checkout is exactly as before, restoring those two files itself if a run was cut short;
+- writes the bag summary with the observer and reports only what the probe measured and the files the run left:
+  the MCAP, bag summary, run identity, probe, Gazebo and recorder logs.
+
+Run it yourself: `uv run python scripts/dev_stack.py --sim-port 8867 --sim-catalog runtimes/sim-host/catalogs/gazebo-openamr.json`
+and use the Studio. Acceptance: `PAP_REQUIRE_GAZEBO=1 uv run pytest services/api/tests/test_experiments_gazebo.py`
+(opt-in: two real runs; the full suite skips it and says so).
+
+**Contract violation versus release regression.** Each trial's verdict is the engine's over one run: a violated trial is a
+contract violation. A release regression is a statistical claim the engine makes in Release Intelligence from enough known
+outcomes per release (the recorded 5 and 7 runs of this regression are still "insufficient evidence"). The Studio states
+this beside the results and claims no regression from one run per arm.
+
+## Camera-configuration comparisons: infrastructure check
+
+Checked (`test_a_configuration_comparison_has_what_a_camera_comparison_needs`, real host): three configuration arms of one
+pinned scenario compile to one workflow each; every trial carries the same fixed conditions and differs only in the
+configuration parameter; each trial has its own captured recording, linked to its run and arm in the twin; results are
+grouped per arm with raw values and verdict counts. What a camera scenario must still bring (simulation owners,
+OpenAMRobot #69, #97): a camera-profile parameter (an enum in its schema), visibility measurements as outputs with units,
+the camera images or bag as artifacts, and the fixed objects and lighting inside the scenario.
+
 ## Not built yet
 
 MuJoCo and Isaac hosts (the contract is the same), the Gazebo catalog entry (SIM-006), an automatic evaluation of arms

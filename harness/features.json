@@ -1759,18 +1759,32 @@
         "Runs only where Gazebo is available (PAP_REQUIRE_GAZEBO=1 makes absence a failure); CI states that it skipped."
       ],
       "tests": [
-        "PAP_REQUIRE_GAZEBO=1 uv run pytest services/api/tests/test_experiments_gazebo.py"
+        "PAP_REQUIRE_ENGINE=1 PAP_REQUIRE_GAZEBO=1 uv run pytest services/api/tests/test_experiments_gazebo.py"
       ],
       "paths": [
         "examples/openamr-cmd-timeout/scenario/",
-        "runtimes/sim-host/catalogs/"
+        "runtimes/sim-host/catalogs/",
+        "scripts/dev_stack.py",
+        "services/api/tests/test_experiments_gazebo.py"
       ],
-      "status": "unstarted",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
-        "evidence": []
+        "verified_at": "2026-11-22",
+        "evidence": [
+          "PAP_REQUIRE_ENGINE=1 PAP_REQUIRE_GAZEBO=1 uv run pytest services/api/tests/test_experiments_gazebo.py: 1 passed in 92 s. Through the API and the worker's own functions: the Gazebo host (catalog gazebo-openamr.json) was registered and discovered, an experiment with a pre-fix arm (wiring main) and a fix arm (wiring fix) was created, requested by one engineer and approved by another, and the platform launched two real headless Gazebo runs in WSL, one after the other. Measured from Gazebo's world pose by the probe: pre-fix travelled 1.0028 m after the command loss, engine verdict VIOLATED; fix travelled 0.0799 m, SATISFIED; the test asserts verdict == SATISFIED iff travel <= upstream's 0.15 m (no hard-coded outcome). The pre-fix result agrees with the 5 earlier recorded runs (0.997-1.003 m) and the fix with the 7 (0.073-0.085 m).",
+          "Captured per trial and checked against the host's digests: the MCAP, the observer's bag summary (pap.ros.bag-summary/1), the run identity (pap.ros.run-identity/1), the probe, the Gazebo and recorder logs. Each MCAP is a Digital Twin recording on upstream's OpenAMRobot model, linked to its workflow run and the engine's verdict. The identities: both on commit d6f810f (the fix branch head at the time); the fix arm a clean tree, the pre-fix arm dirty in exactly gz_bridge.yaml and gz_simulator.launch.py. The ~/p79 checkout status and HEAD were identical before and after the runs.",
+          "Found and fixed by real runs: the preflight's pgrep matched its own command line; PYTHONPATH replaced ROS's path so the bag summary lost rclpy; requiring 1.8 GB free on Windows refused the second run although WSL had the memory (now 1.5 GB inside WSL plus a 1 GB Windows floor). The preflight correctly refused while another session's Gazebo run (r2_heavy.sh) was using the shared workspace; nothing of that session was touched.",
+          "Studio: results state that a violated trial is a contract violation and not a release regression, with the trial count per setup and a link to Releases (e2e experiments.spec.ts 7 passed, axe clean in both themes after underlining that link). Camera-comparison infrastructure: test_a_configuration_comparison_has_what_a_camera_comparison_needs passes (three configuration arms, identical fixed conditions, one recording per trial, per-arm grouping); test_experiments.py 32 passed. No camera scenario was built.",
+          "Dependency audits (2026-11-22): npm audit in apps/web: 0 vulnerabilities (info 0, low 0, moderate 0, high 0, critical 0). pip-audit over the exported locked requirements of the root workspace (includes jsonschema 4.26.0, types-jsonschema) and of runtimes/sim-host (includes mcap, mcap-ros2-support): No known vulnerabilities found. Nothing to address."
+        ]
       },
-      "limitations": []
+      "limitations": [
+        "One run per arm: individual contract verdicts only; no release-level regression is claimed (the engine's comparison needs many known outcomes per release).",
+        "The pre-fix arm is the fix commit with the two wiring files from origin/main (69847ab) for the run, as recorded in its identity, not a separate clean build of 69847ab (it would need its own colcon workspace).",
+        "The fix branch head moved to d6f810f during the session (another session's review commit); the fix arm ran that head. The workspace is shared, so runs are refused while it is dirty or another simulation is running.",
+        "The browser journey on Gazebo was not automated in Playwright (the API acceptance test drives it; the Studio journey is automated on the self-test host). The stack can serve the Gazebo host for a manual run (dev_stack.py --sim-catalog).",
+        "Real Gazebo tests are opt-in; the default full suite skips them."
+      ]
     }
   ]
 }

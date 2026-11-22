@@ -1,0 +1,90 @@
+{
+  "simulator": {
+    "kind": "gazebo",
+    "name": "Gazebo (OpenAMRobot, headless, WSL)",
+    "description": "Gazebo Harmonic with ROS 2 Jazzy in the WSL distribution openmhs-ros, running openAMRobot/openamr-platform-sw's own simulation. Runs one at a time; each needs about 1.5 GB of memory and a few minutes."
+  },
+  "scenarios": [
+    {
+      "id": "openamr-command-loss-stop",
+      "version": "1",
+      "title": "OpenAMRobot: stop after command loss (#79)",
+      "description": "Headless Gazebo run of upstream's command-timeout scenario: the base is driven at 0.2 m/s, the command publisher is killed after 4 s of simulation time, and the travel afterwards is measured from Gazebo's world pose for 5 s. 'fix' runs the fix branch as committed; 'main' swaps in the two wiring files from origin/main (the pre-fix wiring) for the run and restores them.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "wiring"
+        ],
+        "properties": {
+          "wiring": {
+            "type": "string",
+            "enum": [
+              "main",
+              "fix"
+            ],
+            "description": "main: pre-fix wiring from origin/main. fix: the #79 fix as committed."
+          }
+        }
+      },
+      "outputs": [
+        {
+          "name": "travel_after_kill_m",
+          "unit": "m",
+          "description": "Base travel after the command publisher was killed (Gazebo world pose)"
+        },
+        {
+          "name": "driven_before_kill_m",
+          "unit": "m",
+          "description": "Base travel before the kill"
+        },
+        {
+          "name": "kill_sim_time_s",
+          "unit": "s",
+          "description": "Simulation time of the kill"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "recording",
+          "media_type": "application/x-mcap",
+          "description": "rosbag2 MCAP: /clock, /cmd_vel, /sim/base_cmd_vel, /odom, /tf, /joint_states"
+        },
+        {
+          "name": "bag-summary",
+          "media_type": "application/json",
+          "description": "The observer's bag summary (pap.ros.bag-summary/1)"
+        },
+        {
+          "name": "identity",
+          "media_type": "application/json",
+          "description": "Run identity: commit, dirty files, configuration, ROS versions"
+        },
+        {
+          "name": "probe",
+          "media_type": "application/json",
+          "description": "The pose probe's samples and result"
+        },
+        {
+          "name": "sim-log",
+          "media_type": "text/plain",
+          "description": "Gazebo launch log",
+          "optional": true
+        },
+        {
+          "name": "bag-log",
+          "media_type": "text/plain",
+          "description": "Recorder log",
+          "optional": true
+        }
+      ],
+      "max_duration_s": 900,
+      "command": [
+        "{python}",
+        "{catalog_dir}/../../../examples/openamr-cmd-timeout/scenario/platform_run.py",
+        "{run_dir}",
+        "{params_file}"
+      ]
+    }
+  ]
+}

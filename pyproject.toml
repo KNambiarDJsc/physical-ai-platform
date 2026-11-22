@@ -70,5 +70,6 @@ testpaths = [
   "services/api/tests",
 ]
 markers = [
+  "gazebo: starts real Gazebo simulations in WSL (minutes, ~1.5 GB each); opt-in with PAP_REQUIRE_GAZEBO=1 or PAP_RUN_GAZEBO=1",
   "engine: runs the real pinned OpenMHS binary (OPENMHS_BIN); fails instead of skipping when PAP_REQUIRE_ENGINE=1",
 ]

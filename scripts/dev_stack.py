@@ -97,7 +97,12 @@ def main() -> int:
         "--sim-port",
         type=int,
         default=0,
-        help="serve a simulation host with the self-test catalog (runtimes/sim-host; not a simulator) and offer it",
+        help="serve a simulation host (runtimes/sim-host) and offer it; the self-test catalog unless --sim-catalog",
+    )
+    ap.add_argument(
+        "--sim-catalog",
+        default=None,
+        help="catalog for --sim-port, e.g. runtimes/sim-host/catalogs/gazebo-openamr.json (real Gazebo in WSL)",
     )
     ns = ap.parse_args()
     VAR = Path(ns.state_dir).resolve()
@@ -143,6 +148,12 @@ def main() -> int:
     lab_url = f"http://127.0.0.1:{ns.lab_port}" if ns.lab_port else None
     replay_url = f"http://127.0.0.1:{ns.ros_replay_port}" if ns.ros_replay else None
     sim_url = f"http://127.0.0.1:{ns.sim_port}" if ns.sim_port else None
+    sim_catalog = (
+        Path(ns.sim_catalog).resolve()
+        if ns.sim_catalog
+        else ROOT / "runtimes" / "sim-host" / "catalogs" / "selftest.json"
+    )
+    gazebo = "gazebo" in sim_catalog.name
     if (lab_url or ns.ros_observer or replay_url or sim_url) and "PAP_ENVIRONMENTS" not in os.environ:
         # The operator catalog of this local install (D-026): the simulated virtual laboratory, and a ROS observer
         # when one was named. Users choose from this list; they never type an endpoint.
@@ -164,7 +175,12 @@ def main() -> int:
                  "endpoint": replay_url,
                  "description": "Observations recorded from a real ROS 2 graph and replayed unchanged. Ages do not advance. For trying the interface without ROS."}
             )  # fmt: skip
-        if sim_url:
+        if sim_url and gazebo:
+            catalog.append(
+                {"key": "gazebo-openamr", "name": "Gazebo: OpenAMRobot (WSL)", "kind": "simulated", "endpoint": sim_url,
+                 "description": "Real headless Gazebo runs of openAMRobot/openamr-platform-sw in WSL (openmhs-ros, ~/p79). One run at a time, about 1.5 GB of memory and a few minutes each."}
+            )  # fmt: skip
+        elif sim_url:
             catalog.append(
                 {"key": "selftest-sim", "name": "Self-test simulation host", "kind": "simulated", "endpoint": sim_url,
                  "description": "A simulation host with a small kinematic base model. Not a simulator and not Gazebo: it exercises the experiment pipeline without one."}
@@ -198,7 +214,7 @@ def main() -> int:
     if sim_url:
         uv = shutil.which("uv") or "uv"
         sim_cmd = [uv, "run", "--quiet", "--project", str(ROOT / "runtimes" / "sim-host"), "python", "-m",
-                   "pap_sim_host.server", "--catalog", str(ROOT / "runtimes" / "sim-host" / "catalogs" / "selftest.json"),
+                   "pap_sim_host.server", "--catalog", str(sim_catalog),
                    "--port", str(ns.sim_port), "--work", str(VAR / "sim-host")]  # fmt: skip
         procs.append(subprocess.Popen(sim_cmd, env=env, **GROUP))
     if replay_url:
