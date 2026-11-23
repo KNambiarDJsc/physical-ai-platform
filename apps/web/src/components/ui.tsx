@@ -54,13 +54,13 @@ export function EvidenceClassBadge({ classes }: { classes: readonly string[] | u
 
 export function Table({ head, children, caption }: { head: ReactNode[]; children: ReactNode; caption?: string }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="scroll-x overflow-x-auto">
       <table className="w-full border-collapse text-[13px]">
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead>
           <tr className="border-b border-line text-left text-xs text-muted">
             {head.map((h, i) => (
-              <th key={i} scope="col" className="px-2 py-1.5 font-medium whitespace-nowrap">
+              <th key={i} scope="col" className="px-2 py-1.5 align-bottom font-medium">
                 {h}
               </th>
             ))}
@@ -73,7 +73,8 @@ export function Table({ head, children, caption }: { head: ReactNode[]; children
 }
 
 export function Td({ children, num, className }: { children: ReactNode; num?: boolean; className?: string }) {
-  return <td className={clsx("px-2 py-1.5 align-top whitespace-nowrap", num && "num text-right", className)}>{children}</td>;
+  const wraps = className?.includes("whitespace-");
+  return <td className={clsx("px-2 py-1.5 align-top", !wraps && "whitespace-nowrap", num && "num text-right", className)}>{children}</td>;
 }
 
 /**

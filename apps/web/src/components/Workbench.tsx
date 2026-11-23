@@ -249,13 +249,15 @@ function Instruments({
                 onClick={() => onRun(r.id)}
                 aria-current={r.id === runId ? "true" : undefined}
                 className={clsx(
-                  "flex w-full items-center gap-2 rounded-[5px] px-2 py-1.5 text-left text-[12px]",
-                  r.id === runId ? "bg-sunken text-ink" : "text-muted hover:bg-sunken hover:text-ink",
+                  "flex w-full items-center gap-2 rounded-[5px] px-2 py-1.5 text-left text-[12px] transition-colors duration-[80ms]",
+                  r.id === runId ? "bg-selected text-ink" : "text-muted hover:bg-hover hover:text-ink",
                 )}
               >
-                <span className="num">{timestamp(r.created_at)}</span>
-                <span className="truncate">{r.workflow}</span>
-                <span className="ml-auto">{r.verdict ? <VerdictBadge verdict={r.verdict} /> : <Badge tone={stateTone(r.state)}>{RUN_STATE[r.state] ?? r.state}</Badge>}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{r.workflow}</span>
+                  <span className="num block whitespace-nowrap text-[11px] text-muted">{timestamp(r.created_at)}</span>
+                </span>
+                <span className="shrink-0">{r.verdict ? <VerdictBadge verdict={r.verdict} /> : <Badge tone={stateTone(r.state)}>{RUN_STATE[r.state] ?? r.state}</Badge>}</span>
               </button>
             </li>
           ))}

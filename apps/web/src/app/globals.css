@@ -179,6 +179,15 @@
     font-size: 13px;
   }
 
+  /* A table wider than its panel scrolls sideways; a soft edge shows which side still has columns. */
+  .scroll-x {
+    background:
+      linear-gradient(to right, var(--color-panel) 30%, transparent) left center / 24px 100% no-repeat local,
+      linear-gradient(to left, var(--color-panel) 30%, transparent) right center / 24px 100% no-repeat local,
+      linear-gradient(to right, color-mix(in srgb, var(--color-ink) 22%, transparent), transparent) left center / 10px 100% no-repeat scroll,
+      linear-gradient(to left, color-mix(in srgb, var(--color-ink) 22%, transparent), transparent) right center / 10px 100% no-repeat scroll;
+  }
+
   .kbd {
     font-family: var(--font-mono);
     font-size: 11px;

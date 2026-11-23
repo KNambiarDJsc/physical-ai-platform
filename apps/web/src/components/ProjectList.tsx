@@ -61,7 +61,18 @@ const input = "field";
 const button = "btn btn-primary";
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
 
-function SlugForm({ idPrefix, what, submit }: { idPrefix: string; what: string; submit: (slug: string, name: string) => Promise<unknown> }) {
+function SlugForm({
+  idPrefix,
+  what,
+  submit,
+  alone,
+}: {
+  idPrefix: string;
+  what: string;
+  submit: (slug: string, name: string) => Promise<unknown>;
+  /** The form is the whole panel: no divider above it. */
+  alone?: boolean;
+}) {
   const qc = useQueryClient();
   const [slug, setSlug] = useState("");
   const [name, setName] = useState("");
@@ -75,7 +86,10 @@ function SlugForm({ idPrefix, what, submit }: { idPrefix: string; what: string; 
   });
   const valid = SLUG.test(slug) && name.trim().length > 0;
   return (
-    <form className="mt-3 flex flex-wrap items-end gap-2 border-t border-line pt-3" onSubmit={(e: FormEvent) => (e.preventDefault(), m.mutate())}>
+    <form
+      className={alone ? "flex flex-wrap items-end gap-2" : "mt-3 flex flex-wrap items-end gap-2 border-t border-line pt-3"}
+      onSubmit={(e: FormEvent) => (e.preventDefault(), m.mutate())}
+    >
       <label className="text-xs text-muted" htmlFor={`${idPrefix}-name`}>
         {what} name
         <input id={`${idPrefix}-name`} className={`${input} mt-1 block`} value={name} onChange={(e) => setName(e.target.value)} />
@@ -88,6 +102,7 @@ function SlugForm({ idPrefix, what, submit }: { idPrefix: string; what: string; 
         Create {what.toLowerCase()}
       </button>
       {slug && !SLUG.test(slug) && <span className="text-xs text-bad">lowercase letters, digits and dashes</span>}
+      {!valid && !slug && !name && <span className="basis-full text-xs text-muted">Enter a name and a slug to create one. The slug is permanent and appears in URLs.</span>}
       {m.error && <span className="text-xs text-bad">{m.error.message}</span>}
     </form>
   );
@@ -104,5 +119,5 @@ function NewProject({ org }: { org: string }) {
 }
 
 function NewOrganization() {
-  return <SlugForm idPrefix="org" what="Organization" submit={(slug, name) => api("/api/v1/orgs", { method: "POST", body: JSON.stringify({ slug, name }) })} />;
+  return <SlugForm alone idPrefix="org" what="Organization" submit={(slug, name) => api("/api/v1/orgs", { method: "POST", body: JSON.stringify({ slug, name }) })} />;
 }

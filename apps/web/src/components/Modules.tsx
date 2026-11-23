@@ -105,7 +105,7 @@ export function VerificationView() {
                     const contradictions = Object.values(s.classes ?? {}).reduce((n, c) => n + (c.contradiction ?? 0), 0);
                     return (
                       <tr key={e.id}>
-                        <Td>
+                        <Td className="min-w-[14rem] whitespace-normal">
                           <Link className="font-medium text-accent hover:underline" href={evalHref(w, e)}>
                             {e.baseline_label} → {e.candidate_label}
                           </Link>
@@ -328,8 +328,16 @@ function Incidents({ items }: { items: Workspace[] }) {
                     <Td className="num">{x.incident_id}</Td>
                     <Td>{x.robot}</Td>
                     <Td>{x.release}</Td>
-                    <Td>{x.reported}</Td>
-                    <Td>{x.verified === "violated" ? <ClassBadge value="verified_failure" /> : x.verified}</Td>
+                    <Td>{x.reported === "unknown" ? <Badge tone="unknown">unknown</Badge> : x.reported}</Td>
+                    <Td>
+                      {x.verified === "violated" ? (
+                        <ClassBadge value="verified_failure" />
+                      ) : x.verified === "satisfied" ? (
+                        <Badge tone="ok">satisfied</Badge>
+                      ) : (
+                        x.verified
+                      )}
+                    </Td>
                     <td className="min-w-[20rem] px-2 py-1.5 text-xs leading-snug text-muted">{x.headline}</td>
                   </tr>
                 ))}
