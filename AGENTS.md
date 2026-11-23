@@ -50,7 +50,9 @@ is uncommitted. The next agent should not need the conversation.
 ## Handoff (start here if you are new, including Codex)
 
 - `docs/HANDOFF.md`: what exists, where, the invariants, how to run, test and extend.
-- `docs/handoff/CODEX_HANDOFF.md`: the current state, the open work in priority order, and the pitfalls.
+- `docs/handoff/SESSION_HANDOFF.md`: the exact current state, what is left, known limits, pitfalls; prompts for the next
+  session are `NEXT_CLAUDE_PROMPT.md` and `CODEX_PROMPT.md` beside it.
+- `docs/handoff/CODEX_HANDOFF.md`: the earlier briefing (state, open work, pitfalls).
 - `docs/handoff/graphify/`: a code graph of this repository (GRAPH_REPORT.md for people, graph.json for tools).
   Query it with `graphify query "<question>"`, `graphify explain "<symbol>"`, `graphify path "A" "B"`,
   `graphify affected "<symbol>"`; refresh with `graphify update .` (AST only, no API key, nothing leaves the machine).
