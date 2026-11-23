@@ -50,6 +50,11 @@ def settings_env(database_url: str, tmp_path: Path, monkeypatch: pytest.MonkeyPa
     monkeypatch.setenv("PAP_AUTH_MODE", "dev")
     monkeypatch.setenv("PAP_STORAGE_PATH", str(tmp_path / "artifacts"))
     monkeypatch.setenv("PAP_WORK_PATH", str(tmp_path / "work"))
+    # The Agent page runs a subprocess: every test gets a stand-in with the same command line, never the real harness.
+    monkeypatch.setenv("PAP_AGENT_STATE_PATH", str(tmp_path / "agent"))
+    monkeypatch.setenv(
+        "PAP_AGENT_COMMAND", json.dumps([sys.executable, str(Path(__file__).parent / "fake_harness.py")])
+    )
     get_settings.cache_clear()
     get_omhs.cache_clear()
     yield

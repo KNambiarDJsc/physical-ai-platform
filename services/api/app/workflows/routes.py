@@ -6,15 +6,17 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Path, Query, Response
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..auth.deps import SLUG, EngineerDep, ViewerDep, audit_allow, error
+from ..auth.deps import OrgContext as ViewerContext
 from ..db import get_session
 from ..hardware.models import Environment
+from . import report
 from .definition import TEMPLATES, WorkflowDef, definition_sha256, from_template
 from .models import Workflow, WorkflowRun, WorkflowStep
 from .service import WorkflowError, check_against_devices, submit_run
@@ -275,3 +277,50 @@ def get_run(run_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) -> RunDetail
     out = _run_out(session, r, detail=True)
     assert isinstance(out, RunDetailOut)
     return out
+
+
+def _report(session: Session, ctx: ViewerContext, run_id: uuid.UUID) -> dict[str, Any]:
+    from ..agent.models import ExperimentProposal  # imported here: the agent package imports this one
+
+    r = session.scalar(select(WorkflowRun).where(WorkflowRun.organization_id == ctx.org.id, WorkflowRun.id == run_id))
+    if r is None:
+        raise error(404, "not_found", "run not found")
+    out = _run_out(session, r, detail=True)
+    assert isinstance(out, RunDetailOut)
+    proposals = session.scalars(
+        select(ExperimentProposal)
+        .where(ExperimentProposal.organization_id == ctx.org.id)
+        .order_by(ExperimentProposal.created_at)
+    ).all()
+    follow = [
+        {
+            "id": str(p.id), "state": p.state, "workflow": p.workflow_id and str(p.workflow_id), "channel": p.channel,
+            "proposed_by": p.proposed_by, "decided_by": p.decided_by, "rationale": p.rationale,
+            "evidence_ids": list(p.evidence_ids or []), "run_id": str(p.run_id) if p.run_id else None,
+        }
+        for p in proposals
+        if p.run_id == r.id or f"run:{r.id}" in (p.evidence_ids or [])
+    ]  # fmt: skip
+    return report.build(out.model_dump(mode="json"), ctx.org.slug, follow)
+
+
+@router.get("/workflow-runs/{run_id}/report.json")
+def run_report_json(run_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) -> Response:
+    """The run's evidence as one JSON document, from stored records only (same run, same bytes)."""
+    body = report.to_json(_report(session, ctx, run_id))
+    return Response(
+        body,
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="lab-run-{str(run_id)[:8]}.json"'},
+    )
+
+
+@router.get("/workflow-runs/{run_id}/report.html")
+def run_report_html(run_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) -> Response:
+    """The same evidence as a self-contained page. No scripts; every value is escaped."""
+    body = report.to_html(_report(session, ctx, run_id))
+    return Response(
+        body,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'"},
+    )

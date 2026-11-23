@@ -127,6 +127,10 @@ def approve(proposal_id: uuid.UUID, ctx: EngineerDep, session: SessionDep) -> Pr
     p = _get(session, ctx.org.id, proposal_id)
     if p.state != "proposed":
         raise error(409, "conflict", f"this proposal is already {p.state}")
+    if p.proposed_by == ctx.principal.label:  # two people: the one who asks is never the one who approves (as D-037)
+        raise error(
+            403, "separation_of_duties", "A proposal must be approved by someone other than whoever proposed it."
+        )
     w = session.get(Workflow, p.workflow_id)
     assert w is not None
     env = session.get(Environment, w.environment_id)

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import {
   Activity,
   AlertTriangle,
+  Bot,
   Box,
   Boxes,
   ChevronRight,
@@ -16,6 +17,7 @@ import {
   PanelsTopLeft,
   Plug,
   Rocket,
+  Route,
   Search,
   Settings,
   ShieldCheck,
@@ -38,11 +40,13 @@ const GROUPS: { label: string; items: NavItem[] }[] = [
     label: "Lab automation",
     items: [
       { href: "/onboarding", label: "Get started", icon: Rocket, hint: "Workspace, environment, first verified run" },
+      { href: "/journey", label: "Lab experiment", icon: Route, hint: "Guided path: configure, approve, run, investigate, export" },
       { href: "/workbench", label: "Workbench", icon: PanelsTopLeft, hint: "Run workflows, watch instruments, read verdicts" },
       { href: "/experiments", label: "Experiments", icon: FlaskConical, hint: "Configure, approve and run simulation experiments" },
       { href: "/twin", label: "Digital twin", icon: Box, hint: "Robot model, recordings and the event timeline" },
       { href: "/hardware", label: "Hardware Hub", icon: Cpu, hint: "Environments, devices and capabilities" },
       { href: "/workflows", label: "Workflows", icon: Workflow, hint: "Device actions with a verification contract" },
+      { href: "/agent", label: "Agent", icon: Bot, hint: "Ask about runs and experiments; read-only, cites what it used" },
     ],
   },
   {

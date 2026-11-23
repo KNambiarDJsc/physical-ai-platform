@@ -56,6 +56,17 @@ class Settings(BaseSettings):
     device_timeout_s: float = Field(default=10.0, gt=0, le=120)
     workflow_step_timeout_s: float = Field(default=60.0, gt=0, le=3600)
 
+    # The Agent page runs the harness (packages/agent-harness, its own uv project, D-039) as a subprocess, as the
+    # caller. The model key is never a setting: the harness reads PAP_LLM_* from the environment itself.
+    agent_command: str | None = None  # default: uv run --project packages/agent-harness pap-harness
+    agent_state_path: Path = REPO_ROOT / "var" / "agent"
+    agent_session_usd: float = Field(default=0.25, gt=0, le=50)  # hard cap per session (when prices are set)
+    agent_daily_usd: float = Field(default=1.0, gt=0)  # all sessions of a day, all workspaces on this server
+    agent_daily_sessions: int = Field(default=50, ge=1)  # also applies when no prices are set
+    agent_timeout_s: float = Field(default=180.0, gt=10, le=1800)
+    agent_max_steps: int = Field(default=12, ge=1, le=50)
+    agent_max_running: int = Field(default=2, ge=1, le=10)
+
     worker_lease_s: int = Field(default=60, ge=5)
     job_max_attempts: int = Field(default=3, ge=1, le=10)
 

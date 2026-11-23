@@ -144,6 +144,36 @@ def dispense_and_verify(p: DispenseParams) -> WorkflowDef:
     )
 
 
+class DispenseWithFaultParams(DispenseParams):
+    fault: Literal["partial_blockage", "air_in_line", "blocked"] = Field(
+        default="partial_blockage",
+        description="The simulated fault to inject into the pump's line before dispensing.",
+    )
+    simulation: str = Field(default="simulation", description="Device key of the laboratory's simulation controls.")
+
+
+def dispense_with_fault(p: DispenseWithFaultParams) -> WorkflowDef:
+    """The same procedure and contract as ``dispense_and_verify``, run on a bench with a simulated fault.
+
+    The fault is injected and cleared by two visible, journaled steps of the workflow itself, through the laboratory's
+    own simulation controls (a discovered device, simulated only). It changes what physically happens in the simulation:
+    the pump still reports the volume it was commanded, and the balance independently measures what arrived. Nothing is
+    edited after the fact, and the bench is left healthy.
+    """
+    base = dispense_and_verify(p)
+    inject = StepDef(
+        id="inject_fault",
+        device=p.simulation,
+        action="set_fault",
+        input={"fault": p.fault},
+        title=f"Inject a simulated fault: {p.fault.replace('_', ' ')}",
+    )
+    clear = StepDef(
+        id="clear_fault", device=p.simulation, action="set_fault", input={"fault": "none"}, title="Clear the fault"
+    )
+    return WorkflowDef(steps=[inject, *base.steps, clear], verification=base.verification)
+
+
 TEMPLATES: dict[str, tuple[str, str, type[BaseModel]]] = {
     "dispense-and-verify": (
         "Dispense and verify",
@@ -151,10 +181,18 @@ TEMPLATES: dict[str, tuple[str, str, type[BaseModel]]] = {
         "reading is the independent evidence the engine checks against the tolerance.",
         DispenseParams,
     ),
+    "dispense-with-fault": (
+        "Dispense and verify, with a simulated fault",
+        "The same procedure and tolerance, on a bench where a simulated fault is injected into the pump's line first "
+        "and cleared afterwards. The pump still reports success; the balance shows what really arrived.",
+        DispenseWithFaultParams,
+    ),
 }
 
 
 def from_template(name: str, params: dict[str, Any]) -> WorkflowDef:
     if name == "dispense-and-verify":
         return dispense_and_verify(DispenseParams(**params))
+    if name == "dispense-with-fault":
+        return dispense_with_fault(DispenseWithFaultParams(**params))
     raise ValueError(f"unknown template {name!r}")

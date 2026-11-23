@@ -75,6 +75,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/agent/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sessions */
+        get: operations["list_sessions_api_v1_orgs__org_slug__agent_sessions_get"];
+        put?: never;
+        /** Ask */
+        post: operations["ask_api_v1_orgs__org_slug__agent_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/agent/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Session Detail */
+        get: operations["get_session_detail_api_v1_orgs__org_slug__agent_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/agent/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agent Status */
+        get: operations["agent_status_api_v1_orgs__org_slug__agent_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_slug}/assistant/tools": {
         parameters: {
             query?: never;
@@ -1051,6 +1103,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/{org_slug}/workflow-runs/{run_id}/report.html": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run Report Html
+         * @description The same evidence as a self-contained page. No scripts; every value is escaped.
+         */
+        get: operations["run_report_html_api_v1_orgs__org_slug__workflow_runs__run_id__report_html_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_slug}/workflow-runs/{run_id}/report.json": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run Report Json
+         * @description The run's evidence as one JSON document, from stored records only (same run, same bytes).
+         */
+        get: operations["run_report_json_api_v1_orgs__org_slug__workflow_runs__run_id__report_json_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_slug}/workflow-templates": {
         parameters: {
             query?: never;
@@ -1164,6 +1256,35 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AgentStatus */
+        AgentStatus: {
+            /** Can Ask */
+            can_ask: boolean;
+            /** Daily Sessions Cap */
+            daily_sessions_cap: number;
+            /** Daily Usd Cap */
+            daily_usd_cap: number;
+            /** Max Steps */
+            max_steps: number;
+            /** Model */
+            model: string | null;
+            /** Model Configured */
+            model_configured: boolean;
+            /** Priced */
+            priced: boolean;
+            /** Role */
+            role: string;
+            /** Runner Available */
+            runner_available: boolean;
+            /** Session Usd Cap */
+            session_usd_cap: number;
+            /** Sessions Today */
+            sessions_today: number;
+            /** Timeout S */
+            timeout_s: number;
+            /** Usd Today */
+            usd_today: number;
+        };
         /** Arm */
         Arm: {
             /** Attempt Outcomes */
@@ -1293,6 +1414,16 @@ export interface components {
             sha256: string;
             /** Size Bytes */
             size_bytes: number;
+        };
+        /** AskIn */
+        AskIn: {
+            /**
+             * Propose
+             * @default false
+             */
+            propose: boolean;
+            /** Question */
+            question: string;
         };
         /** AuditOut */
         AuditOut: {
@@ -2838,6 +2969,86 @@ export interface components {
             /** Workflow Name */
             workflow_name: string;
         };
+        /** SessionDetail */
+        SessionDetail: {
+            /** Answer */
+            answer?: string | null;
+            /** Asked By */
+            asked_by: string;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Error */
+            error?: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Grounding */
+            grounding?: {
+                [key: string]: unknown;
+            } | null;
+            /** Id */
+            id: string;
+            /** Model */
+            model?: string | null;
+            /** Question */
+            question: string;
+            /** Route */
+            route?: string | null;
+            /** Started At */
+            started_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "running" | "done" | "failed" | "interrupted";
+            /** Steps */
+            steps?: {
+                [key: string]: unknown;
+            }[];
+            /** Stop */
+            stop?: string | null;
+            /** Usage */
+            usage?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** SessionOut */
+        SessionOut: {
+            /** Answer */
+            answer?: string | null;
+            /** Asked By */
+            asked_by: string;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Error */
+            error?: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Grounding */
+            grounding?: {
+                [key: string]: unknown;
+            } | null;
+            /** Id */
+            id: string;
+            /** Model */
+            model?: string | null;
+            /** Question */
+            question: string;
+            /** Route */
+            route?: string | null;
+            /** Started At */
+            started_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "running" | "done" | "failed" | "interrupted";
+            /** Stop */
+            stop?: string | null;
+            /** Usage */
+            usage?: {
+                [key: string]: unknown;
+            } | null;
+        };
         /** SimEnvironmentOut */
         SimEnvironmentOut: {
             /** Last Discovered At */
@@ -3325,6 +3536,137 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sessions_api_v1_orgs__org_slug__agent_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ask_api_v1_orgs__org_slug__agent_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_session_detail_api_v1_orgs__org_slug__agent_sessions__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_status_api_v1_orgs__org_slug__agent_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentStatus"];
                 };
             };
             /** @description Validation Error */
@@ -5628,6 +5970,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_report_html_api_v1_orgs__org_slug__workflow_runs__run_id__report_html_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_report_json_api_v1_orgs__org_slug__workflow_runs__run_id__report_json_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                org_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

@@ -209,6 +209,9 @@ function NewWorkflow({ org }: { org: string }) {
   );
 }
 
+/** A person's name from the API's principal label ("user:<issuer>|<subject>"). */
+const person = (label: string) => label.split("|").pop() ?? label;
+
 const PROPOSAL_TONE = { proposed: "warn", approved: "ok", rejected: "neutral" } as const;
 
 /** Experiments someone (often an assistant) proposed. Only an engineer decides; an approval queues an ordinary run. */
@@ -248,12 +251,13 @@ function Proposals({ org, canDecide }: { org: string; canDecide: boolean }) {
                 <span className="num">{p.workflow}</span> <KindBadge kind={p.environment_kind} />
               </Td>
               <Td className="whitespace-normal">
-                {p.proposed_by.replace(/^dev:/, "")} {p.channel === "agent-tools" && <Badge tone="accent">via assistant tools</Badge>}
+                {person(p.proposed_by)} {p.channel === "agent-tools" && <Badge tone="accent">via assistant tools</Badge>}
               </Td>
               <Td className="max-w-md whitespace-normal">{p.rationale}</Td>
               <Td className="num max-w-xs whitespace-normal text-muted">{p.evidence_ids.length ? p.evidence_ids.join(", ") : "—"}</Td>
               <Td>
                 <Badge tone={PROPOSAL_TONE[p.state as keyof typeof PROPOSAL_TONE] ?? "neutral"}>{p.state}</Badge>
+                {p.decided_by && <span className="ml-1.5 text-[12px] text-muted">by {person(p.decided_by)}</span>}
               </Td>
               <Td className="whitespace-normal">
                 {p.state === "proposed" && canDecide && (

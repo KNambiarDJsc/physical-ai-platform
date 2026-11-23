@@ -8,6 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   api,
+  download,
+  openInTab,
   orgPath,
   type Device,
   type PropertyRead,
@@ -162,7 +164,7 @@ function Workbench() {
             className="h-full"
             pane={<Inspector run={run.data} sel={sel} />}
           >
-            <RunView run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} />
+            <RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} />
           </Split>
         </Split>
       </Split>
@@ -269,13 +271,32 @@ function Instruments({
 
 // --------------------------------------------------------------------------------------------- centre: the run
 
+/** The run's evidence as a page or a JSON file. Built by the API from stored records only; the same run gives the same bytes. */
+export function ReportButtons({ org, runId }: { org: string; runId: string }) {
+  const [failed, setFailed] = useState(false);
+  const base = `${orgPath(org)}/workflow-runs/${runId}`;
+  return (
+    <span className="ml-auto flex items-center gap-2">
+      {failed && <span role="alert" className="text-[12px] text-bad">Could not get the report. Try again.</span>}
+      <button type="button" className="btn text-[12px]" onClick={() => openInTab(`${base}/report.html`).then(() => setFailed(false), () => setFailed(true))}>
+        Evidence report
+      </button>
+      <button type="button" className="btn text-[12px]" onClick={() => download(`${base}/report.json`, `lab-run-${runId.slice(0, 8)}.json`).then(() => setFailed(false), () => setFailed(true))}>
+        Download JSON
+      </button>
+    </span>
+  );
+}
+
 function RunView({
+  org,
   run,
   loading,
   error,
   sel,
   onSelect,
 }: {
+  org: string;
   run: WorkflowRunDetail | undefined;
   loading: boolean;
   error?: string;
@@ -297,6 +318,7 @@ function RunView({
         <Badge tone={stateTone(run.state)}>{RUN_STATE[run.state] ?? run.state}</Badge>
         <Badge tone="warn">SIMULATED EVIDENCE</Badge>
         {busy && <span role="status" className="text-[12px] text-muted">The worker is executing; this view updates by itself.</span>}
+        {!busy && <ReportButtons org={org} runId={run.id} />}
       </div>
       {run.error && run.state !== "succeeded" && (
         <div className="mb-3">

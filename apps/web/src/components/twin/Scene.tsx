@@ -74,6 +74,19 @@ function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onSta
     let dead = false;
     let pending = 0;
     let loaded = 0;
+    let failed = 0;
+    // A model asks for all its meshes at the same instant; a proxy can drop one of them. Retry a couple of times before
+    // calling it a failure, so a momentary hiccup does not leave a robot missing a part.
+    const fetchMesh = async (rel: string): Promise<ArrayBuffer> => {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          return await fetchRef.current(rel);
+        } catch (e) {
+          if (dead || attempt >= 2) throw e;
+          await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
+        }
+      }
+    };
     const manager = new THREE.LoadingManager();
     const loader = new URDFLoader(manager);
     loader.packages = "model:"; // package://<pkg>/<path> becomes model:/<pkg>/<path>; matched to the version's files below
@@ -84,7 +97,7 @@ function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onSta
         return;
       }
       pending++;
-      fetchRef.current(rel)
+      fetchMesh(rel)
         .then((buf) => {
           if (dead) return;
           const geometry = new STLLoader().parse(buf);
@@ -93,13 +106,15 @@ function Robot({ urdf, files, fetchFile, pose, joints, selected, onSelect, onSta
         })
         .catch((e: unknown) => {
           if (!dead) {
+            failed++;
             statusRef.current({ state: "error", message: e instanceof Error ? e.message : "a mesh could not be loaded" });
             done(new THREE.Object3D(), e instanceof Error ? e : new Error("mesh"));
           }
         })
         .finally(() => {
           pending--;
-          if (!dead && pending === 0) statusRef.current({ state: "ready", meshes: loaded });
+          // Never let "ready" replace an error: a robot with a missing part is not a loaded robot.
+          if (!dead && pending === 0 && failed === 0) statusRef.current({ state: "ready", meshes: loaded });
         });
     };
     statusRef.current({ state: "loading" });

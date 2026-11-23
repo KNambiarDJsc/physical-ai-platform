@@ -245,3 +245,70 @@ def test_definitions_are_checked_against_the_discovered_devices_and_roles(client
     workflow(client)
     assert client.post(f"{ORG}/workflows/dispense/runs", headers=as_user("vic")).status_code == 403
     assert len(ok(client.get(f"{ORG}/workflow-runs", headers=as_user("vic")))) == 0
+
+
+def test_a_fault_is_a_visible_step_of_the_workflow_and_the_bench_is_left_healthy(client: TestClient, lab: str) -> None:
+    """The failing demo case: the fault is injected and cleared by journaled steps, nothing is edited afterwards."""
+    body = {
+        "slug": "faulty", "name": "faulty", "environment": "virtual-lab", "template": "dispense-with-fault",
+        "parameters": {"volume_ul": 50, "tolerance_pct": 2, "fault": "partial_blockage"},
+    }  # fmt: skip
+    ok(client.post(f"{ORG}/workflows", json=body, headers=H), 201)
+    queued = run(client, "faulty")
+    assert work_once() == "succeeded"
+    r = get_run(client, queued["id"])
+    assert [(s["device"], s["action"]) for s in r["steps"]] == [
+        ("simulation", "set_fault"), ("balance", "tare"), ("pump", "dispense"), ("balance", "weigh"),
+        ("simulation", "set_fault"),
+    ]  # fmt: skip
+    assert {s["state"] for s in r["steps"]} == {"completed"}
+    assert r["reported"]["value"] == "succeeded" and r["reported"]["output"]["reported_dispensed_ul"] == 50
+    assert r["verdict"] == "VIOLATED" and r["outcome_class"] == "contradiction"
+    assert r["provenance"]["evidence_class"] == "simulated"
+    observed = r["verification"]["evidence"][1]["value"]["value"]
+    assert 0.028 < observed < 0.034  # about 62 % of the 0.0499 g that 50 µL of water weighs
+    # the bench was cleared by the workflow's own last step: the next ordinary dispense is healthy
+    workflow(client, "healthy", volume_ul=50, tolerance_pct=2)
+    healthy = run(client, "healthy")
+    assert work_once() == "succeeded"
+    assert get_run(client, healthy["id"])["verdict"] == "SATISFIED"
+
+
+def test_a_run_report_is_reproducible_labelled_escaped_and_private(client: TestClient, lab: str) -> None:
+    import json
+
+    workflow(client, "healthy", volume_ul=50, tolerance_pct=2)
+    queued = run(client, "healthy")
+    assert work_once() == "succeeded"
+    rid = queued["id"]
+    # a follow-up that cites the run, with markup in its rationale, must be shown as text
+    prop = {
+        "workflow": "healthy",
+        "rationale": "Repeat <script>alert(1)</script> once.",
+        "evidence_ids": [f"run:{rid}"],
+    }
+    pid = ok(client.post(f"{ORG}/experiment-proposals", json=prop, headers=as_user("ada")), 201)["id"]
+
+    first = client.get(f"{ORG}/workflow-runs/{rid}/report.json", headers=H)
+    second = client.get(f"{ORG}/workflow-runs/{rid}/report.json", headers=H)
+    assert first.status_code == 200 and first.content == second.content  # same run, same bytes
+    assert "attachment" in first.headers["content-disposition"]
+    rep = json.loads(first.text)
+    assert rep["schema"] == "pap.lab-run-report/1" and rep["evidence_class"] == "simulated"
+    assert rep["independently_verified"]["verdict"] == "SATISFIED"
+    assert rep["reported_by_instrument"]["value"] == "succeeded"
+    assert len(rep["procedure"]["definition_sha256"]) == 64 and len(rep["execution"]) == 3
+    assert [p["id"] for p in rep["follow_up_proposals"]] == [pid]
+    assert rep["provenance"]["engine"]["commit"] and rep["provenance"]["contract_sha256"]
+
+    page = client.get(f"{ORG}/workflow-runs/{rid}/report.html", headers=H)
+    assert page.status_code == 200 and "SIMULATED EVIDENCE" in page.text and "SATISFIED" in page.text
+    assert "<script>alert(1)" not in page.text and "&lt;script&gt;alert(1)" in page.text
+    assert "default-src 'none'" in page.headers["content-security-policy"]
+
+    make_org(client, "mallory", "other")
+    for kind in ("json", "html"):
+        r = client.get(f"/api/v1/orgs/other/workflow-runs/{rid}/report.{kind}", headers=as_user("mallory"))
+        assert r.status_code == 404
+        assert client.get(f"{ORG}/workflow-runs/{rid}/report.{kind}", headers=as_user("mallory")).status_code == 404
+        assert client.get(f"{ORG}/workflow-runs/{rid}/report.{kind}").status_code == 401

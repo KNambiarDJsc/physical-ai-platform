@@ -100,3 +100,15 @@ export async function download(path: string, filename: string): Promise<void> {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 }
+
+/** Fetches an HTML document from the API with the caller's identity and shows it in a new tab. */
+export async function openInTab(path: string): Promise<void> {
+  const headers = new Headers();
+  const identity = getIdentity();
+  if (identity) headers.set("Authorization", `Bearer ${identity}`);
+  const res = await fetch(path, { headers, cache: "no-store" });
+  if (!res.ok) throw new ApiError(res.status, "http_error", `${res.status} ${res.statusText}`);
+  const url = URL.createObjectURL(new Blob([await res.text()], { type: "text/html;charset=utf-8" }));
+  window.open(url, "_blank", "noopener");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}

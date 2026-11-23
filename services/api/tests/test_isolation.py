@@ -22,7 +22,7 @@ from helpers import as_user, bearer, make_org, ok
 DEMO = Path(__file__).resolve().parents[3] / "examples" / "manipulation-demo"
 ID_PARAMS = {
     "user_id", "credential_id", "artifact_id", "release_id", "mapping_id", "job_id", "episode_id",
-    "device_id", "run_id", "proposal_id", "recording_id", "request_id", "trial_id",
+    "device_id", "run_id", "proposal_id", "recording_id", "request_id", "trial_id", "session_id",
 }  # fmt: skip
 pytestmark = pytest.mark.engine
 
@@ -90,6 +90,7 @@ def bodies(v: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
         ("POST", f"{o}/experiment-requests/{{request_id}}/approve"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
         ("POST", f"{o}/experiment-requests/{{request_id}}/reject"): {"json": {"spec_sha256": "sha256:" + "0" * 64}},
         ("POST", f"{o}/assistant/tools/{{tool_name}}"): {"json": {"arguments": {}}},
+        ("POST", f"{o}/agent/sessions"): {"json": {"question": "planted question"}},
         ("POST", f"{o}/experiment-proposals"): {"json": {"workflow": "dispense", "rationale": "planted proposal text"}},
         ("POST", f"{o}/experiment-proposals/{{proposal_id}}/approve"): {},
         ("POST", f"{o}/experiment-proposals/{{proposal_id}}/reject"): {"json": {"note": "planted"}},
@@ -201,6 +202,9 @@ def world(
     }
     ok(client.post("/api/v1/orgs/acme/workflows", json=wf, headers=h), 201)
     v["workflow_slug"] = "dispense"
+    v["session_id"] = ok(
+        client.post("/api/v1/orgs/acme/agent/sessions", json={"question": "victim question"}, headers=h), 202
+    )["id"]  # a real session of the victim's (the runner is the test stand-in)
     v["run_id"] = ok(client.post("/api/v1/orgs/acme/workflows/dispense/runs", headers=h), 201)["id"]
     prop = {"workflow": "dispense", "rationale": "victim-proposal-rationale", "evidence_ids": ["run:victim"]}
     v["proposal_id"] = ok(client.post("/api/v1/orgs/acme/experiment-proposals", json=prop, headers=h), 201)["id"]
@@ -274,8 +278,9 @@ def world(
         v[k]
         for k in ("user_id", "credential_id", "baseline", "candidate", "baseline_art", "candidate_art", "mapping_id",
                   "job_id", "episode_id", "device_id", "run_id", "proposal_id", "recording_id", "request_id",
-                  "trial_id")
+                  "trial_id", "session_id")
     } | {victim["org"]["id"], victim["project"]["id"], "victim-ci", "victim-baseline", "victim-candidate",
+         "victim question",
          "victim-proposal-rationale",
          "victim-workflow", "victim-recording", "victim-model", "victim-experiment", "victim-controller",
          "victim-contract", "victim condition", "victim-reviewer"}  # fmt: skip

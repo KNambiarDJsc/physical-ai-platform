@@ -8,6 +8,7 @@ from fastapi import FastAPI
 def register(app: FastAPI) -> None:
     from .agent.assistant import router as assistant
     from .agent.routes import router as agent
+    from .agent.sessions import router as agent_sessions
     from .evaluations.routes import router as evaluations
     from .evidence.routes import router as evidence
     from .experiments.routes import router as experiments
@@ -30,6 +31,7 @@ def register(app: FastAPI) -> None:
         workflows,
         experiments,
         agent,
+        agent_sessions,
         twin,
         assistant,
     ):

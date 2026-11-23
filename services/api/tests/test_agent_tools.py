@@ -300,3 +300,24 @@ def test_only_the_implemented_protocol_version_is_negotiated() -> None:
     assert negotiate("2025-11-25") == PROTOCOL
     assert negotiate("1999-01-01") == PROTOCOL
     assert negotiate(None) == PROTOCOL
+
+
+def test_an_engineer_cannot_approve_their_own_proposal_but_a_second_person_can(
+    client: TestClient, world: dict[str, Any]
+) -> None:
+    """Two people: whoever proposes a run is never the one who approves it (the same rule as experiment approval)."""
+    body = {"workflow": "dispense", "rationale": "Repeat the dispense to check the shortfall.", "evidence_ids": []}
+    pid = ok(client.post(f"{ORG}/experiment-proposals", json=body, headers=as_user("eve")), 201)["id"]
+    own = client.post(f"{ORG}/experiment-proposals/{pid}/approve", headers=as_user("eve"))
+    assert own.status_code == 403 and own.json()["detail"]["code"] == "separation_of_duties"
+    assert ok(client.get(f"{ORG}/experiment-proposals/{pid}", headers=ADA))["state"] == "proposed"  # nothing queued
+    approved = ok(client.post(f"{ORG}/experiment-proposals/{pid}/approve", headers=ADA))
+    assert approved["state"] == "approved" and approved["run_id"]
+    # withdrawing your own proposal is allowed: it only ends it
+    pid2 = ok(client.post(f"{ORG}/experiment-proposals", json=body, headers=as_user("eve")), 201)["id"]
+    assert (
+        ok(
+            client.post(f"{ORG}/experiment-proposals/{pid2}/reject", json={"note": "withdrawn"}, headers=as_user("eve"))
+        )["state"]
+        == "rejected"
+    )
