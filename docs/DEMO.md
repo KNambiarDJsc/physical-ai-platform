@@ -42,5 +42,6 @@ independent verification engine, and shows the evidence in 3D.
 - Commands go only to simulated environments (the operator decides); physical equipment is read-only.
 - Simulated evidence is labelled as such everywhere.
 - The self-test host is a small kinematic model, not a simulator; the Gazebo runs are real.
-- Do not claim real-model agent performance: the harness has been tested with a scripted stand-in only.
+- Do not claim general agent quality: the harness was verified with one real model on a small data set (safe, grounded
+  behaviour there, nothing broader). It is a command-line component, not a page in the web app.
 - Do not claim hardware validation or customer results; there are none (see `harness/blockers.md`).
