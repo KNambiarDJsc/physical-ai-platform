@@ -104,6 +104,8 @@ const pages = () => [
 for (const theme of ["dark", "light"] as const) {
   test(`no WCAG A/AA violations on any page (${theme} theme)`, async ({ page }) => {
     test.setTimeout(180_000);
+    // axe must not sample a half-faded page; the motion itself has its own test below.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await signIn(page, theme);
     const failures: string[] = [];
     for (const [url, ready] of pages()) {
@@ -117,6 +119,16 @@ for (const theme of ["dark", "light"] as const) {
     expect(failures, failures.join("\n")).toEqual([]);
   });
 }
+
+test("motion: route content fades in, and reduced motion turns the fade off", async ({ page }) => {
+  const animation = () => page.locator("main > .reveal").evaluate((el) => getComputedStyle(el).animationName);
+  await signIn(page, "dark");
+  await page.goto("/verification");
+  await expect.poll(animation).toBe("fade-in");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/evidence");
+  await expect.poll(animation).toBe("none");
+});
 
 test("command palette: opens with Ctrl K, keeps focus inside, Escape returns focus", async ({ page }) => {
   await signIn(page, "dark");

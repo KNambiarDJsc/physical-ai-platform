@@ -21,7 +21,7 @@ export function Badge({ tone, children }: { tone: "ok" | "bad" | "warn" | "unkno
     neutral: "bg-sunken text-muted",
     accent: "bg-accent-soft text-accent",
   }[tone];
-  return <span className={clsx("inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium", cls)}>{children}</span>;
+  return <span className={clsx("state-fade inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium", cls)}>{children}</span>;
 }
 
 export function VerdictBadge({ verdict }: { verdict: string }) {

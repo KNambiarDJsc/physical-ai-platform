@@ -119,11 +119,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                         href={href}
                         aria-current={on ? "page" : undefined}
                         className={clsx(
-                          "relative flex h-7 items-center gap-2 whitespace-nowrap rounded-[5px] px-2 text-[13px] transition-colors duration-150",
-                          on ? "bg-sunken font-medium text-ink" : "text-muted hover:bg-sunken hover:text-ink",
+                          "relative flex h-7 items-center gap-2 whitespace-nowrap rounded-[5px] px-2 text-[13px] transition-colors duration-[80ms]",
+                          on ? "bg-selected font-medium text-ink" : "text-muted hover:bg-hover hover:text-ink",
                         )}
                       >
-                        {on && <span aria-hidden className="absolute inset-y-1.5 left-0 hidden w-0.5 rounded-full bg-accent md:block" />}
+                        {on && <span aria-hidden className="fade-in absolute inset-y-1.5 left-0 hidden w-0.5 rounded-full bg-accent md:block" />}
                         <Icon size={14} strokeWidth={1.75} aria-hidden className={on ? "text-accent" : undefined} />
                         <span>{label}</span>
                       </Link>
@@ -140,7 +140,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar path={path} onPalette={() => setPalette(true)} />
-        <main className="min-w-0 flex-1 px-4 py-5 md:px-7">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-5 md:px-7">
+          <div key={path} className="reveal">
+            {children}
+          </div>
+        </main>
       </div>
       {palette && <CommandPalette onClose={() => setPalette(false)} />}
     </div>
@@ -268,12 +272,12 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
     router.push(i.href);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[14vh]" onMouseDown={onClose}>
+    <div className="scrim-enter fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[14vh]" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="w-full max-w-lg overflow-hidden rounded-md border border-line bg-panel shadow-2xl shadow-black/40"
+        className="dialog-enter w-full max-w-lg overflow-hidden rounded-md border border-line bg-panel shadow-2xl shadow-black/40"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 border-b border-line px-3">

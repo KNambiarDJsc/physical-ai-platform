@@ -41,6 +41,9 @@ Defined once in `apps/web/src/app/globals.css` (`@theme`), used through Tailwind
 | `bad` | Verified failure, regression, errors | `#E06C75` | `#BF3540` |
 | `unknown` | Unknown, insufficient evidence, reported only | `#A9AEDB` | `#545A9E` |
 
+Two overlay tokens tint the surface beneath them for interaction: `hover` (dark: white 6 %, light: ink 5 %) and
+`selected` (dark: white 10 %, light: ink 8 %). They never carry text on their own.
+
 Each semantic colour has a `-soft` background (badges, notices). Dark is the default; light follows the
 operating system or the theme switch in the top bar. All text tokens meet WCAG AA (4.5:1) on `bg`, `panel` and `sunken`, and on their own `-soft` backgrounds (checked by computing the ratios, not by eye).
 
@@ -141,8 +144,27 @@ visitors see the sign-in prompt, never data.
 
 ## 10. Motion
 
-Transitions of 120–160 ms on hover and focus only. No entrance animations, no animated charts, no skeleton
-shimmer. Respect `prefers-reduced-motion`.
+Motion confirms a change; it never decorates. The approach follows fluid functionalism (fluidfunctionalism.com):
+a small set of speeds, and the bigger the thing that moves, the slower it is. Durations come from the tokens in
+`globals.css`, never from a hand-written number.
+
+| Tier | Token | Use |
+|---|---|---|
+| fast | `--dur-fast` 80 ms | hover, focus, press, colour changes |
+| moderate | `--dur-moderate` 160 ms | route content, menus, panels, a state changing by itself |
+| slow | `--dur-slow` 240 ms | dialogs and the command palette, with a slight settle (`--ease-settle`) |
+
+- Animate `opacity` and `transform` only, never `width`, `height`, `top` or `left`.
+- Route content fades in (`.reveal`), with no rise: a page is not an object that moves. A dialog rises 6 px and
+  fades (`.dialog-enter`). A badge fades its colour when a run finishes by itself (`.state-fade`).
+- A press is an inset shadow, not a scale.
+- Exits are quicker than entrances. Not built yet: the command palette closes instantly; an exit needs a deferred
+  unmount that keeps focus return correct.
+- Reduced motion means fewer and gentler, not none: movement and the route fade stop; colour fades and a dialog's
+  short fade stay (`prefers-reduced-motion`).
+- Still not allowed: animated charts, skeleton shimmer, looping or attention-seeking animation, anything that
+  delays reading a number.
+- Hover and selection tint with the overlay tokens `hover` and `selected`, so they read the same on every surface.
 
 ## 11. Accessibility
 
