@@ -32,11 +32,12 @@ a build plus a Gazebo run at the same time.
 ## Agent and model
 
 The agent needs an OpenAI-compatible model endpoint of your choice (a hosted API, or a local server such as vLLM or
-Ollama). Measured with `openai/gpt-oss-120b` through a hosted OpenAI-compatible endpoint:
+Ollama). Measured through a hosted OpenAI-compatible endpoint:
 
-- one investigation is about 3 model calls, 6,700 tokens in and 1,000 out, about **$0.0004**;
-- wall time ranged from **12 to 111 seconds** across sessions: one model call took 5 to 70 seconds depending on the
-  provider's load and reasoning effort;
+- `anthropic/claude-haiku-4.5` (the demo model): one investigation is 3 model calls, about 22,000 tokens in and 1,300
+  out, about **$0.03**, about **15 seconds**;
+- `openai/gpt-oss-120b`: about 6,700 in and 1,000 out, about $0.0004, but 12 to 111 seconds depending on the provider's
+  load, and on one day the provider returned 502 for every request with tool definitions on that model;
 - the platform caps spend per session ($0.25 by default), per day ($1.00) and sessions at once (2); all are settings.
 
 Nothing leaves your installation except what your own model endpoint receives in a session: the tool results the asker could

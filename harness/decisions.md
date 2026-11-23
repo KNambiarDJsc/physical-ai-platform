@@ -331,3 +331,12 @@ left healthy. (3) `GET /workflow-runs/{id}/report.json|html` formats a run's sto
 steps, reported vs independently verified, engine provenance, follow-up proposals). It computes nothing and has no
 generation time, so the same run always yields the same bytes.
 
+## D-042 (2026-11-23) The model is configuration; an answer must not claim what the trace does not show
+On the day of the Fraunhofer preparation the provider returned 502 for every request with tool definitions on the model
+first verified (gpt-oss-120b), so the demo model became anthropic/claude-haiku-4.5 through the same OpenAI-compatible
+endpoint: a change of three environment variables, no code. Two harness guards follow. A call that fails before the
+provider produced anything is retried twice (3 s, 8 s) when the error is transient (429, 500, 502, 503, 504, a dropped
+connection); nothing else is retried. When drafting is on and an answer speaks of a draft that is not in the trace, the
+platform appends a note marked as its own. Both join the simulated-evidence note (D-040): the platform states facts the
+model may omit or misstate, in words marked as the platform's.
+

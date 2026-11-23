@@ -454,4 +454,8 @@ runs, block on one command and print summary lines only.
   unrelated tests (API calls up to 17 s); each passed on a rerun. See docs/demo/READINESS_REPORT.md.
 - To demo: docs/demo/RUNBOOK.md. The key is in no file; it was pasted in chat twice: ROTATE IT at aicredits.in.
 - Not done: PDF versions of the one-pagers, narration, live Gazebo in the journey, any physical hardware.
+- Later the same day: the model provider returned 502 for every request with tools on gpt-oss-120b (the page showed a
+  plain-words message, no charge). Demo model is now anthropic/claude-haiku-4.5 (about 15 s, $0.03 per investigation,
+  rehearsal 24 of 24). Harness: transient provider errors retried twice; a platform correction when an answer claims a
+  draft that was not recorded (D-042). harness 28 passed. Real-model spend while preparing, all models: about $0.15.
 

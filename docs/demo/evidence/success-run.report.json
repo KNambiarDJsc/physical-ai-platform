@@ -7,15 +7,15 @@
       "device": "balance",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:37.059970Z",
+      "finished_at": "2026-11-23T11:18:28.066192Z",
       "idempotent": false,
       "input": {},
-      "invocation_id": "6345a09a-6217-4e01-89ec-27e359334548",
+      "invocation_id": "cf1cb2ef-87de-4e95-9a58-c86ac6089fce",
       "key": "tare",
       "output": null,
       "position": 0,
-      "request_id": "2f9fae0e80684876af42523751ffe58d-0",
-      "started_at": "2026-11-23T08:38:36.751288Z",
+      "request_id": "aec3571bcdb6412aa25a79940f8813fd-0",
+      "started_at": "2026-11-23T11:18:27.756884Z",
       "state": "completed"
     },
     {
@@ -23,20 +23,20 @@
       "device": "pump",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:37.376628Z",
+      "finished_at": "2026-11-23T11:18:28.405818Z",
       "idempotent": true,
       "input": {
         "volume_ul": 50.0
       },
-      "invocation_id": "5d031cc1-2c70-4596-b4e7-236538c18139",
+      "invocation_id": "91747303-1ace-4d52-a504-0d353508b3d8",
       "key": "dispense",
       "output": {
         "reported_dispensed_ul": 50.0,
-        "request_id": "2f9fae0e80684876af42523751ffe58d-1"
+        "request_id": "aec3571bcdb6412aa25a79940f8813fd-1"
       },
       "position": 1,
-      "request_id": "2f9fae0e80684876af42523751ffe58d-1",
-      "started_at": "2026-11-23T08:38:37.064968Z",
+      "request_id": "aec3571bcdb6412aa25a79940f8813fd-1",
+      "started_at": "2026-11-23T11:18:28.091153Z",
       "state": "completed"
     },
     {
@@ -44,17 +44,17 @@
       "device": "balance",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:37.688663Z",
+      "finished_at": "2026-11-23T11:18:28.762478Z",
       "idempotent": false,
       "input": {},
-      "invocation_id": "869b1b30-527a-4f06-922a-bb83d95a5779",
+      "invocation_id": "e4a6ad5d-688a-484d-b379-84911903ca85",
       "key": "weigh",
       "output": {
-        "mass_g": 0.0498
+        "mass_g": 0.05
       },
       "position": 2,
-      "request_id": "2f9fae0e80684876af42523751ffe58d-2",
-      "started_at": "2026-11-23T08:38:37.380628Z",
+      "request_id": "aec3571bcdb6412aa25a79940f8813fd-2",
+      "started_at": "2026-11-23T11:18:28.434612Z",
       "state": "completed"
     }
   ],
@@ -63,12 +63,12 @@
       "channel": "api",
       "decided_by": "user:dev|bob",
       "evidence_ids": [],
-      "id": "3b4a321d-acf8-4b7b-9349-2d3fb24da38a",
+      "id": "43f7b8dd-90da-42c4-a755-db9e99117f6b",
       "proposed_by": "user:dev|ada",
       "rationale": "Rehearsal: the success case, requested by ada.",
-      "run_id": "2f9fae0e-8068-4876-af42-523751ffe58d",
+      "run_id": "aec3571b-cdb6-412a-a25a-79940f8813fd",
       "state": "approved",
-      "workflow": "c0b60aac-abee-448f-8362-edf7f4aa8825"
+      "workflow": "9170fda4-f5de-4774-b106-ab589b87867f"
     }
   ],
   "independently_verified": {
@@ -80,7 +80,7 @@
         "observed": [
           {
             "unit": "g",
-            "value": 0.0498
+            "value": 0.05
           }
         ],
         "op": "between",
@@ -92,7 +92,7 @@
     ],
     "contract": {
       "binding": {
-        "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+        "episode": "aec3571b-cdb6-412a-a25a-79940f8813fd"
       },
       "conditions": [
         {
@@ -136,7 +136,7 @@
       {
         "id": "claim",
         "refs": {
-          "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+          "episode": "aec3571b-cdb6-412a-a25a-79940f8813fd"
         },
         "signal": "task.reported",
         "source": {
@@ -147,7 +147,7 @@
         },
         "time": {
           "clock_domain": "pap-worker",
-          "source": "2026-11-23T08:38:37.376628Z",
+          "source": "2026-11-23T11:18:28.405818Z",
           "uncertainty_ms": 50
         },
         "value": "succeeded"
@@ -155,7 +155,7 @@
       {
         "id": "delivered_mass",
         "refs": {
-          "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+          "episode": "aec3571b-cdb6-412a-a25a-79940f8813fd"
         },
         "signal": "vessel.net_mass",
         "source": {
@@ -166,19 +166,19 @@
         },
         "time": {
           "clock_domain": "pap-worker",
-          "source": "2026-11-23T08:38:37.688663Z",
+          "source": "2026-11-23T11:18:28.762478Z",
           "uncertainty_ms": 50
         },
         "value": {
           "unit": "g",
-          "value": 0.0498
+          "value": 0.05
         }
       }
     ],
     "outcome_class": "supported_success",
     "verdict": "SATISFIED"
   },
-  "organization": "lab-journey-final2",
+  "organization": "lab-journey-haiku3",
   "procedure": {
     "definition_sha256": "5f61bdc52bc06461a84293f98ba54565dc6ad7ba41406c4ed1372c9400b7a19f",
     "steps": [
@@ -246,7 +246,7 @@
     }
   },
   "provenance": {
-    "contract_sha256": "24bb3ea399936d949b7105c51e8a716791b97e03305e7642e1fdc628b50cd3db",
+    "contract_sha256": "9ad52aa88879b170564cf5e14e9e64f185d5623e2de38f100c24a06293e313f8",
     "definition_sha256": "5f61bdc52bc06461a84293f98ba54565dc6ad7ba41406c4ed1372c9400b7a19f",
     "engine": {
       "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
@@ -267,25 +267,25 @@
       "slug": "virtual-lab"
     },
     "evidence_class": "simulated",
-    "evidence_sha256": "2c1a2683c3155606cb28e7431444433674b46995ef30d9544bf0779b0f87e8b9"
+    "evidence_sha256": "3a67208d86696883a695b00e562a1d2a99aff20eca90e3814cbdc97af5bafc0b"
   },
   "reported_by_instrument": {
     "device": "pump",
     "output": {
       "reported_dispensed_ul": 50.0,
-      "request_id": "2f9fae0e80684876af42523751ffe58d-1"
+      "request_id": "aec3571bcdb6412aa25a79940f8813fd-1"
     },
     "step": "dispense",
     "value": "succeeded"
   },
   "run": {
     "attempts": 1,
-    "created_at": "2026-11-23T08:38:36.057399Z",
+    "created_at": "2026-11-23T11:18:27.116996Z",
     "environment": "virtual-lab",
     "error": null,
-    "finished_at": "2026-11-23T08:38:37.728668Z",
-    "id": "2f9fae0e-8068-4876-af42-523751ffe58d",
-    "started_at": "2026-11-23T08:38:36.499521Z",
+    "finished_at": "2026-11-23T11:18:28.808776Z",
+    "id": "aec3571b-cdb6-412a-a25a-79940f8813fd",
+    "started_at": "2026-11-23T11:18:27.463884Z",
     "state": "succeeded",
     "submitted_by": "user:dev|bob",
     "workflow": "dispense-50ul",

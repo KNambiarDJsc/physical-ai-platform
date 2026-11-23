@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-11-23T08:38:35.980565Z",
+  "created_at": "2026-11-23T11:18:27.053103Z",
   "definition": {
     "schema": "pap.workflow/1",
     "steps": [
@@ -84,7 +84,7 @@
   "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
   "description": "",
   "environment": "virtual-lab",
-  "id": "19f29308-0d15-4059-b686-4cd465c7c641",
+  "id": "b2aacfce-c35c-4374-a64d-057b7a7ba2a5",
   "name": "Dispense 50 µL (simulated partial blockage)",
   "parameters": {
     "fault": "partial_blockage",

@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-11-23T08:38:35.969405Z",
+  "created_at": "2026-11-23T11:18:27.053103Z",
   "definition": {
     "schema": "pap.workflow/1",
     "steps": [
@@ -66,7 +66,7 @@
   "definition_sha256": "5f61bdc52bc06461a84293f98ba54565dc6ad7ba41406c4ed1372c9400b7a19f",
   "description": "",
   "environment": "virtual-lab",
-  "id": "c0b60aac-abee-448f-8362-edf7f4aa8825",
+  "id": "9170fda4-f5de-4774-b106-ab589b87867f",
   "name": "Dispense 50 µL (normal bench)",
   "parameters": {
     "tolerance_pct": 2,

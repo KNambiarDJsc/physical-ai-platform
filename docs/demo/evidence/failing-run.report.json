@@ -7,17 +7,17 @@
       "device": "simulation",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:38.670978Z",
+      "finished_at": "2026-11-23T11:18:29.716997Z",
       "idempotent": false,
       "input": {
         "fault": "partial_blockage"
       },
-      "invocation_id": "d0174600-8e87-434d-a285-146e7cb12c14",
+      "invocation_id": "cb5b48da-309f-40f0-8caf-3ddc2eea3e0f",
       "key": "inject_fault",
       "output": "partial_blockage",
       "position": 0,
-      "request_id": "99703861c3894231a211676c6a160739-0",
-      "started_at": "2026-11-23T08:38:38.514461Z",
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-0",
+      "started_at": "2026-11-23T11:18:29.555616Z",
       "state": "completed"
     },
     {
@@ -25,15 +25,15 @@
       "device": "balance",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:38.985560Z",
+      "finished_at": "2026-11-23T11:18:30.049342Z",
       "idempotent": false,
       "input": {},
-      "invocation_id": "65644da6-1d7c-4fea-86c9-de0f5a37b89c",
+      "invocation_id": "ce8d462d-31bd-46be-ba5b-994f8cef5386",
       "key": "tare",
       "output": null,
       "position": 1,
-      "request_id": "99703861c3894231a211676c6a160739-1",
-      "started_at": "2026-11-23T08:38:38.677018Z",
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-1",
+      "started_at": "2026-11-23T11:18:29.716997Z",
       "state": "completed"
     },
     {
@@ -41,20 +41,20 @@
       "device": "pump",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:39.297909Z",
+      "finished_at": "2026-11-23T11:18:30.425720Z",
       "idempotent": true,
       "input": {
         "volume_ul": 50.0
       },
-      "invocation_id": "253fe74e-6954-4904-a1d1-0c5142eef9c8",
+      "invocation_id": "5ac89be9-5b53-445a-a2dd-37456ccf1c75",
       "key": "dispense",
       "output": {
         "reported_dispensed_ul": 50.0,
-        "request_id": "99703861c3894231a211676c6a160739-2"
+        "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-2"
       },
       "position": 2,
-      "request_id": "99703861c3894231a211676c6a160739-2",
-      "started_at": "2026-11-23T08:38:38.989560Z",
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-2",
+      "started_at": "2026-11-23T11:18:30.104918Z",
       "state": "completed"
     },
     {
@@ -62,17 +62,17 @@
       "device": "balance",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:39.612902Z",
+      "finished_at": "2026-11-23T11:18:30.777575Z",
       "idempotent": false,
       "input": {},
-      "invocation_id": "e5cf858d-32ca-483d-8b50-fb749e0ac268",
+      "invocation_id": "6b465984-578b-4042-a2cd-b906dbc5b923",
       "key": "weigh",
       "output": {
         "mass_g": 0.0308
       },
       "position": 3,
-      "request_id": "99703861c3894231a211676c6a160739-3",
-      "started_at": "2026-11-23T08:38:39.304878Z",
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-3",
+      "started_at": "2026-11-23T11:18:30.425720Z",
       "state": "completed"
     },
     {
@@ -80,17 +80,17 @@
       "device": "simulation",
       "dispatches": 1,
       "error": null,
-      "finished_at": "2026-11-23T08:38:39.772723Z",
+      "finished_at": "2026-11-23T11:18:30.942854Z",
       "idempotent": false,
       "input": {
         "fault": "none"
       },
-      "invocation_id": "aae30b23-19a4-40bc-9e58-3064db65a5bd",
+      "invocation_id": "10b6bde9-53f2-4662-938a-39ef2bfa2c4f",
       "key": "clear_fault",
       "output": "none",
       "position": 4,
-      "request_id": "99703861c3894231a211676c6a160739-4",
-      "started_at": "2026-11-23T08:38:39.616940Z",
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-4",
+      "started_at": "2026-11-23T11:18:30.777575Z",
       "state": "completed"
     }
   ],
@@ -99,12 +99,12 @@
       "channel": "api",
       "decided_by": "user:dev|bob",
       "evidence_ids": [],
-      "id": "7fae0c2c-bffd-41fc-881b-cc3aebb654bf",
+      "id": "0307cbf6-c68b-4ae1-8aad-85ebd7b7fd41",
       "proposed_by": "user:dev|ada",
       "rationale": "Rehearsal: the failing case, requested by ada.",
-      "run_id": "99703861-c389-4231-a211-676c6a160739",
+      "run_id": "68ed2ef9-13d4-403a-9cf5-b576017d7fb1",
       "state": "approved",
-      "workflow": "19f29308-0d15-4059-b686-4cd465c7c641"
+      "workflow": "b2aacfce-c35c-4374-a64d-057b7a7ba2a5"
     }
   ],
   "independently_verified": {
@@ -133,7 +133,7 @@
     ],
     "contract": {
       "binding": {
-        "episode": "99703861-c389-4231-a211-676c6a160739"
+        "episode": "68ed2ef9-13d4-403a-9cf5-b576017d7fb1"
       },
       "conditions": [
         {
@@ -177,7 +177,7 @@
       {
         "id": "claim",
         "refs": {
-          "episode": "99703861-c389-4231-a211-676c6a160739"
+          "episode": "68ed2ef9-13d4-403a-9cf5-b576017d7fb1"
         },
         "signal": "task.reported",
         "source": {
@@ -188,7 +188,7 @@
         },
         "time": {
           "clock_domain": "pap-worker",
-          "source": "2026-11-23T08:38:39.297909Z",
+          "source": "2026-11-23T11:18:30.425720Z",
           "uncertainty_ms": 50
         },
         "value": "succeeded"
@@ -196,7 +196,7 @@
       {
         "id": "delivered_mass",
         "refs": {
-          "episode": "99703861-c389-4231-a211-676c6a160739"
+          "episode": "68ed2ef9-13d4-403a-9cf5-b576017d7fb1"
         },
         "signal": "vessel.net_mass",
         "source": {
@@ -207,7 +207,7 @@
         },
         "time": {
           "clock_domain": "pap-worker",
-          "source": "2026-11-23T08:38:39.612902Z",
+          "source": "2026-11-23T11:18:30.777575Z",
           "uncertainty_ms": 50
         },
         "value": {
@@ -219,7 +219,7 @@
     "outcome_class": "contradiction",
     "verdict": "VIOLATED"
   },
-  "organization": "lab-journey-final2",
+  "organization": "lab-journey-haiku3",
   "procedure": {
     "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
     "steps": [
@@ -307,7 +307,7 @@
     }
   },
   "provenance": {
-    "contract_sha256": "c163ad9d439d641f24e1462f0f712a0b577e9845bdb1d999dde6f1ea5c43cb6a",
+    "contract_sha256": "cc905be06f535048d449f0333d843c1fe8b420965568d3dc0e068327d70777a5",
     "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
     "engine": {
       "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
@@ -328,25 +328,25 @@
       "slug": "virtual-lab"
     },
     "evidence_class": "simulated",
-    "evidence_sha256": "d1347646cd9b83e7d7cf73236ceef4719945362b6bdb2fe6d93611fefaf00d91"
+    "evidence_sha256": "2bafa813920002dd11adb8127ba8dc476272523b9af0a19922f940f61597c472"
   },
   "reported_by_instrument": {
     "device": "pump",
     "output": {
       "reported_dispensed_ul": 50.0,
-      "request_id": "99703861c3894231a211676c6a160739-2"
+      "request_id": "68ed2ef913d4403a9cf5b576017d7fb1-2"
     },
     "step": "dispense",
     "value": "succeeded"
   },
   "run": {
     "attempts": 1,
-    "created_at": "2026-11-23T08:38:38.135634Z",
+    "created_at": "2026-11-23T11:18:29.223918Z",
     "environment": "virtual-lab",
     "error": null,
-    "finished_at": "2026-11-23T08:38:39.811837Z",
-    "id": "99703861-c389-4231-a211-676c6a160739",
-    "started_at": "2026-11-23T08:38:38.242182Z",
+    "finished_at": "2026-11-23T11:18:30.984719Z",
+    "id": "68ed2ef9-13d4-403a-9cf5-b576017d7fb1",
+    "started_at": "2026-11-23T11:18:29.323476Z",
     "state": "succeeded",
     "submitted_by": "user:dev|bob",
     "workflow": "dispense-50ul-blocked-line",
