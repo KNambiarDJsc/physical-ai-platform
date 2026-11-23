@@ -436,3 +436,22 @@ runs, block on one command and print summary lines only.
   approval prompt crashing the tool call. Full gate on the tree before these fixes: verify.sh all passed (pytest 301
   passed, 5 skipped; harness 14 passed).
 - Demo: bash scripts/demo_up.sh seeds the workspace; docs/DEMO.md is the walkthrough. Stack left running (var/demo).
+
+## 2026-11-23 (late): the agent in the website; the Laboratory experiment journey; Fraunhofer demo ready (54 -> 56 features)
+- Pushed earlier today: 6801fe1 / 82645f4 (CI green on 6801fe1). Everything below is LOCAL and unpushed.
+- AGT-002: the Agent page (`/agent`) runs the Strands harness as a subprocess of the API, as the signed-in caller (D-040).
+  Server-side caps (per session, per day, concurrency), engineers only, never writes: at most a DRAFT the person files.
+  No model: fixed questions plus a rule-based investigation of a lab run, labelled. Real model: gpt-oss-120b, grounded,
+  about $0.0004 per investigation; about $0.011 spent in total today (22 sessions). Provider latency 12 to 111 s; one 502.
+  `PAP_LLM_REASONING_EFFORT=medium` is the demo setting (low was faster but one sample was uncited).
+- LAB-002: template `dispense-with-fault` (a visible, journaled fault step; the bench is cleared after), proposals cannot be
+  approved by their proposer (D-041), run evidence reports (`report.json|html`, byte-identical on repeat), the Lab
+  experiment page (`/journey`), `scripts/journey_seed.py`, `journey_rehearse.py`, `record_journey.js`, docs/demo/*.
+- Also: motion and overlay tokens (12118b5), visual review fixes of the older pages (82645f4), the 3D scene no longer
+  reports ready after a failed mesh download and retries, the worker-killing browser spec runs in its own project.
+- Gate on the final tree: verify.sh all passed (pytest 315/5 skipped, harness 22, web 57); browser suite 56 passed, 13
+  skipped with 2 workers. Five full runs on near-identical builds: 2 + 1 green, 2 with 1 to 3 load-related timeouts in
+  unrelated tests (API calls up to 17 s); each passed on a rerun. See docs/demo/READINESS_REPORT.md.
+- To demo: docs/demo/RUNBOOK.md. The key is in no file; it was pasted in chat twice: ROTATE IT at aicredits.in.
+- Not done: PDF versions of the one-pagers, narration, live Gazebo in the journey, any physical hardware.
+

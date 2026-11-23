@@ -1,5 +1,7 @@
 # Demo runbook (about 12 minutes)
 
+> The laboratory-experiment demo (agent-assisted, 10 minutes, with the guided journey) is in `docs/demo/RUNBOOK.md`.
+
 ## Before you start
 
 ```bash

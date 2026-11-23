@@ -56,6 +56,16 @@ engine's, and when the evidence is too thin the answer is "insufficient evidence
 3. **Two sources of truth are kept apart.** "Reported by the instrument" is what the pump claimed. "Independently verified
    (OpenMHS engine)" is the balance reading judged against the contract. They can disagree, and that disagreement is shown.
 4. The run view updates by itself while it executes, then shows verdict, contract, engine build, digests and a timeline.
+5. A finished run has an **evidence report** (`report.html`, `report.json`): the procedure's digest, every executed step,
+   the instrument's claim and the independent measurement, the engine's provenance and any follow-up proposals. It is
+   built only from stored records and has no generation time, so the same run always gives the same bytes.
+6. **A genuine failing case.** The built-in template `dispense-with-fault` adds two visible steps to the same procedure: it
+   injects a simulated fault (a partial blockage, for example) through the laboratory's simulation controls and clears it
+   at the end. The pump still reports 50 µL; the balance measures about 0.031 g; the engine says VIOLATED, a
+   *contradiction*. Nothing is edited afterwards.
+
+**Two people.** Any member can *request* a run (a proposal); an engineer other than the requester approves it, and only
+then is a run queued. The agent can only *draft* a follow-up; a person files it, and a different person still approves.
 
 ### 3.3 Experiment on a simulation host: request, approve, run, capture, judge
 
@@ -81,8 +91,8 @@ the platform.
 
 | Role | Can |
 |---|---|
-| Viewer | Read everything in their workspace; ask for an experiment run; propose a workflow run |
-| Engineer | Configure experiments and workflows; approve or reject (never their own request); run workflows |
+| Viewer | Read everything in their workspace, including agent sessions; ask for an experiment run; request (propose) a workflow run |
+| Engineer | Configure experiments and workflows; run workflows; ask the agent; approve or reject someone else's request (never their own: 403) |
 | Admin | Everything above, plus members, projects and organizations |
 | Someone outside the workspace | Gets 404: tenant isolation |
 
@@ -97,7 +107,9 @@ safety path.
 | Page | What it is for | What you see |
 |---|---|---|
 | Get started | First run | Five steps (workspace, environment, discover devices, workflow, run and read the verified result), each marked done |
-| Workbench | Run and watch | Live instrument values, observed robots, run list, the run (reported vs verified), steps, timeline |
+| Lab experiment | The guided journey | Six steps from discovery to exported evidence: discover the pump, balance and simulation controls; see two procedures with their explicit tolerance; request a run (a different person approves); inspect the successful and the failing run; investigate with the agent; export. Each step's status comes from stored data and links to the page where the work happens |
+| Agent | Ask and investigate | Ask about runs and experiments; the answer cites ids, shows its cost and full trace; an optional drafted follow-up that a person files. Read-only (`docs/agent-harness.md`) |
+| Workbench | Run and watch | Live instrument values, observed robots, run list, the run (reported vs verified), steps, timeline, and an evidence report (page or JSON) for each finished run |
 | Experiments | The Studio | Configure setups, request, approve, run, per-trial results, setups side by side, release verdict |
 | Digital twin | Inspect a recording | 3D robot model, MCAP playback, event timeline, "Compare with" a second recording as a ghost, the engineering assistant |
 | Hardware Hub | What is connected | Environments (kind, adapter, endpoint, devices, last discovery), each device's properties, actions and live reads |
@@ -128,7 +140,8 @@ page in both themes, quiet motion that respects reduced-motion settings, and eve
 
 - **Web assistant** (Digital twin, select an event, "Explain this event"): rule-based. It calls the platform's read-only
   tools as the signed-in user and cites the evidence ids it relied on, plus what is not known. **No language model.**
-- **Strands agent harness** (`packages/agent-harness`): a command-line component, not a page. It works only through the
+- **Strands agent harness** (`packages/agent-harness`): a command-line component, also reachable from the website's
+  **Agent** page (read-only, drafts only; `docs/agent-harness.md`). It works only through the
   same typed, allow-listed tools, as the person who started it. It can read, and with an explicit flag it may *record* a
   request for a person to approve. It has no tool to approve, run, edit or command a device. Providers are configuration,
   spend is capped per session and per experiment, every session leaves a trace, and answers are checked against the ids
@@ -156,6 +169,6 @@ page in both themes, quiet motion that respects reduced-motion settings, and eve
 ## 9. Not built yet
 
 MuJoCo and Isaac simulation hosts (same contract, no platform change); cancelling a running scenario; streaming large
-artifacts to clients; an Agents page that stores and shows harness traces; agent plans that resume after an approval;
+artifacts to clients; agent plans that resume after an approval;
 branching workflows; a split 3D view for two recordings beyond the ghost. Overview and Releases currently list the same
 projects.

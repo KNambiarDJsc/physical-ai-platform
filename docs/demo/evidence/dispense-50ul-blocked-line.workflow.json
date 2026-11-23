@@ -1,0 +1,96 @@
+{
+  "created_at": "2026-11-23T08:38:35.980565Z",
+  "definition": {
+    "schema": "pap.workflow/1",
+    "steps": [
+      {
+        "action": "set_fault",
+        "device": "simulation",
+        "id": "inject_fault",
+        "input": {
+          "fault": "partial_blockage"
+        },
+        "title": "Inject a simulated fault: partial blockage"
+      },
+      {
+        "action": "tare",
+        "device": "balance",
+        "id": "tare",
+        "input": {},
+        "title": "Zero the balance"
+      },
+      {
+        "action": "dispense",
+        "device": "pump",
+        "id": "dispense",
+        "input": {
+          "volume_ul": 50.0
+        },
+        "title": "Dispense 50 µL"
+      },
+      {
+        "action": "weigh",
+        "device": "balance",
+        "id": "weigh",
+        "input": {},
+        "title": "Weigh the delivered liquid"
+      },
+      {
+        "action": "set_fault",
+        "device": "simulation",
+        "id": "clear_fault",
+        "input": {
+          "fault": "none"
+        },
+        "title": "Clear the fault"
+      }
+    ],
+    "verification": {
+      "claim_step": "dispense",
+      "conditions": [
+        {
+          "evidence": "delivered_mass",
+          "max": {
+            "unit": "g",
+            "value": 0.050908
+          },
+          "min": {
+            "unit": "g",
+            "value": 0.048912
+          },
+          "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+          "op": "between"
+        }
+      ],
+      "contract": "volume-delivered",
+      "evidence": [
+        {
+          "kind": "independent_sensor",
+          "name": "delivered_mass",
+          "output_field": "mass_g",
+          "signal": "vessel.net_mass",
+          "step": "weigh",
+          "unit": "g"
+        }
+      ],
+      "max_clock_uncertainty_ms": 1000,
+      "version": "1",
+      "window_ms": [
+        0,
+        120000
+      ]
+    }
+  },
+  "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
+  "description": "",
+  "environment": "virtual-lab",
+  "id": "19f29308-0d15-4059-b686-4cd465c7c641",
+  "name": "Dispense 50 µL (simulated partial blockage)",
+  "parameters": {
+    "fault": "partial_blockage",
+    "tolerance_pct": 2,
+    "volume_ul": 50
+  },
+  "slug": "dispense-50ul-blocked-line",
+  "template": "dispense-with-fault"
+}

@@ -1953,6 +1953,86 @@
         ]
       },
       "limitations": []
+    },
+    {
+      "id": "AGT-002",
+      "title": "The agent in the website: the Agent page over the Strands harness, read-only, drafts a person files",
+      "priority": 3,
+      "depends_on": [
+        "HAR-001",
+        "WF-001"
+      ],
+      "description": "GET/POST /agent/status|sessions in the API runs packages/agent-harness as a subprocess as the signed-in caller (D-040); the Agent page asks, shows the answer, grounding, cost and trace, and lists sessions. Spend is capped per session, per day and by concurrency; asking needs the engineer role. With no model: fixed questions and a rule-based investigation of a laboratory run, labelled. An engineer may let the agent DRAFT a follow-up; a person files it.",
+      "acceptance": [
+        "The model key is read only from PAP_LLM_* in the server environment: never a setting, never returned, never in a trace, and scrubbed from stored errors.",
+        "A session runs as the caller with a minimal environment; the question is passed after -- and cannot act as an option; another workspace cannot see it (404).",
+        "Viewers can read sessions but cannot ask; daily session and dollar caps and a concurrency limit refuse before any spend.",
+        "The website never lets the agent write: at most a draft is recorded in the trace and a person files it, and a different person still approves.",
+        "With no model the fixed questions and the rule-based investigation answer, labelled 'no model'; simulated evidence is labelled in every agent answer.",
+        "A real-model investigation of a failed laboratory run is grounded, cites ids that exist in the tool results, drafts one follow-up, and an attempt to approve and run is refused."
+      ],
+      "tests": [
+        "uv run --project services/api pytest services/api/tests/test_agent_sessions.py",
+        "uv run --project packages/agent-harness pytest packages/agent-harness",
+        "cd apps/web && npx playwright test e2e/agent.spec.ts",
+        "uv run python scripts/journey_rehearse.py --org <new>"
+      ],
+      "paths": [
+        "services/api/app/agent/sessions.py",
+        "packages/agent-harness/",
+        "apps/web/src/components/Agent.tsx"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-23",
+        "evidence": [
+          "services/api tests/test_agent_sessions.py: 11 passed against a labelled stand-in runner with the real command line: status; viewer cannot ask (403); minimal environment and the caller's own credential; '--' question handling; workspace isolation; daily limits; concurrency limit; failure message scrubbed of the credential; interrupted sessions; audit without the question text; drafts only on request and never sent. The isolation test over every route passed with the new routes.",
+          "packages/agent-harness: 22 passed (scripted stand-in model, labelled): no-model fixed questions, draft mode, rule-based investigation, simulated-evidence note, reasoning-effort setting. mypy clean.",
+          "Browser (real stack, real harness, no model): e2e/agent.spec.ts and the journey spec: a viewer cannot ask; an engineer asks and gets an answer, 'no model used' and a trace; the drafted follow-up is filed by a person and still awaits someone else.",
+          "REAL MODEL (the user's key in the process environment only; hard caps $0.25 per session and $1.00 per day; total real-model spend on 22 sessions and 68 calls: about $0.011): scripts/journey_rehearse.py, 24 of 24 steps: openai/gpt-oss-120b investigated the failed run through investigate_run, grounded=true, cited real ids, drafted one follow-up and filed nothing, labelled the evidence simulated, cost $0.0004 for 3 calls; asked to approve and run, it refused and nothing was approved or started (docs/demo/evidence/rehearsal.json)."
+        ]
+      },
+      "limitations": "One model and a handful of sessions on one small data set: this shows safe, grounded behaviour there, not general investigation quality. Provider latency varied from 12 s to 111 s per investigation and the provider returned one 502 (the page says so and nothing is spent). Low reasoning effort was faster but one sample was uncited, so the demo uses medium. One browser (Chromium)."
+    },
+    {
+      "id": "LAB-002",
+      "title": "Laboratory experiment journey: faulty-bench template, second-person approval of proposals, run evidence reports, guided page",
+      "priority": 3,
+      "depends_on": [
+        "WF-001",
+        "AGT-002",
+        "WB-001"
+      ],
+      "description": "A built-in dispense-with-fault template (the same procedure and tolerance, with journaled steps that inject and clear a simulated fault through the virtual laboratory's own simulation controls); proposals cannot be approved by their proposer; GET /workflow-runs/{id}/report.json|html; the Lab experiment page guiding discover, configure, request, approve, run, investigate and export; scripts/journey_seed.py and journey_rehearse.py; the demo documents under docs/demo.",
+      "acceptance": [
+        "A genuine failing case: the faulty-bench run has the pump report success while the balance measures about 62 percent and the engine says VIOLATED (contradiction); the fault is a visible step and the bench is left healthy; no measurement is edited.",
+        "An engineer cannot approve their own proposal (403 separation_of_duties); a second person can; withdrawing is allowed.",
+        "A run report is built from stored records only, is byte-identical on repeat, labels simulated evidence, escapes every value and is private to its workspace.",
+        "The Lab experiment page derives each step's status from stored data and links to the page where the work happens.",
+        "The whole journey runs in a real browser against the real API, worker, virtual laboratory, engine and harness; a rehearsal script reproduces it through the API with a real model."
+      ],
+      "tests": [
+        "uv run --project services/api pytest services/api/tests/test_workflows.py services/api/tests/test_agent_tools.py",
+        "cd apps/web && npx playwright test e2e/journey.spec.ts --project lab-journey",
+        "uv run python scripts/journey_rehearse.py --org <new>"
+      ],
+      "paths": [
+        "services/api/app/workflows/",
+        "apps/web/src/components/Journey.tsx",
+        "scripts/journey_seed.py",
+        "docs/demo/"
+      ],
+      "status": "verified",
+      "verification": {
+        "verified_at": "2026-11-23",
+        "evidence": [
+          "services/api tests (real virtual laboratory, real pinned engine): the faulty template runs set_fault, tare, dispense, weigh, set_fault; reported succeeded, VIOLATED/contradiction, measured 0.028 to 0.034 g; a healthy dispense afterwards is SATISFIED. The report test: byte-identical JSON on repeat, a SIMULATED banner, a <script> in a rationale escaped, follow-up proposals listed, 404 for another workspace and 401 without a token. The separation-of-duties test passed.",
+          "Browser: e2e/journey.spec.ts (project lab-journey, runs alone after the others): discover, configure with the tolerance shown, request, the requester's approval refused, a second person's approval, a successful run (Supported success), a failing run (Contradiction), the rule-based investigation, a filed draft that still awaits someone else, the exported JSON (VIOLATED, 5 executed steps, two proposals) and the HTML report; a viewer cannot approve or ask.",
+          "Full gate on the final tree: verify.sh all gates passed (pytest 315 passed, 5 skipped; harness 22; web unit 57; mypy, ruff, secret scan, audits). smoke.sh --e2e with 2 workers: 56 passed, 13 skipped (the opt-in ones).",
+          "Rehearsal from a clean workspace through the API (scripts/journey_rehearse.py): 24 of 24 steps passed, including real-model agent sessions; reports and workflow definitions are in docs/demo/evidence."
+        ]
+      },
+      "limitations": "The pump and balance are a simulated bench with a seeded noise model: agreement with a real instrument is not claimed. Full browser runs on this shared machine were not uniformly green: of five full runs on near-identical builds, two passed with 4 workers, one passed with 2 workers, and two had 1 to 3 timeouts in unrelated tests while API calls took up to 17 s (the machine under load); each failing test passed on a rerun. No physical hardware, no customer data."
     }
   ]
 }

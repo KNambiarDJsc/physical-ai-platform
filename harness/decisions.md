@@ -308,3 +308,26 @@ a model call on a step limit, timeout, cancellation, session budget or per-exper
 environment and are never written. Its tests use a labelled scripted model and verify orchestration only; real-model
 quality is claimed only from real runs with the user's spending authorization.
 
+## D-040 (2026-11-23) The harness reaches the website as a subprocess of the API, read-only, with drafts a person files
+The owner asked for the agent to work in the website with a real model. The API must not gain a language-model framework
+(D-039 keeps Strands in its own uv project), so `app/agent/sessions.py` runs `pap-harness ask` as a subprocess, as the
+signed-in caller (their credential, passed by environment, not by argument; the question follows `--` so it is never an
+option). The model key is read by the harness from `PAP_LLM_*` in the server's environment: never a setting, never
+returned, scrubbed from anything stored, never sent to a browser. Asking costs money, so it needs the engineer role and is
+bounded three ways: a per-session cap, a daily cap over the server, and a limit on sessions running at once. The website
+never passes `--allow-requests`. At most the engineer may tick a box so the agent can DRAFT a follow-up (`--draft-requests`):
+the draft stays in the trace, and a person files it with a click, as themselves; filing is an ordinary proposal and still
+needs a different person to approve. With no model configured the page still answers the fixed questions and a
+rule-based investigation of a laboratory run, labelled "no model"; that is the scripted fallback and is never presented as
+inference. A deterministic note is appended when evidence is simulated and the model's answer does not say so.
+
+## D-041 (2026-11-23) A second person approves every proposed run; a fault is a journaled step; a run has a report
+(1) Approving a workflow proposal now refuses its own proposer (403 `separation_of_duties`), as D-037 does for Studio
+experiments; withdrawing your own proposal stays allowed. (2) The failing laboratory case is a second built-in template,
+`dispense-with-fault`: the same procedure and tolerance with two extra visible steps that inject and clear a simulated
+fault through the virtual laboratory's own simulation controls (a discovered, simulated-only device). The pump still
+reports the volume it was commanded and the balance measures what arrived; nothing is edited afterwards and the bench is
+left healthy. (3) `GET /workflow-runs/{id}/report.json|html` formats a run's stored records (procedure digest, executed
+steps, reported vs independently verified, engine provenance, follow-up proposals). It computes nothing and has no
+generation time, so the same run always yields the same bytes.
+

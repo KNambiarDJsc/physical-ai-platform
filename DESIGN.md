@@ -199,3 +199,18 @@ step has a link and the browser's Back works. A stage rail (Configured, Approved
   statistical comparison. Simulated evidence is labelled wherever a result appears, including in the twin.
 - Errors say what happened and offer the way forward (reload, check again, make a changed version, open the Hardware Hub).
 
+## 6d. Laboratory experiment journey and Agent
+
+**Lab experiment** (`/journey`) is a guide, not a new module. Six numbered steps (discover, configure, request and approve,
+inspect the runs, investigate, export), each opening the page where the work is done. A step is "Done" only from stored
+data (devices discovered, both procedures present, an approved request, a satisfied and a violated run, an agent session);
+nothing is ticked by hand. The tolerance appears in words beside every procedure ("50 µL, accepted within ±2 %"), and the
+simulated fault is a labelled badge. The page says first that nothing physical is involved.
+
+**Agent** (`/agent`) shows what is configured before it offers a question box: the model (or that none is set and what
+still works), the limits for today and per session, and that the agent is read-only. An answer says who wrote it ("written
+by a language model", or "answered by a fixed tool call: no model") and is followed by the cost and a collapsed trace with
+digests. A drafted follow-up is a card labelled "drafted, not filed" with one explicit button; it says that nothing runs
+until someone else approves. Viewers read; asking needs the engineer role and the page says why. Every state is covered:
+not configured, no runner, running, failed, interrupted, stopped by a limit, answered without citing.
+

@@ -1,0 +1,356 @@
+{
+  "basis": "Stored platform records only. Nothing here is recomputed; the verdict is the OpenMHS engine's.",
+  "evidence_class": "simulated",
+  "execution": [
+    {
+      "action": "set_fault",
+      "device": "simulation",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:38.670978Z",
+      "idempotent": false,
+      "input": {
+        "fault": "partial_blockage"
+      },
+      "invocation_id": "d0174600-8e87-434d-a285-146e7cb12c14",
+      "key": "inject_fault",
+      "output": "partial_blockage",
+      "position": 0,
+      "request_id": "99703861c3894231a211676c6a160739-0",
+      "started_at": "2026-11-23T08:38:38.514461Z",
+      "state": "completed"
+    },
+    {
+      "action": "tare",
+      "device": "balance",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:38.985560Z",
+      "idempotent": false,
+      "input": {},
+      "invocation_id": "65644da6-1d7c-4fea-86c9-de0f5a37b89c",
+      "key": "tare",
+      "output": null,
+      "position": 1,
+      "request_id": "99703861c3894231a211676c6a160739-1",
+      "started_at": "2026-11-23T08:38:38.677018Z",
+      "state": "completed"
+    },
+    {
+      "action": "dispense",
+      "device": "pump",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:39.297909Z",
+      "idempotent": true,
+      "input": {
+        "volume_ul": 50.0
+      },
+      "invocation_id": "253fe74e-6954-4904-a1d1-0c5142eef9c8",
+      "key": "dispense",
+      "output": {
+        "reported_dispensed_ul": 50.0,
+        "request_id": "99703861c3894231a211676c6a160739-2"
+      },
+      "position": 2,
+      "request_id": "99703861c3894231a211676c6a160739-2",
+      "started_at": "2026-11-23T08:38:38.989560Z",
+      "state": "completed"
+    },
+    {
+      "action": "weigh",
+      "device": "balance",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:39.612902Z",
+      "idempotent": false,
+      "input": {},
+      "invocation_id": "e5cf858d-32ca-483d-8b50-fb749e0ac268",
+      "key": "weigh",
+      "output": {
+        "mass_g": 0.0308
+      },
+      "position": 3,
+      "request_id": "99703861c3894231a211676c6a160739-3",
+      "started_at": "2026-11-23T08:38:39.304878Z",
+      "state": "completed"
+    },
+    {
+      "action": "set_fault",
+      "device": "simulation",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:39.772723Z",
+      "idempotent": false,
+      "input": {
+        "fault": "none"
+      },
+      "invocation_id": "aae30b23-19a4-40bc-9e58-3064db65a5bd",
+      "key": "clear_fault",
+      "output": "none",
+      "position": 4,
+      "request_id": "99703861c3894231a211676c6a160739-4",
+      "started_at": "2026-11-23T08:38:39.616940Z",
+      "state": "completed"
+    }
+  ],
+  "follow_up_proposals": [
+    {
+      "channel": "api",
+      "decided_by": "user:dev|bob",
+      "evidence_ids": [],
+      "id": "7fae0c2c-bffd-41fc-881b-cc3aebb654bf",
+      "proposed_by": "user:dev|ada",
+      "rationale": "Rehearsal: the failing case, requested by ada.",
+      "run_id": "99703861-c389-4231-a211-676c6a160739",
+      "state": "approved",
+      "workflow": "19f29308-0d15-4059-b686-4cd465c7c641"
+    }
+  ],
+  "independently_verified": {
+    "conditions": [
+      {
+        "evidence": "delivered_mass",
+        "index": 0,
+        "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+        "observed": [
+          {
+            "unit": "g",
+            "value": 0.0308
+          }
+        ],
+        "op": "between",
+        "reason": {
+          "code": "condition.false",
+          "detail": "Between does not hold on delivered_mass",
+          "item": "delivered_mass"
+        },
+        "records": [
+          "delivered_mass"
+        ],
+        "result": "FALSE"
+      }
+    ],
+    "contract": {
+      "binding": {
+        "episode": "99703861-c389-4231-a211-676c6a160739"
+      },
+      "conditions": [
+        {
+          "evidence": "delivered_mass",
+          "max": {
+            "unit": "g",
+            "value": 0.050908
+          },
+          "min": {
+            "unit": "g",
+            "value": 0.048912
+          },
+          "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+          "op": "between"
+        }
+      ],
+      "contract": "volume-delivered",
+      "evidence": {
+        "claim": {
+          "device": "pump",
+          "kind": "controller",
+          "signal": "task.reported"
+        },
+        "delivered_mass": {
+          "device": "balance",
+          "kind": "independent_sensor",
+          "signal": "vessel.net_mass"
+        }
+      },
+      "timing": {
+        "anchor": "claim",
+        "default_window_ms": [
+          0,
+          120000
+        ],
+        "max_clock_uncertainty_ms": 1000
+      },
+      "version": "1"
+    },
+    "evidence": [
+      {
+        "id": "claim",
+        "refs": {
+          "episode": "99703861-c389-4231-a211-676c6a160739"
+        },
+        "signal": "task.reported",
+        "source": {
+          "device": "pump",
+          "kind": "controller",
+          "provenance": "simulator",
+          "system": "virtual-lab"
+        },
+        "time": {
+          "clock_domain": "pap-worker",
+          "source": "2026-11-23T08:38:39.297909Z",
+          "uncertainty_ms": 50
+        },
+        "value": "succeeded"
+      },
+      {
+        "id": "delivered_mass",
+        "refs": {
+          "episode": "99703861-c389-4231-a211-676c6a160739"
+        },
+        "signal": "vessel.net_mass",
+        "source": {
+          "device": "balance",
+          "kind": "independent_sensor",
+          "provenance": "simulator",
+          "system": "virtual-lab"
+        },
+        "time": {
+          "clock_domain": "pap-worker",
+          "source": "2026-11-23T08:38:39.612902Z",
+          "uncertainty_ms": 50
+        },
+        "value": {
+          "unit": "g",
+          "value": 0.0308
+        }
+      }
+    ],
+    "outcome_class": "contradiction",
+    "verdict": "VIOLATED"
+  },
+  "organization": "lab-journey-final2",
+  "procedure": {
+    "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
+    "steps": [
+      {
+        "action": "set_fault",
+        "device": "simulation",
+        "id": "inject_fault",
+        "input": {
+          "fault": "partial_blockage"
+        },
+        "position": 0,
+        "title": "Inject a simulated fault: partial blockage"
+      },
+      {
+        "action": "tare",
+        "device": "balance",
+        "id": "tare",
+        "input": {},
+        "position": 1,
+        "title": "Zero the balance"
+      },
+      {
+        "action": "dispense",
+        "device": "pump",
+        "id": "dispense",
+        "input": {
+          "volume_ul": 50.0
+        },
+        "position": 2,
+        "title": "Dispense 50 µL"
+      },
+      {
+        "action": "weigh",
+        "device": "balance",
+        "id": "weigh",
+        "input": {},
+        "position": 3,
+        "title": "Weigh the delivered liquid"
+      },
+      {
+        "action": "set_fault",
+        "device": "simulation",
+        "id": "clear_fault",
+        "input": {
+          "fault": "none"
+        },
+        "position": 4,
+        "title": "Clear the fault"
+      }
+    ],
+    "verification": {
+      "claim_step": "dispense",
+      "conditions": [
+        {
+          "evidence": "delivered_mass",
+          "max": {
+            "unit": "g",
+            "value": 0.050908
+          },
+          "min": {
+            "unit": "g",
+            "value": 0.048912
+          },
+          "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+          "op": "between"
+        }
+      ],
+      "contract": "volume-delivered",
+      "evidence": [
+        {
+          "kind": "independent_sensor",
+          "name": "delivered_mass",
+          "output_field": "mass_g",
+          "signal": "vessel.net_mass",
+          "step": "weigh",
+          "unit": "g"
+        }
+      ],
+      "max_clock_uncertainty_ms": 1000,
+      "version": "1",
+      "window_ms": [
+        0,
+        120000
+      ]
+    }
+  },
+  "provenance": {
+    "contract_sha256": "c163ad9d439d641f24e1462f0f712a0b577e9845bdb1d999dde6f1ea5c43cb6a",
+    "definition_sha256": "62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa",
+    "engine": {
+      "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+      "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+      "engine": "openmhs",
+      "interfaces": {
+        "artifact_schema": "openmhs.artifact/0.1",
+        "deployment_schema": "openmhs.deployment/0.1",
+        "event_schema": "openmhs.event/0.1",
+        "ops_rules_version": "corr-1",
+        "outcome_contract_version": "0.1"
+      },
+      "version": "openmhs 0.1.0"
+    },
+    "environment": {
+      "config_key": "virtual-lab",
+      "kind": "simulated",
+      "slug": "virtual-lab"
+    },
+    "evidence_class": "simulated",
+    "evidence_sha256": "d1347646cd9b83e7d7cf73236ceef4719945362b6bdb2fe6d93611fefaf00d91"
+  },
+  "reported_by_instrument": {
+    "device": "pump",
+    "output": {
+      "reported_dispensed_ul": 50.0,
+      "request_id": "99703861c3894231a211676c6a160739-2"
+    },
+    "step": "dispense",
+    "value": "succeeded"
+  },
+  "run": {
+    "attempts": 1,
+    "created_at": "2026-11-23T08:38:38.135634Z",
+    "environment": "virtual-lab",
+    "error": null,
+    "finished_at": "2026-11-23T08:38:39.811837Z",
+    "id": "99703861-c389-4231-a211-676c6a160739",
+    "started_at": "2026-11-23T08:38:38.242182Z",
+    "state": "succeeded",
+    "submitted_by": "user:dev|bob",
+    "workflow": "dispense-50ul-blocked-line",
+    "workflow_name": "Dispense 50 µL (simulated partial blockage)"
+  },
+  "schema": "pap.lab-run-report/1"
+}

@@ -60,7 +60,30 @@ why it stopped, and the usage.
 The tests run the orchestration with a scripted stand-in model. They show the guarantees above hold; they say nothing
 about how well a real model investigates. That is measured only with a real model run, recorded with its trace.
 
+## In the website (the Agent page)
+
+`/agent` runs a session as the signed-in person and shows the answer, its cost and its full trace (`app/agent/sessions.py`,
+D-040). The API starts `pap-harness ask` as a subprocess with the caller's own credential, so the platform's roles and
+workspace isolation apply to everything the agent reads, and the harness's environment holds only the model settings and
+that credential. Asking needs the engineer role; viewers can read what engineers asked. Limits (all server settings):
+`PAP_AGENT_SESSION_USD` per session, `PAP_AGENT_DAILY_USD` and `PAP_AGENT_DAILY_SESSIONS` per day over the server,
+`PAP_AGENT_MAX_RUNNING` at once, `PAP_AGENT_TIMEOUT_S`, `PAP_AGENT_MAX_STEPS`. The runner is `uv run --project
+packages/agent-harness pap-harness` unless `PAP_AGENT_COMMAND` says otherwise (a JSON list or a command line).
+
+- **No model configured:** the page says so and still answers the fixed questions, including `Investigate workflow run
+  <id>.`: the platform's rule-based investigation of a laboratory run. It is labelled "no model used" and cites the ids
+  it read. It is the scripted fallback and is not AI inference.
+- **Drafting:** an engineer may tick "let the agent draft a follow-up". The agent can then call `propose_experiment` or
+  `request_experiment_run`; the call is recorded as a *draft* in the trace and sent nowhere. The page shows it, and a
+  person files it with a click, as themselves; a different person must still approve it. The website never passes
+  `--allow-requests`.
+- **Simulated evidence:** when the tool results say the evidence is simulated and the model's answer does not, the
+  harness appends a note marked as the platform's own words.
+- **Speed:** `PAP_LLM_REASONING_EFFORT=low` (OpenAI-compatible reasoning models) cut one small request from 18 s to 7.5 s
+  in a single measurement; it is a speed setting, and the harness checks answers either way.
+- **Key:** `PAP_LLM_*` in the server's environment only; the page never sees it and a failed session's message is scrubbed.
+
 ## Not built yet
 
-Traces stored in and shown by the platform (the Agents page), multi-step plans that wait for an approval and continue,
-and evaluation of the agent's answers against known cases.
+Multi-step plans that wait for an approval and continue, evaluation of the agent's answers against known cases, and an
+approver's view of an agent's draft inside the Workflows page (today the person who files it follows a link).

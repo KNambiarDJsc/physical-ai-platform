@@ -1,8 +1,19 @@
-# Session handoff (2026-11-23)
+# Session handoff (2026-11-23, updated late)
 
 The state at the end of a very long session. All 54 features in `harness/features.json` are verified; what remains is
 confirmation on the final tree, publishing, a UI review of the older pages, and a short list of unbuilt items. Read
 `AGENTS.md` first, then this file. The full prompt for a new session is `NEXT_CLAUDE_PROMPT.md` beside it.
+
+## Update (late 2026-11-23): what changed after the text below
+
+All 56 features are verified. New and LOCAL (not pushed): the Agent page and its backend (AGT-002, D-040), the Laboratory
+experiment journey with a faulty-bench template, second-person approval of proposals and run evidence reports (LAB-002,
+D-041), and the Fraunhofer demo kit in `docs/demo/` (runbook, architecture, pilot proposal, requirements sheet, readiness
+report, real evidence, a screen recording). Start with `docs/demo/READINESS_REPORT.md`. Commands: `bash
+scripts/demo_up.sh`, then `uv run python scripts/journey_seed.py`; rehearse with `journey_rehearse.py`; the agent needs the
+`PAP_LLM_*` variables (including `PAP_LLM_REASONING_EFFORT=medium`) in the shell that starts the stack. The Agents-page item
+in "not built yet" below is now built; the browser suite can be load-sensitive on a busy machine (use
+`PAP_E2E_WORKERS=2`); the key was pasted in chat twice and must be rotated.
 
 ## Where the repository stands
 

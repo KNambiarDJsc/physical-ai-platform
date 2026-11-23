@@ -1,0 +1,295 @@
+{
+  "basis": "Stored platform records only. Nothing here is recomputed; the verdict is the OpenMHS engine's.",
+  "evidence_class": "simulated",
+  "execution": [
+    {
+      "action": "tare",
+      "device": "balance",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:37.059970Z",
+      "idempotent": false,
+      "input": {},
+      "invocation_id": "6345a09a-6217-4e01-89ec-27e359334548",
+      "key": "tare",
+      "output": null,
+      "position": 0,
+      "request_id": "2f9fae0e80684876af42523751ffe58d-0",
+      "started_at": "2026-11-23T08:38:36.751288Z",
+      "state": "completed"
+    },
+    {
+      "action": "dispense",
+      "device": "pump",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:37.376628Z",
+      "idempotent": true,
+      "input": {
+        "volume_ul": 50.0
+      },
+      "invocation_id": "5d031cc1-2c70-4596-b4e7-236538c18139",
+      "key": "dispense",
+      "output": {
+        "reported_dispensed_ul": 50.0,
+        "request_id": "2f9fae0e80684876af42523751ffe58d-1"
+      },
+      "position": 1,
+      "request_id": "2f9fae0e80684876af42523751ffe58d-1",
+      "started_at": "2026-11-23T08:38:37.064968Z",
+      "state": "completed"
+    },
+    {
+      "action": "weigh",
+      "device": "balance",
+      "dispatches": 1,
+      "error": null,
+      "finished_at": "2026-11-23T08:38:37.688663Z",
+      "idempotent": false,
+      "input": {},
+      "invocation_id": "869b1b30-527a-4f06-922a-bb83d95a5779",
+      "key": "weigh",
+      "output": {
+        "mass_g": 0.0498
+      },
+      "position": 2,
+      "request_id": "2f9fae0e80684876af42523751ffe58d-2",
+      "started_at": "2026-11-23T08:38:37.380628Z",
+      "state": "completed"
+    }
+  ],
+  "follow_up_proposals": [
+    {
+      "channel": "api",
+      "decided_by": "user:dev|bob",
+      "evidence_ids": [],
+      "id": "3b4a321d-acf8-4b7b-9349-2d3fb24da38a",
+      "proposed_by": "user:dev|ada",
+      "rationale": "Rehearsal: the success case, requested by ada.",
+      "run_id": "2f9fae0e-8068-4876-af42-523751ffe58d",
+      "state": "approved",
+      "workflow": "c0b60aac-abee-448f-8362-edf7f4aa8825"
+    }
+  ],
+  "independently_verified": {
+    "conditions": [
+      {
+        "evidence": "delivered_mass",
+        "index": 0,
+        "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+        "observed": [
+          {
+            "unit": "g",
+            "value": 0.0498
+          }
+        ],
+        "op": "between",
+        "records": [
+          "delivered_mass"
+        ],
+        "result": "TRUE"
+      }
+    ],
+    "contract": {
+      "binding": {
+        "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+      },
+      "conditions": [
+        {
+          "evidence": "delivered_mass",
+          "max": {
+            "unit": "g",
+            "value": 0.050908
+          },
+          "min": {
+            "unit": "g",
+            "value": 0.048912
+          },
+          "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+          "op": "between"
+        }
+      ],
+      "contract": "volume-delivered",
+      "evidence": {
+        "claim": {
+          "device": "pump",
+          "kind": "controller",
+          "signal": "task.reported"
+        },
+        "delivered_mass": {
+          "device": "balance",
+          "kind": "independent_sensor",
+          "signal": "vessel.net_mass"
+        }
+      },
+      "timing": {
+        "anchor": "claim",
+        "default_window_ms": [
+          0,
+          120000
+        ],
+        "max_clock_uncertainty_ms": 1000
+      },
+      "version": "1"
+    },
+    "evidence": [
+      {
+        "id": "claim",
+        "refs": {
+          "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+        },
+        "signal": "task.reported",
+        "source": {
+          "device": "pump",
+          "kind": "controller",
+          "provenance": "simulator",
+          "system": "virtual-lab"
+        },
+        "time": {
+          "clock_domain": "pap-worker",
+          "source": "2026-11-23T08:38:37.376628Z",
+          "uncertainty_ms": 50
+        },
+        "value": "succeeded"
+      },
+      {
+        "id": "delivered_mass",
+        "refs": {
+          "episode": "2f9fae0e-8068-4876-af42-523751ffe58d"
+        },
+        "signal": "vessel.net_mass",
+        "source": {
+          "device": "balance",
+          "kind": "independent_sensor",
+          "provenance": "simulator",
+          "system": "virtual-lab"
+        },
+        "time": {
+          "clock_domain": "pap-worker",
+          "source": "2026-11-23T08:38:37.688663Z",
+          "uncertainty_ms": 50
+        },
+        "value": {
+          "unit": "g",
+          "value": 0.0498
+        }
+      }
+    ],
+    "outcome_class": "supported_success",
+    "verdict": "SATISFIED"
+  },
+  "organization": "lab-journey-final2",
+  "procedure": {
+    "definition_sha256": "5f61bdc52bc06461a84293f98ba54565dc6ad7ba41406c4ed1372c9400b7a19f",
+    "steps": [
+      {
+        "action": "tare",
+        "device": "balance",
+        "id": "tare",
+        "input": {},
+        "position": 0,
+        "title": "Zero the balance"
+      },
+      {
+        "action": "dispense",
+        "device": "pump",
+        "id": "dispense",
+        "input": {
+          "volume_ul": 50.0
+        },
+        "position": 1,
+        "title": "Dispense 50 µL"
+      },
+      {
+        "action": "weigh",
+        "device": "balance",
+        "id": "weigh",
+        "input": {},
+        "position": 2,
+        "title": "Weigh the delivered liquid"
+      }
+    ],
+    "verification": {
+      "claim_step": "dispense",
+      "conditions": [
+        {
+          "evidence": "delivered_mass",
+          "max": {
+            "unit": "g",
+            "value": 0.050908
+          },
+          "min": {
+            "unit": "g",
+            "value": 0.048912
+          },
+          "name": "50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)",
+          "op": "between"
+        }
+      ],
+      "contract": "volume-delivered",
+      "evidence": [
+        {
+          "kind": "independent_sensor",
+          "name": "delivered_mass",
+          "output_field": "mass_g",
+          "signal": "vessel.net_mass",
+          "step": "weigh",
+          "unit": "g"
+        }
+      ],
+      "max_clock_uncertainty_ms": 1000,
+      "version": "1",
+      "window_ms": [
+        0,
+        120000
+      ]
+    }
+  },
+  "provenance": {
+    "contract_sha256": "24bb3ea399936d949b7105c51e8a716791b97e03305e7642e1fdc628b50cd3db",
+    "definition_sha256": "5f61bdc52bc06461a84293f98ba54565dc6ad7ba41406c4ed1372c9400b7a19f",
+    "engine": {
+      "binary_sha256": "sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41",
+      "commit": "e9ef873b42f74f201aecf392ee6e61453e1f40a4",
+      "engine": "openmhs",
+      "interfaces": {
+        "artifact_schema": "openmhs.artifact/0.1",
+        "deployment_schema": "openmhs.deployment/0.1",
+        "event_schema": "openmhs.event/0.1",
+        "ops_rules_version": "corr-1",
+        "outcome_contract_version": "0.1"
+      },
+      "version": "openmhs 0.1.0"
+    },
+    "environment": {
+      "config_key": "virtual-lab",
+      "kind": "simulated",
+      "slug": "virtual-lab"
+    },
+    "evidence_class": "simulated",
+    "evidence_sha256": "2c1a2683c3155606cb28e7431444433674b46995ef30d9544bf0779b0f87e8b9"
+  },
+  "reported_by_instrument": {
+    "device": "pump",
+    "output": {
+      "reported_dispensed_ul": 50.0,
+      "request_id": "2f9fae0e80684876af42523751ffe58d-1"
+    },
+    "step": "dispense",
+    "value": "succeeded"
+  },
+  "run": {
+    "attempts": 1,
+    "created_at": "2026-11-23T08:38:36.057399Z",
+    "environment": "virtual-lab",
+    "error": null,
+    "finished_at": "2026-11-23T08:38:37.728668Z",
+    "id": "2f9fae0e-8068-4876-af42-523751ffe58d",
+    "started_at": "2026-11-23T08:38:36.499521Z",
+    "state": "succeeded",
+    "submitted_by": "user:dev|bob",
+    "workflow": "dispense-50ul",
+    "workflow_name": "Dispense 50 µL (normal bench)"
+  },
+  "schema": "pap.lab-run-report/1"
+}

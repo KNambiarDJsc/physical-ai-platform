@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Laboratory run 99703861-c389-4231-a211-676c6a160739</title>
+<style>body{font:14px/1.5 system-ui,Segoe UI,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem;color:#111418}
+h1{font-size:1.4rem}h2{font-size:1.05rem;margin-top:1.8rem;border-bottom:1px solid #ccd;padding-bottom:.2rem}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:.3rem .5rem;border-bottom:1px solid #dde1e6;vertical-align:top}
+code,.num{font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all}
+.banner{background:#fbf1dc;color:#5c3b00;padding:.5rem .8rem;border-radius:4px;font-weight:600}
+.bad{color:#9b2430;font-weight:600}.ok{color:#14603f;font-weight:600}.note{color:#525d6a;font-size:12px}</style></head><body>
+<h1>Laboratory run evidence report</h1>
+<p class="banner">SIMULATED EVIDENCE: produced by a simulated instrument bench. No physical hardware was involved.</p>
+<p class="note">Stored platform records only. Nothing here is recomputed; the verdict is the OpenMHS engine&#x27;s. Schema <code>pap.lab-run-report/1</code>. Same run, same bytes: there is no generation time.</p>
+<h2>Run</h2>
+<table><tr><th>Workflow</th><td>Dispense 50 µL (simulated partial blockage) (<code>dispense-50ul-blocked-line</code>)</td></tr>
+<tr><th>Run id</th><td class=num>99703861-c389-4231-a211-676c6a160739</td></tr><tr><th>Workspace</th><td>lab-journey-final2</td></tr>
+<tr><th>Environment</th><td>virtual-lab</td></tr><tr><th>State</th><td>succeeded, 1 attempt(s)</td></tr>
+<tr><th>Started by</th><td>user:dev|bob</td></tr><tr><th>Created</th><td class=num>2026-11-23T08:38:38.135634Z</td></tr>
+<tr><th>Finished</th><td class=num>2026-11-23T08:38:39.811837Z</td></tr></table>
+<h2>Result</h2>
+<table><tr><th>Reported by the instrument</th><td>pump: succeeded <span class=num>{&quot;reported_dispensed_ul&quot;: 50.0, &quot;request_id&quot;: &quot;99703861c3894231a211676c6a160739-2&quot;}</span></td></tr>
+<tr><th>Independently verified (OpenMHS engine)</th><td class="bad">VIOLATED &middot; contradiction</td></tr></table>
+<h2>Verification conditions</h2><table><tr><th>Condition</th><th>Result</th><th>Observed</th></tr><tr><td>50 µL ± 2 % delivered (as water at 20 °C: 0.0489–0.0509 g)</td><td>FALSE</td><td class=num>[{&quot;unit&quot;: &quot;g&quot;, &quot;value&quot;: 0.0308}]</td></tr></table>
+<h2>Procedure and execution</h2>
+<p class="note">Procedure digest <code>62aba22469120dc55850cee20b3d167b9eacd29c4fa69141eb621d33979bb9fa</code></p>
+<table><tr><th>#</th><th>Device action</th><th>Input</th><th>State</th><th>Sends</th><th>Started</th><th>Output</th></tr><tr><td>1</td><td>simulation.set_fault</td><td class=num>{&quot;fault&quot;: &quot;partial_blockage&quot;}</td><td>completed</td><td class=num>1</td><td class=num>2026-11-23T08:38:38.514461Z</td><td class=num>&quot;partial_blockage&quot;</td></tr><tr><td>2</td><td>balance.tare</td><td class=num>{}</td><td>completed</td><td class=num>1</td><td class=num>2026-11-23T08:38:38.677018Z</td><td class=num>null</td></tr><tr><td>3</td><td>pump.dispense</td><td class=num>{&quot;volume_ul&quot;: 50.0}</td><td>completed</td><td class=num>1</td><td class=num>2026-11-23T08:38:38.989560Z</td><td class=num>{&quot;reported_dispensed_ul&quot;: 50.0, &quot;request_id&quot;: &quot;99703861c3894231a211676c6a160739-2&quot;}</td></tr><tr><td>4</td><td>balance.weigh</td><td class=num>{}</td><td>completed</td><td class=num>1</td><td class=num>2026-11-23T08:38:39.304878Z</td><td class=num>{&quot;mass_g&quot;: 0.0308}</td></tr><tr><td>5</td><td>simulation.set_fault</td><td class=num>{&quot;fault&quot;: &quot;none&quot;}</td><td>completed</td><td class=num>1</td><td class=num>2026-11-23T08:38:39.616940Z</td><td class=num>&quot;none&quot;</td></tr></table>
+<h2>Provenance</h2>
+<table><tr><th>Engine (pinned build)</th><td class=num>{&quot;binary_sha256&quot;: &quot;sha256:d51af06ff90e01b8a672f468712657f4c248db7a633529c9724957e0ae602e41&quot;, &quot;commit&quot;: &quot;e9ef873b42f74f201aecf392ee6e61453e1f40a4&quot;, &quot;engine&quot;: &quot;openmhs&quot;, &quot;interfaces&quot;: {&quot;artifact_schema&quot;: &quot;openmhs.artifact/0.1&quot;, &quot;deployment_schema&quot;: &quot;openmhs.deployment/0.1&quot;, &quot;event_schema&quot;: &quot;openmhs.event/0.1&quot;, &quot;ops_rules_version&quot;: &quot;corr-1&quot;, &quot;outcome_contract_version&quot;: &quot;0.1&quot;}, &quot;version&quot;: &quot;openmhs 0.1.0&quot;}</td></tr>
+<tr><th>Contract digest</th><td class=num>c163ad9d439d641f24e1462f0f712a0b577e9845bdb1d999dde6f1ea5c43cb6a</td></tr>
+<tr><th>Evidence digest</th><td class=num>d1347646cd9b83e7d7cf73236ceef4719945362b6bdb2fe6d93611fefaf00d91</td></tr>
+<tr><th>Evidence class</th><td>simulated</td></tr></table>
+<h2>Follow-up proposals that cite or started this run</h2>
+<table><tr><th>Proposal</th><th>State</th><th>Proposed by</th><th>Decided by</th><th>Rationale</th><th>Evidence</th></tr><tr><td class=num>7fae0c2c-bffd-41fc-881b-cc3aebb654bf</td><td>approved</td><td>user:dev|ada</td><td>user:dev|bob</td><td>Rehearsal: the failing case, requested by ada.</td><td class=num></td></tr></table>
+</body></html>
