@@ -1,0 +1,15 @@
+# Gitleaks configuration (CI: the "gitleaks (history)" step scans every commit).
+title = "physical-ai-platform"
+
+[extend]
+useDefault = true # every default rule stays on
+
+# One known false positive in history: a deliberately fake value in the agent harness's test, used to prove that the
+# key is never written to a trace (commit 495f101; the test now builds its canary at run time). It is not a credential.
+# History is not rewritten, so the exact string is allowlisted, nothing broader.
+[[allowlists]]
+description = "fake API key used as a canary in the agent harness test (not a credential)"
+regexTarget = "match"
+regexes = ['''sk-test-SECRET-123''']
+paths = ['''packages/agent-harness/tests/test_harness\.py''']
+condition = "AND"

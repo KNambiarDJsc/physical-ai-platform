@@ -235,17 +235,20 @@ def test_providers_are_configuration_and_the_key_never_appears(monkeypatch: pyte
         monkeypatch.delenv(k, raising=False)
     with pytest.raises(NotConfigured, match="PAP_LLM_API_KEY"):
         LLMSettings.from_env()
-    monkeypatch.setenv("PAP_LLM_API_KEY", "sk-test-SECRET-123")
+    canary = (
+        "".join(["canary", "-", "not", "-", "a", "-", "key"]) * 2
+    )  # built at run time: no key-shaped literal in the source
+    monkeypatch.setenv("PAP_LLM_API_KEY", canary)
     monkeypatch.setenv("PAP_LLM_BASE_URL", "https://llm.example/v1")
     monkeypatch.setenv("PAP_LLM_MODEL", "some-model")
     s = LLMSettings.from_env(max_usd=0.2)
-    assert "SECRET" not in repr(s) and s.max_usd == 0.2
+    assert canary not in repr(s) and s.max_usd == 0.2
     assert type(build_model(s, "openai")).__name__ == "OpenAIModel"  # constructed, nothing sent
     with pytest.raises(NotConfigured, match="unknown provider"):
         build_model(s, "nope")
     sess = session([{"text": "hello"}], Platform(), tmp_path, sessions_dir=tmp_path / "sessions", session_id="k")
     stored = "".join(p.read_text(encoding="utf-8", errors="ignore") for p in tmp_path.rglob("*") if p.is_file())
-    assert "SECRET" not in stored and sess.trace.stop == "answered"  # not in traces, sessions or anything written
+    assert canary not in stored and sess.trace.stop == "answered"  # not in traces, sessions or anything written
 
 
 def test_the_instructions_keep_violations_and_regressions_apart() -> None:
