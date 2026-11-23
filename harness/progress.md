@@ -428,3 +428,11 @@ runs, block on one command and print summary lines only.
   traces; 6 tests with a scripted stand-in. Waits for the user's PAP_LLM_* environment variables for a real run.
 - Next: real-model run, SIM-007 e2e, then the UI pass over every page and the production items (OIDC default,
   deployment and backup docs, security checklist).
+
+## 2026-11-23: HAR-001 verified with a real model (53/54 -> 54/54)
+- gpt-oss-120b via aicredits.in, user-authorized, $0.0032 spent of a $0.50 cap; key only in the process environment (grep
+  of repo, var/, traces, sessions and memory finds it nowhere). The user pasted it in chat: rotate it.
+- Found and fixed by real runs: Windows console encoding crash, Unicode-hyphen ids missed by grounding, an unanswerable
+  approval prompt crashing the tool call. Full gate on the tree before these fixes: verify.sh all passed (pytest 301
+  passed, 5 skipped; harness 14 passed).
+- Demo: bash scripts/demo_up.sh seeds the workspace; docs/DEMO.md is the walkthrough. Stack left running (var/demo).

@@ -12,7 +12,15 @@ UUID = re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 DIGEST = re.compile(r"\bsha256:[0-9a-f]{8,64}\b")
 
 
+_DASHES = {
+    code: "-" for code in (0x2010, 0x2011, 0x2012, 0x2013, 0x2014, 0x2015, 0x2212)
+}  # dashes a model may type in an id
+
+
 def ids_in(text: str) -> set[str]:
+    """Ids found in text. Models often write UUIDs with Unicode hyphens (U+2011); those are normalised first, so such a
+    citation is checked instead of silently not seen."""
+    text = text.translate(_DASHES)
     return set(UUID.findall(text)) | set(DIGEST.findall(text))
 
 

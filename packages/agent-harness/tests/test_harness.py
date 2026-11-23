@@ -250,3 +250,50 @@ def test_providers_are_configuration_and_the_key_never_appears(monkeypatch: pyte
 
 def test_the_instructions_keep_violations_and_regressions_apart() -> None:
     assert "NOT a release regression" in SYSTEM and "cannot approve" in SYSTEM and "not known" in SYSTEM
+
+
+def test_the_cli_prints_any_unicode_a_model_streams_even_on_a_legacy_console_code_page(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import io
+    import sys
+
+    from pap_agent_harness.__main__ import utf8_streams
+
+    raw = io.BytesIO()
+    legacy = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")  # what a Windows console defaults to
+    with pytest.raises(UnicodeEncodeError):
+        legacy.write("non‑breaking")
+        legacy.flush()
+    legacy = io.TextIOWrapper(io.BytesIO(), encoding="cp1252", errors="strict")
+    monkeypatch.setattr(sys, "stdout", legacy)
+    utf8_streams()
+    sys.stdout.write("non‑breaking → ok")
+    sys.stdout.flush()
+    assert sys.stdout.buffer.getvalue().decode("utf-8") == "non‑breaking → ok"
+
+
+def test_ids_written_with_unicode_hyphens_are_still_checked() -> None:
+    real = "d46bca2f-e322-450c-b19a-e029e645369e"
+    fake = "11111111-2222-4333-8444-555555555555"
+    steps = [{"kind": "tool", "permitted": True, "output": {"id": real}}]
+    typed = f"trial {real.replace('-', chr(0x2011))} and {fake.replace('-', chr(0x2011))}"  # non-breaking hyphens
+    g = grounding.check(typed, steps)
+    assert g["cited"] == sorted([real, fake]) and g["unsupported"] == [fake] and g["grounded"] is False
+
+
+def test_an_approval_that_cannot_be_answered_is_a_refusal_not_a_failure(tmp_path: Path) -> None:
+    req = (
+        "request_experiment_run",
+        {"org": "lab", "experiment": "stop", "version": 1, "rationale": "more evidence please"},
+    )
+
+    def no_one_to_ask(name: str, args: dict[str, Any]) -> bool:
+        raise EOFError
+
+    p = Platform()
+    s = session([{"tools": [req]}, {"text": "I would have requested a run for more evidence."}], p, tmp_path,
+                allow_requests=True, approve=no_one_to_ask)  # fmt: skip
+    st = s.trace.steps[1]
+    assert st["permitted"] is False and "not approved" in st["error"] and p.calls == []
+    assert s.trace.stop == "answered" and s.budget.calls == 2  # the session went on to answer; nothing was retried

@@ -24,12 +24,24 @@ from .ledger import Ledger
 from .providers import build_model
 
 
+def utf8_streams() -> None:
+    """A model may stream any Unicode (a non-breaking hyphen, an arrow). Windows consoles default to a legacy code page
+    that cannot print it and would crash the session at the answer; write UTF-8 and replace what cannot be shown."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def _confirm(name: str, args: dict[str, Any]) -> bool:
     if not sys.stdin.isatty():
         print(f"[harness] {name} needs your confirmation, but there is no terminal: refused", file=sys.stderr)
         return False
     print(f"\n[harness] the agent wants to {name}: {json.dumps(args)}", file=sys.stderr)
-    return input("[harness] send this request for an engineer to decide? [y/N] ").strip().lower() == "y"
+    try:
+        return input("[harness] send this request for an engineer to decide? [y/N] ").strip().lower() == "y"
+    except EOFError:  # stdin is not readable after all
+        print("[harness] no answer could be read: refused", file=sys.stderr)
+        return False
 
 
 def _progress(msg: str) -> None:
@@ -41,6 +53,7 @@ def _progress(msg: str) -> None:
 
 
 def main() -> None:
+    utf8_streams()
     ap = argparse.ArgumentParser(prog="pap-harness")
     sub = ap.add_subparsers(dest="cmd", required=True)
     a = sub.add_parser("ask", help="ask one question; the agent investigates with the platform's tools")

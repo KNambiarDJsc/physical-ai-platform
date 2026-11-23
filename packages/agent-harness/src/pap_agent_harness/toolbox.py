@@ -97,10 +97,19 @@ class Toolbox:
         if name in WRITES:
             with self._write_lock:  # writes one at a time, each approved by the person running the session
                 assert self.approve is not None
-                if not self.approve(name, args):
+                try:
+                    approved = bool(self.approve(name, args))
+                except (
+                    EOFError,
+                    KeyboardInterrupt,
+                    OSError,
+                ):  # no one could answer: that is a refusal, never a failure
+                    approved = False
+                if not approved:
                     self.trace.tool(name, args, permitted=False, error="not approved by the person running the session")
-                    self._say(f"{name} was not approved")
-                    return {"error": "refused: the person running this session did not approve this request"}
+                    self._say(f"{name} was not approved (do not ask again in this session)")
+                    return {"error": "refused: the person running this session did not approve this request. "
+                                     "Do not retry; say what you would have requested and why."}  # fmt: skip
                 return self._run(name, t, a, args, retries=0)
         return self._run(name, t, a, args, retries=READ_RETRIES)
 
