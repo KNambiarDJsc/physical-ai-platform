@@ -88,6 +88,7 @@ def investigate(run: dict[str, Any]) -> dict[str, Any]:
         "run": rid,
         "state": state,
         "method": "rule-based over stored records; not a model",
+        "evidence_class": (run.get("provenance") or {}).get("evidence_class"),  # "simulated": say so when reporting
         "findings": findings,
         "suggested_experiments": suggestions,
     }

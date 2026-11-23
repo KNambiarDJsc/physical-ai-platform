@@ -19,6 +19,9 @@ class LLMSettings:
     max_tokens: int = 200_000  # hard cap per session, whatever the price
     usd_per_m_input: float | None = None  # price per million input tokens, when known
     usd_per_m_output: float | None = None
+    # How hard a reasoning model thinks before answering: "low", "medium" or "high". Unset: the provider's default.
+    # Lower is faster and cheaper; it is a speed setting, not a safety one (the harness checks answers either way).
+    reasoning_effort: str | None = None
 
     @classmethod
     def from_env(cls, max_usd: float | None = None) -> LLMSettings:
@@ -34,7 +37,11 @@ class LLMSettings:
             v = os.environ.get(name)
             return float(v) if v else None
 
+        effort = os.environ.get("PAP_LLM_REASONING_EFFORT") or None
+        if effort not in (None, "low", "medium", "high"):
+            raise NotConfigured("PAP_LLM_REASONING_EFFORT must be low, medium or high")
         return cls(
+            reasoning_effort=effort,
             base_url=base,
             model=model,
             api_key=key,

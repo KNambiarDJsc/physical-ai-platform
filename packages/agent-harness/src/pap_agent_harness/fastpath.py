@@ -74,7 +74,38 @@ def _verdicts(tb: Toolbox, org: str, m: re.Match[str]) -> str:
     return "\n".join([*out, "(Answered without a model.)"])
 
 
+def _investigate(tb: Toolbox, org: str, m: re.Match[str]) -> str:
+    """The platform's rule-based investigation of a laboratory run: what the stored records say, nothing more. This is
+    the scripted fallback for the website: it needs no model, says it is rule-based, and cites every id it used."""
+    rid = m.group("id")
+    res = tb.call("investigate_run", {"org": org, "run_id": rid})
+    if "error" in res:
+        return f"Could not investigate run {rid}: {res['error']}"
+    d = res["result"]
+    lines = [f"Investigation of run {rid}: it ended {d['state']}. Method: {d['method']}."]
+    if d.get("evidence_class") == "simulated":
+        lines.append("The evidence is SIMULATED: it comes from a simulated instrument bench, not physical hardware.")
+    cited: list[str] = []
+    for f in d["findings"]:
+        lines.append(f"- {f['id']} [{f['severity']}] {f['statement']} (evidence: {', '.join(f['evidence'])})")
+        cited += [e for e in f["evidence"] if e not in cited]
+    for s in (d.get("suggested_experiments") or [])[:1]:
+        lines.append(f"Suggested follow-up: run the workflow {s['workflow']} once more. {s['rationale']}")
+        if "propose_experiment" in tb.names():  # the person allowed drafts: record it; they decide whether to file it
+            out = tb.call("propose_experiment", {"org": org, "workflow": s["workflow"],
+                                                 "rationale": str(s["rationale"])[:2000], "evidence_ids": cited[:18]})  # fmt: skip  # noqa: E501
+            drafted = isinstance(out.get("result"), dict) and out["result"].get("drafted")
+            lines.append("It is recorded as a draft below for you to file." if drafted else "It could not be drafted.")
+    lines.append("(Answered by fixed rules over stored records, without a model.)")
+    return "\n".join(lines)
+
+
 FAST_PATHS = (
+    FastPath(
+        "investigate_run",
+        re.compile(rf"^\s*investigate\s+(workflow\s+)?run\s+(?P<id>{UUID})\s*[.?]?\s*$", re.I),
+        _investigate,
+    ),
     FastPath("run_status", re.compile(rf"^\s*(status of|show)\s+(run\s+)?(?P<id>{UUID})\s*\??\s*$", re.I), _run_status),
     FastPath("list_experiments", re.compile(r"^\s*(list|show)\s+(the\s+)?experiments\s*\??\s*$", re.I), _experiments),
     FastPath(

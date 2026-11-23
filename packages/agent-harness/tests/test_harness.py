@@ -300,3 +300,127 @@ def test_an_approval_that_cannot_be_answered_is_a_refusal_not_a_failure(tmp_path
     st = s.trace.steps[1]
     assert st["permitted"] is False and "not approved" in st["error"] and p.calls == []
     assert s.trace.stop == "answered" and s.budget.calls == 2  # the session went on to answer; nothing was retried
+
+
+def test_without_a_model_the_fixed_questions_still_answer_and_anything_else_says_so(tmp_path: Path) -> None:
+    """The website runs the harness even when the operator has set no model: nothing is guessed, nothing is spent."""
+    fixed = Platform()
+    opts = Options(org="lab", trace_dir=tmp_path / "traces")
+    done = run_session(question="list experiments", model=None, model_label="none", client=fixed.client(),
+                       budget=Budget(1, 0.0), options=opts)  # fmt: skip
+    assert done.trace.route == "fast:list_experiments" and done.trace.answer and done.trace.stop == "answered"
+    assert done.budget.calls == 0 and done.budget.report()["input_tokens"] == 0
+
+    other = Platform()
+    refused = run_session(question="Why did the pre-fix run violate its contract?", model=None, model_label="none",
+                          client=other.client(), budget=Budget(1, 0.0), options=Options(org="lab"))  # fmt: skip
+    assert refused.trace.answer is None
+    assert refused.trace.stop is not None and "No language model is configured" in refused.trace.stop
+    assert other.calls == []  # it did not even read anything it could not use
+
+
+def test_a_drafted_follow_up_is_recorded_and_sent_nowhere_and_approval_stays_refused(tmp_path: Path) -> None:
+    """The website's mode: the agent may DRAFT a follow-up; a person files it. Nothing is sent from here."""
+    req = (
+        "request_experiment_run",
+        {"org": "lab", "experiment": "stop", "version": 1, "rationale": "Repeat once to see if the shortfall repeats."},
+    )
+    p = Platform()
+    s = session([{"tools": [req, ("approve_experiment_request", {"org": "lab"})]}, {"text": "I drafted a repeat run."}],
+                p, tmp_path, draft_requests=True)  # fmt: skip
+    tools = {st["tool"]: st for st in s.trace.steps if st["kind"] == "tool"}
+    assert p.calls == []  # not requested, not proposed, not run
+    draft = tools["request_experiment_run"]
+    assert draft["permitted"] is True and draft["output"]["drafted"] is True and draft["output"]["filed"] is False
+    assert draft["output"]["request"]["version"] == 1
+    assert tools["approve_experiment_request"]["permitted"] is False  # there is still no tool to approve anything
+    assert s.trace.answer == "I drafted a repeat run."
+    # without draft mode the same call is refused outright, as before
+    p2 = Platform()
+    s2 = session([{"tools": [req]}, {"text": "refused"}], p2, tmp_path)
+    assert [st["permitted"] for st in s2.trace.steps if st["kind"] == "tool"] == [False] and p2.calls == []
+
+
+def test_a_failed_laboratory_run_is_investigated_by_fixed_rules_and_the_follow_up_is_only_a_draft(
+    tmp_path: Path,
+) -> None:
+    """The scripted fallback: no model, every finding cites stored ids, and a follow-up is drafted, never filed."""
+    rid = "11111111-2222-4333-8444-555555555555"
+    run = {
+        "id": rid, "state": "succeeded", "workflow": "dispense-50ul-blocked-line", "outcome_class": "contradiction",
+        "reported": {"device": "pump", "value": "succeeded"}, "steps": [], "provenance": {"contract_sha256": "a" * 64},
+        "verification": {"verdict": "VIOLATED", "report": {"conditions": [
+            {"name": "50 µL ± 2 %", "result": "FALSE", "observed": [{"value": 0.031, "unit": "g"}]}]}},
+    }  # fmt: skip
+    calls: list[tuple[str, str]] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        calls.append((req.method, req.url.path))
+        if req.url.path == "/api/v1/me":
+            return httpx.Response(200, json={"kind": "user", "organizations": [{"slug": "lab", "role": "engineer"}]})
+        if req.url.path.endswith(f"/workflow-runs/{rid}"):
+            return httpx.Response(200, json=run)
+        return httpx.Response(404, json={"detail": {"code": "not_found", "message": "not found"}})
+
+    client = PlatformClient("http://platform.test", "dev:ada",
+                            http=httpx.Client(transport=httpx.MockTransport(handler), base_url="http://platform.test"))  # fmt: skip  # noqa: E501
+    for draft in (False, True):
+        calls.clear()
+        s = run_session(question=f"Investigate workflow run {rid}.", model=None, model_label="none", client=client,
+                        budget=Budget(1, 0.0), options=Options(org="lab", draft_requests=draft, trace_dir=tmp_path / "t"))  # fmt: skip  # noqa: E501
+        assert s.trace.route == "fast:investigate_run" and s.budget.calls == 0
+        a = s.trace.answer or ""
+        assert "not a model" in a and "without a model" in a and "0.031 g" in a
+        assert f"run:{rid}" in a and "verification:" in a  # cites what it used
+        assert all(m == "GET" for m, _ in calls)  # nothing was proposed, requested or run
+        drafted = [st for st in s.trace.steps if st.get("tool") == "propose_experiment"]
+        if draft:
+            assert drafted and drafted[0]["output"]["drafted"] is True and "recorded as a draft" in a
+            assert drafted[0]["output"]["request"]["workflow"] == "dispense-50ul-blocked-line"
+        else:
+            assert not drafted
+
+
+def test_simulated_evidence_is_labelled_even_when_the_model_forgets(tmp_path: Path) -> None:
+    rid = "11111111-2222-4333-8444-555555555555"
+    run = {"id": rid, "state": "succeeded", "workflow": "w", "outcome_class": "supported_success", "steps": [],
+           "reported": {"device": "pump", "value": "succeeded"}, "verification": {"verdict": "SATISFIED", "report": {}},
+           "provenance": {"contract_sha256": "a" * 64, "evidence_class": "simulated"}}  # fmt: skip
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        if req.url.path == "/api/v1/me":
+            return httpx.Response(200, json={"kind": "user", "organizations": [{"slug": "lab", "role": "viewer"}]})
+        if req.url.path.endswith(f"/workflow-runs/{rid}"):
+            return httpx.Response(200, json=run)
+        return httpx.Response(404, json={"detail": {"code": "not_found", "message": "nope"}})
+
+    def go(answer: str) -> str:
+        client = PlatformClient("http://platform.test", "dev:ada",
+                                http=httpx.Client(transport=httpx.MockTransport(handler), base_url="http://platform.test"))  # fmt: skip  # noqa: E501
+        turns = [{"tools": [("investigate_run", {"org": "lab", "run_id": rid})]}, {"text": answer}]
+        s = run_session(question="Why?", model=ScriptedModel(turns), model_label=ScriptedModel.label, client=client,
+                        budget=Budget(100_000, 1.0), options=Options(org="lab", trace_dir=tmp_path / "t"))  # fmt: skip
+        return s.trace.answer or ""
+
+    forgot = go(f"It was fine; see run:{rid}.")
+    assert "Added by the platform, not by the model" in forgot and "SIMULATED" in forgot
+    assert "Added by the platform" not in go(f"The evidence is simulated; see run:{rid}.")  # no duplicate label
+
+
+def test_reasoning_effort_is_an_optional_speed_setting_for_the_openai_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    for n, v in (
+        ("PAP_LLM_API_KEY", "k-test-123456"),
+        ("PAP_LLM_BASE_URL", "http://llm.test/v1"),
+        ("PAP_LLM_MODEL", "m"),
+    ):
+        monkeypatch.setenv(n, v)
+    monkeypatch.delenv("PAP_LLM_REASONING_EFFORT", raising=False)
+    assert LLMSettings.from_env().reasoning_effort is None
+    assert "reasoning_effort" not in build_model(LLMSettings.from_env(), "openai").get_config()["params"]
+    monkeypatch.setenv("PAP_LLM_REASONING_EFFORT", "low")
+    s = LLMSettings.from_env()
+    assert s.reasoning_effort == "low"
+    assert build_model(s, "openai").get_config()["params"] == {"temperature": 0, "reasoning_effort": "low"}
+    monkeypatch.setenv("PAP_LLM_REASONING_EFFORT", "turbo")
+    with pytest.raises(NotConfigured, match="low, medium or high"):
+        LLMSettings.from_env()

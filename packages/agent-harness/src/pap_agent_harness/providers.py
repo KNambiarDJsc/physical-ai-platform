@@ -20,8 +20,11 @@ def build_model(s: LLMSettings, provider: str = "openai") -> Model:
         if provider == "openai":  # any OpenAI-compatible endpoint (aicredits, vLLM, LM Studio, OpenAI itself)
             from strands.models.openai import OpenAIModel
 
+            params: dict[str, Any] = {"temperature": 0}
+            if s.reasoning_effort:
+                params["reasoning_effort"] = s.reasoning_effort
             return OpenAIModel(client_args={"api_key": s.api_key, "base_url": s.base_url}, model_id=s.model,
-                               params={"temperature": 0})  # fmt: skip
+                               params=params)  # fmt: skip
         if provider == "anthropic":
             from strands.models.anthropic import AnthropicModel
 

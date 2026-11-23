@@ -45,7 +45,11 @@ class Toolbox:
         cancel: threading.Event | None = None,
         role: str | None = None,
         backoff_s: float = 0.5,
+        draft_writes: bool = False,
     ) -> None:
+        # draft_writes: a write is recorded in the trace as a DRAFT and sent nowhere; a person files or discards it
+        # (the website's Agent page). Nothing is requested, proposed or run by the agent itself.
+        self.draft_writes = draft_writes
         self.client, self.trace, self.allow_requests = client, trace, allow_requests
         self.approve, self.progress, self.cancel, self.role = approve, progress, cancel, role
         self.backoff_s = backoff_s
@@ -60,7 +64,7 @@ class Toolbox:
     def names(self) -> list[str]:
         if self.role is None and self.trace.org:  # discovery said the caller is not in this workspace
             return []
-        writes_ok = self.allow_requests and self.approve is not None
+        writes_ok = (self.allow_requests and self.approve is not None) or self.draft_writes
         return [n for n in TOOLS if writes_ok or n not in WRITES]
 
     def specs(self) -> list[dict[str, Any]]:
@@ -94,6 +98,14 @@ class Toolbox:
             msg = "; ".join(f"{'.'.join(map(str, x['loc']))}: {x['msg']}" for x in e.errors())
             self.trace.tool(name, args, permitted=True, error=f"invalid input: {msg}")
             return {"error": f"invalid input: {msg}"}
+        if name in WRITES and self.draft_writes:
+            note = (
+                "Recorded as a DRAFT. Nothing was sent or run: a person reads it on the page and files or discards it. "
+                "Say plainly what you drafted and why, and do not call this tool again for the same follow-up."
+            )
+            self.trace.tool(name, args, permitted=True, output={"drafted": True, "filed": False, "request": args})
+            self._say(f"drafted {name} (not filed: a person decides)")
+            return {"result": {"drafted": True, "note": note}}
         if name in WRITES:
             with self._write_lock:  # writes one at a time, each approved by the person running the session
                 assert self.approve is not None

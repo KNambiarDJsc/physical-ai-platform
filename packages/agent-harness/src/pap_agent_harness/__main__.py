@@ -62,6 +62,11 @@ def main() -> None:
     a.add_argument("--api", default=os.environ.get("PAP_API_URL", "http://127.0.0.1:8000"))
     a.add_argument("--as", dest="subject", help="development sign-in subject (dev auth mode only)")
     a.add_argument("--allow-requests", action="store_true", help="let the agent ask (with your confirmation) for runs")
+    a.add_argument(
+        "--draft-requests",
+        action="store_true",
+        help="let the agent DRAFT a follow-up; it is recorded in the trace and sent nowhere (a person files it)",
+    )
     a.add_argument("--max-usd", type=float, help="spend cap for this session")
     a.add_argument("--max-steps", type=int, default=12, help="model calls per session")
     a.add_argument("--timeout-s", type=float, default=300.0)
@@ -70,6 +75,11 @@ def main() -> None:
     a.add_argument("--experiment-max-tokens", type=int)
     a.add_argument("--session", help="resume (or name) a persistent session")
     a.add_argument("--no-fast-paths", action="store_true")
+    a.add_argument(
+        "--allow-no-model",
+        action="store_true",
+        help="when no model is configured, still answer the fixed questions (no model call, no cost)",
+    )
     a.add_argument("--state", default="var/agent", help="traces, sessions and the cost ledger go here")
     ns = ap.parse_args()
 
@@ -79,25 +89,32 @@ def main() -> None:
             "set PAP_API_TOKEN (a service credential) or use --as <subject> on a development install", file=sys.stderr
         )
         sys.exit(2)
+    model = None
     try:
         s = LLMSettings.from_env(ns.max_usd)
         model = build_model(s, os.environ.get("PAP_LLM_PROVIDER", "openai"))
+        model_label = s.model
+        budget = Budget(s.max_tokens, s.max_usd, s.usd_per_m_input, s.usd_per_m_output)
+        if s.usd_per_m_input is None or s.usd_per_m_output is None:
+            print(f"[harness] no prices set, so only the token cap ({s.max_tokens}) applies", file=sys.stderr)
     except NotConfigured as e:
-        print(f"not configured: {e}", file=sys.stderr)
-        sys.exit(2)
-    if s.usd_per_m_input is None or s.usd_per_m_output is None:
-        print(f"[harness] no prices set, so only the token cap ({s.max_tokens}) applies", file=sys.stderr)
+        if not ns.allow_no_model:
+            print(f"not configured: {e}", file=sys.stderr)
+            sys.exit(2)
+        print("[harness] no model configured: answering fixed questions only", file=sys.stderr)
+        model_label = "none"
+        budget = Budget(1, 0.0)
     state = Path(ns.state)
     opts = Options(
         org=ns.org, allow_requests=ns.allow_requests, approve=_confirm if ns.allow_requests else None,
         max_calls=ns.max_steps, timeout_s=ns.timeout_s, experiment=ns.experiment,
         experiment_max_tokens=ns.experiment_max_tokens, experiment_max_usd=ns.experiment_max_usd,
+        draft_requests=ns.draft_requests,
         ledger=Ledger(state / "ledger.json"), session_id=ns.session, sessions_dir=state / "sessions",
         trace_dir=state / "traces", fast_paths=not ns.no_fast_paths, progress=_progress,
     )  # fmt: skip
     signal.signal(signal.SIGINT, lambda *_: opts.cancel.set())
-    budget = Budget(s.max_tokens, s.max_usd, s.usd_per_m_input, s.usd_per_m_output)
-    sess = run_session(question=ns.question, model=model, model_label=s.model, client=PlatformClient(ns.api, token),
+    sess = run_session(question=ns.question, model=model, model_label=model_label, client=PlatformClient(ns.api, token),
                        budget=budget, options=opts)  # fmt: skip
     print("\n" + (sess.trace.answer or f"(no answer: {sess.trace.stop})"))
     g = sess.trace.grounding

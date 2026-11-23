@@ -59,6 +59,7 @@ class Options:
     sessions_dir: Path | None = None
     trace_dir: Path | None = None
     fast_paths: bool = True
+    draft_requests: bool = False  # the agent may DRAFT a follow-up; a person files it elsewhere (never sent from here)
     progress: Progress | None = None
     cancel: threading.Event = field(default_factory=threading.Event)
 
@@ -96,7 +97,26 @@ def _stop_cause(e: BaseException | None) -> BaseException | None:
     return None
 
 
+SIMULATED_NOTE = (
+    "\n\n[Added by the platform, not by the model: the evidence above is SIMULATED. It comes from a simulated "
+    "instrument bench, not physical hardware.]"
+)
+
+
+def _label_simulated(trace: Trace) -> None:
+    """A model may forget the rule that simulated evidence is labelled. When any tool result says the evidence is
+    simulated and the answer does not, the platform says it, in words marked as its own."""
+    if trace.route != "agent" or not trace.answer or "simulat" in trace.answer.lower():
+        return
+    if any(
+        s.get("kind") == "tool" and '"evidence_class": "simulated"' in json.dumps(s.get("output"), default=str)
+        for s in trace.steps
+    ):
+        trace.answer += SIMULATED_NOTE
+
+
 def _finish(trace: Trace, budget: Budget, o: Options) -> Session:
+    _label_simulated(trace)
     trace.grounding = grounding.check(trace.answer, trace.steps) if trace.route == "agent" else None
     if o.ledger and o.experiment:
         o.ledger.add(f"{o.org}/{o.experiment}", trace.id, budget.input_tokens + budget.output_tokens, budget.usd)
@@ -104,8 +124,14 @@ def _finish(trace: Trace, budget: Budget, o: Options) -> Session:
     return Session(trace, budget, path)
 
 
+NO_MODEL = (
+    "No language model is configured on this server, so only the fixed questions are answered "
+    "(status of run <id>, list experiments, verdicts for <experiment>)."
+)
+
+
 def run_session(
-    *, question: str, model: Model, model_label: str, client: PlatformClient, budget: Budget, options: Options
+    *, question: str, model: Model | None, model_label: str, client: PlatformClient, budget: Budget, options: Options
 ) -> Session:
     o = options
     trace = Trace(question=question, model=model_label, org=o.org, allow_requests=o.allow_requests)
@@ -118,8 +144,9 @@ def run_session(
         trace.stop = f"stopped: {e}"
         return _finish(trace, budget, o)
     toolbox = Toolbox(
-        client, trace, o.allow_requests, approve=o.approve, progress=o.progress, cancel=o.cancel, role=role
-    )
+        client, trace, o.allow_requests, approve=o.approve, progress=o.progress, cancel=o.cancel, role=role,
+        draft_writes=o.draft_requests,
+    )  # fmt: skip
     if role is None:
         trace.stop = f"stopped: not a member of workspace {o.org}"
         return _finish(trace, budget, o)
@@ -130,6 +157,10 @@ def run_session(
             trace.route, trace.answer, trace.stop = f"fast:{fast[0]}", fast[1], "answered"
             say(f"answered by the {fast[0]} fast path (no model call)")
             return _finish(trace, budget, o)
+
+    if model is None:  # nothing fixed matched and there is no model: say so, never guess
+        trace.stop = f"stopped: {NO_MODEL}"
+        return _finish(trace, budget, o)
 
     key = f"{o.org}/{o.experiment}" if o.experiment else None
 
@@ -158,10 +189,19 @@ def run_session(
     session_manager = (
         FileSessionManager(session_id=trace.id, storage_dir=str(o.sessions_dir)) if o.sessions_dir else None
     )
+    drafting = (
+        "\n\nDrafting is on. When your investigation points to a follow-up experiment, DRAFT it once with "
+        "propose_experiment: an existing workflow of this workspace (list_workflows shows them), a plain rationale and "
+        "the evidence ids. A draft is only recorded; a person decides whether to file it and a second person must "
+        "approve before anything runs. Then say what you drafted and why. "
+        "Never describe a follow-up without drafting it."
+        if o.draft_requests
+        else ""
+    )
     agent = Agent(
         model=capped,
         tools=platform_tools(toolbox),  # type: ignore[arg-type]
-        system_prompt=SYSTEM + f'\n\nThe workspace is "{o.org}". Pass org="{o.org}" to every tool.',
+        system_prompt=SYSTEM + drafting + f'\n\nThe workspace is "{o.org}". Pass org="{o.org}" to every tool.',
         callback_handler=None,
         session_manager=session_manager,
     )
