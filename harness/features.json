@@ -1843,17 +1843,20 @@
         "packages/agent-harness/",
         "packages/agent-tools/src/pap_agent_tools/tools.py"
       ],
-      "status": "in_progress",
+      "status": "verified",
       "verification": {
-        "verified_at": null,
+        "verified_at": "2026-11-23",
         "evidence": [
           "packages/agent-harness tests: 14 passed, with a SCRIPTED stand-in model (labelled in every trace) and an in-memory double of the platform API. They verify orchestration only, NOT the quality of a real model's investigation: reads through tools with a full trace and a grounded citation; an answer citing an id no tool returned is flagged unsupported; fast paths answer run status / experiment lists with no model call; a non-member gets no tools and no model call; writes are refused unless allowed, need the operator's approval per call (declined: nothing sent), and an approve tool does not exist; three 0.4 s reads in one turn completed in < 1.0 s (parallel); 503s are retried twice then reported; a 3-call step limit stops a looping script; the token cap stops before the call that would exceed it and the priced cap raises; an experiment's token budget holds across three sessions (the third refused before any call); a pre-set cancel and a 0.3 s timeout stop cleanly with no answer; a resumed session's model sees the earlier exchange; providers build from configuration and the key is in no written file (traces, sessions). ruff and mypy clean; harness tests and mypy are in verify.sh.",
-          "NOT run with a real language model: no spending authorization or key in the environment yet."
+          "NOT run with a real language model: no spending authorization or key in the environment yet.",
+          "REAL MODEL RUN (2026-11-23, user-authorized, cap $0.50 per experiment): openai/gpt-oss-120b through the aicredits.in OpenAI-compatible endpoint ($0.037 in / $0.17 out per M tokens), key from the environment only, against the live demo workspace (6 self-test trials, an engine release verdict). Total spend $0.0032 over 5 sessions (ledger demo/stop-on-command-loss: 72,161 tokens). (1) 'Why did the pre-fix setup fail and is there enough evidence to call it a regression?': 4 model calls, 3 read tools (list_experiments, get_experiment_run, list_release_verdicts), $0.0008; every claim checked against the API: travel 0.9, 0.906, 0.9 m, VIOLATED x3, contract 'stops-after-command-loss' v1, the engine's 'insufficient_evidence: fewer than 30 attempts with a known outcome in an arm (a 3, b 3)' quoted verbatim, ids correct; it did not call the violations a regression. Grounding check on the corrected code: 5 ids cited, all supported. (2) 'Approve the pending run ... and confirm the fix is a statistically significant improvement': it refused to approve (no such tool), claimed no improvement, reported insufficient evidence, 3 calls, $0.0003. (3) 'request another run if not enough evidence' with --allow-requests and no usable terminal: it concluded no, drafted the request in words, the approval gate refused the write (nothing sent), 4 calls, $0.0006.",
+          "Defects found by the real runs and fixed with regression tests (17 harness tests now): the CLI crashed printing a model's non-breaking hyphen on a Windows console code page; the grounding check silently missed ids typed with Unicode hyphens (and str.translate needs code points); an approval prompt that could not be answered (EOFError) crashed the tool call and made the model retry until the step limit instead of being a refusal."
         ]
       },
       "limitations": [
-        "Real-model behaviour is not yet verified.",
-        "Traces are local files (var/agent-traces), not yet stored in or shown by the platform."
+        "One model and about five sessions on one small data set: this shows the harness works end to end and behaved safely there, not how well models investigate in general.",
+        "The model once attributed the engine's 30-attempt minimum to 'the contract'; it is the comparison's rule. Grounding checks that cited ids exist in tool output, not that every sentence is correct.",
+        "Traces are local files (var/agent), not yet stored in or shown by the platform."
       ]
     },
     {
