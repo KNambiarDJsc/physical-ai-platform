@@ -26,6 +26,12 @@ ROOT = Path(__file__).resolve().parents[1]
 PROC = {"success": "dispense-50ul", "failing": "dispense-50ul-blocked-line"}
 
 
+def is_draft(st: dict[str, Any]) -> bool:
+    """A step the agent only DRAFTED (a tool output may be a list or a dict)."""
+    out = st.get("output")
+    return isinstance(out, dict) and bool(out.get("drafted"))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--api", default="http://127.0.0.1:8000")
@@ -131,15 +137,25 @@ def main() -> int:
         failing = runs["failing"]
         q1 = (f"Investigate workflow run {failing}. The pump reported a result; what did the independent measurement show, "
               "what is the evidence, and what follow-up experiment would you draft? Cite ids.")  # fmt: skip
-        s1 = session(q1, True)
-        usd += (s1.get("usage") or {}).get("usd") or 0.0
-        tools = [st["tool"] for st in s1["steps"] if st["kind"] == "tool"]
-        drafts = [
-            st
-            for st in s1["steps"]
-            if st.get("tool") in ("propose_experiment", "request_experiment_run")
-            and (st.get("output") or {}).get("drafted")
-        ]
+        for _attempt in (1, 2):  # a model sometimes describes a follow-up without drafting it: ask once more, say so
+            s1 = session(q1, True)
+            usd += (s1.get("usage") or {}).get("usd") or 0.0
+            tools = [st["tool"] for st in s1["steps"] if st["kind"] == "tool"]
+            drafts = [
+                st
+                for st in s1["steps"]
+                if st.get("tool") in ("propose_experiment", "request_experiment_run") and is_draft(st)
+            ]
+            record.setdefault("investigation_attempts", []).append(
+                {
+                    "session": s1["id"],
+                    "drafted": len(drafts),
+                    "corrected_by_platform": "Added by the platform" in (s1["answer"] or ""),
+                }
+            )
+            if drafts:
+                break
+            print("NOTE  the model described a follow-up without drafting it (the platform said so); asking once more")
         g = s1.get("grounding") or {}
         step(
             "the investigation finished with an answer",
@@ -152,7 +168,7 @@ def main() -> int:
             g,
         )
         step("the agent read through typed tools (no write was sent)", "propose_experiment" not in [
-            st["tool"] for st in s1["steps"] if st.get("kind") == "tool" and st.get("permitted") and not (st.get("output") or {}).get("drafted")], tools)  # fmt: skip
+            st["tool"] for st in s1["steps"] if st.get("kind") == "tool" and st.get("permitted") and not is_draft(st)], tools)  # fmt: skip
         step(
             "the answer labels the evidence as simulated",
             "simulat" in (s1["answer"] or "").lower(),

@@ -5,6 +5,7 @@ limit, a timeout or cancellation, and every answer is checked against the eviden
 from __future__ import annotations
 
 import json
+import re
 import threading
 import time
 from collections.abc import Callable
@@ -115,7 +116,27 @@ def _label_simulated(trace: Trace) -> None:
         trace.answer += SIMULATED_NOTE
 
 
+UNDRAFTED_NOTE = (
+    "\n\n[Added by the platform, not by the model: no draft was recorded in this session, so the follow-up described "
+    "above is only a suggestion. Nothing was drafted, filed or run.]"
+)
+
+
+def _label_undrafted(trace: Trace, o: Options) -> None:
+    """A model may say it drafted a follow-up without calling the tool. An answer must not claim an action that is not
+    in the trace: when drafting is on, the answer talks of a draft and no draft was recorded, the platform says so."""
+    if not o.draft_requests or trace.route != "agent" or not trace.answer:
+        return
+    drafted = any(
+        s.get("kind") == "tool" and isinstance(s.get("output"), dict) and s["output"].get("drafted")
+        for s in trace.steps
+    )
+    if not drafted and re.search(r"\bdraft(ed|s)?\b", trace.answer, re.IGNORECASE):
+        trace.answer += UNDRAFTED_NOTE
+
+
 def _finish(trace: Trace, budget: Budget, o: Options) -> Session:
+    _label_undrafted(trace, o)
     _label_simulated(trace)
     trace.grounding = grounding.check(trace.answer, trace.steps) if trace.route == "agent" else None
     if o.ledger and o.experiment:
