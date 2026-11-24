@@ -505,3 +505,13 @@ runs, block on one command and print summary lines only.
   rehearsal 24 of 24). Harness: transient provider errors retried twice; a platform correction when an answer claims a
   draft that was not recorded (D-042). harness 28 passed. Real-model spend while preparing, all models: about $0.15.
 
+## 2026-11-24: redesign accepted; its CI regression fixed in the specs
+- Another session pushed d47cb59 (Studio investigation workspace) and 01c06af (Taste direction); everything from the demo
+  kit is already in origin/main. CI on 01c06af FAILED (3 jobs): the redesign moved the organization and project forms
+  behind buttons and replaced the empty-state text, but release-flow, oidc and trial-exercise specs still expected the old
+  UI. Specs updated to open the forms first (nothing weakened). Re-run: verify.sh all passed; browser suite 56 passed, 13
+  skipped; oidc smoke 3/3; trial exercise 1/1. Not yet confirmed by CI on a pushed fix.
+- Sidebar regrouped (Projects, Studio, Runs, Integrations, Settings), a Run history page added; labels the demo uses are
+  unchanged. gpt-oss-120b tool calls work again (Haiku remains the verified demo model).
+- A leaked Gazebo host on :8867 (the stop file does not stop it) again blocked a fresh stack: stop that PID.
+

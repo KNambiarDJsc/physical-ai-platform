@@ -94,9 +94,11 @@ test("the trial exercise, as written, from a clean install", async ({ page }) =>
   await page.getByLabel("Subject").fill(`trial-${run}`);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Projects" }).click();
+  await page.getByRole("button", { name: "Create organization" }).click(); // the form opens on request
   await page.getByLabel("Organization name").fill("Trial");
   await page.getByLabel("Organization slug").fill(`trial-${run}`);
   await page.getByRole("button", { name: "Create organization" }).click();
+  await page.getByRole("button", { name: "New project" }).first().click(); // the form opens on request
   await page.getByLabel("Project name").fill("Reaching arm");
   await page.getByLabel("Project slug").fill("reach");
   await page.getByRole("button", { name: "Create project" }).click();
@@ -138,6 +140,7 @@ test("the trial exercise, as written, from a clean install", async ({ page }) =>
 
   // T5: real flights (physical evidence)
   await page.getByRole("link", { name: "Projects" }).click();
+  await page.getByRole("button", { name: "New project" }).first().click(); // the form opens on request
   await page.getByLabel(`Project name`).first().fill("Drone flights");
   await page.getByLabel(`Project slug`).first().fill("drones");
   await page.getByRole("button", { name: "Create project" }).first().click();

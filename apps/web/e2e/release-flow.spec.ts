@@ -17,10 +17,12 @@ test("register releases, upload evidence, evaluate, compare, export, drill down"
   await page.getByLabel("Subject").fill(user);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Projects" }).click();
-  await expect(page.getByText("You are not a member of any organization yet.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Start with a workspace." })).toBeVisible();
+  await page.getByRole("button", { name: "Create organization" }).click(); // the form opens on request
   await page.getByLabel("Organization name").fill("E2E");
   await page.getByLabel("Organization slug").fill(org);
   await page.getByRole("button", { name: "Create organization" }).click();
+  await page.getByRole("button", { name: "New project" }).first().click(); // the form opens on request
   await page.getByLabel("Project name").fill("Picking cell");
   await page.getByLabel("Project slug").fill("picking");
   await page.getByRole("button", { name: "Create project" }).click();

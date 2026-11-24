@@ -102,6 +102,10 @@ safety path.
 
 ## 5. The website, page by page
 
+Since the redesign the sidebar has five groups: **Projects** (Overview, Get started, Fleet), **Studio** (Digital twin,
+Workflows, Lab experiment, Experiments, Agent), **Runs** (Run history, Workbench, Releases, Evidence, Verification,
+Incidents), **Integrations** (Hardware Hub, Integrations) and **Settings**. The tables below group pages by purpose.
+
 **Lab automation**
 
 | Page | What it is for | What you see |
@@ -109,6 +113,7 @@ safety path.
 | Get started | First run | Five steps (workspace, environment, discover devices, workflow, run and read the verified result), each marked done |
 | Lab experiment | The guided journey | Six steps from discovery to exported evidence: discover the pump, balance and simulation controls; see two procedures with their explicit tolerance; request a run (a different person approves); inspect the successful and the failing run; investigate with the agent; export. Each step's status comes from stored data and links to the page where the work happens |
 | Agent | Ask and investigate | Ask about runs and experiments; the answer cites ids, shows its cost and full trace; an optional drafted follow-up that a person files. Read-only (`docs/agent-harness.md`) |
+| Run history | Search past runs | Workflow runs filtered by environment, outcome and date |
 | Workbench | Run and watch | Live instrument values, observed robots, run list, the run (reported vs verified), steps, timeline, and an evidence report (page or JSON) for each finished run |
 | Experiments | The Studio | Configure setups, request, approve, run, per-trial results, setups side by side, release verdict |
 | Digital twin | Inspect a recording | 3D robot model, MCAP playback, event timeline, "Compare with" a second recording as a ghost, the engineering assistant |

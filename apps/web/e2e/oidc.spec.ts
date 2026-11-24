@@ -29,7 +29,7 @@ test("sign in with the identity provider; tokens stay out of the page; sign out"
 
   // Back in the app, signed in.
   await page.waitForURL(`${baseURL}/`);
-  await expect(page.getByText("You are not a member of any organization yet.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Start with a workspace." })).toBeVisible();
 
   // The session cookie: HttpOnly, Secure, SameSite=Lax; the sign-in transaction cookie is gone.
   const cookies = await context.cookies();
@@ -59,9 +59,11 @@ test("sign in with the identity provider; tokens stay out of the page; sign out"
   expect(forged.subject).toBe(user);
 
   // The signed-in user can work: create an organization and a project through the UI.
+  await page.getByRole("button", { name: "Create organization" }).click(); // the form opens on request
   await page.getByLabel("Organization name").fill("OIDC");
   await page.getByLabel("Organization slug").fill(`oidc-${run}`);
   await page.getByRole("button", { name: "Create organization" }).click();
+  await page.getByRole("button", { name: "New project" }).first().click(); // the form opens on request
   await page.getByLabel("Project name").fill("Picking cell");
   await page.getByLabel("Project slug").fill("picking");
   await page.getByRole("button", { name: "Create project" }).click();

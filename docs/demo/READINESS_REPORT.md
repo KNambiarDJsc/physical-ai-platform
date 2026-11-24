@@ -50,6 +50,15 @@ Haiku, DeepSeek and a model comparison).
 | Rehearsal from a clean workspace through the API (`journey_rehearse.py`) | **24 of 24 steps** in each of the last two runs, with the real model (an earlier run failed its grounding check at `low` effort, which is why the demo uses `medium`) |
 | Screen recording from the real application | `docs/demo/recording/laboratory-experiment-journey.webm`, about 2 minutes, includes a real model answer |
 
+**After the redesign (2026-11-24).** Another session redesigned the interface (commits `d47cb59`, `01c06af`) and CI
+went red on it: the redesign hid the organization form and the project form behind buttons and replaced the empty-state
+text, and three specs (`release-flow`, `oidc`, `trial-exercise`) still filled the forms directly. They now open the forms
+first; the flow and assertions are otherwise unchanged. Re-verified on the redesigned tree: `verify.sh` all gates passed
+(pytest 315 passed, 5 skipped; harness 31; web unit 57), the browser suite **56 passed, 13 skipped** (2 workers) including
+the whole journey, the OIDC smoke 3 of 3, and the trial exercise 1 of 1 against the local stack. The demo click path and
+every button label in the runbook are unchanged. The live-model rehearsal was not repeated on this tree (the API and
+harness did not change); the model provider answers tool calls again today for both Haiku and gpt-oss-120b.
+
 **Honest note on the browser suite.** Over five full runs on near-identical builds, two passed with 4 workers, one passed
 with 2 workers, and two had 1 to 3 timeouts in unrelated tests (a 3D mesh download, a workflow queue, a navigation) while
 API calls took up to 17 seconds because the machine was busy. No server errors were logged, and each test passed on a
