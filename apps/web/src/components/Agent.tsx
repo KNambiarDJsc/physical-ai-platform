@@ -9,6 +9,7 @@ import { api, orgPath, type Proposal } from "@/lib/api/client";
 import { shortDigest } from "@/lib/format";
 import { Notice, PageHeader, Panel } from "./AppShell";
 import { RequireIdentity } from "./Identity";
+import { Markdown } from "./Markdown";
 import { Badge, Time } from "./ui";
 import { OrgSelect, useOrg } from "./Workspace";
 
@@ -143,7 +144,7 @@ export function Agent({ initialQuestion, workspace, focus = "general" }: { initi
             {status.isLoading && <p className="text-[13px] text-muted">Loading…</p>}
             {status.error && <Notice tone="bad">Could not read the agent&apos;s status: {status.error.message}</Notice>}
             {st && !st.runner_available && (
-              <Notice tone="warn">The agent runner is not installed on this server, so nothing can be asked here. The operator sets it up with <span className="num">PAP_AGENT_COMMAND</span>.</Notice>
+              <Notice tone="warn">The agent is not available on this server (its runner is not installed, or it cannot keep sessions), so nothing can be asked here. The operator sets it up with a writable <span className="num">PAP_AGENT_STATE_PATH</span> and <span className="num">PAP_AGENT_COMMAND</span>.</Notice>
             )}
             {st && st.runner_available && !st.model_configured && (
               <div className="mb-3">
@@ -385,7 +386,9 @@ function SessionView({ s, org, canFile, proposals, onFiled }: { s: Session; org:
               <h3 id="answer-h" className="mb-1 text-[12px] font-medium text-faint">
                 Answer
               </h3>
-              <div className="whitespace-pre-wrap rounded-sm border border-line bg-bg p-3 text-[13px] leading-relaxed">{s.answer}</div>
+              <div className="rounded-sm border border-line bg-bg p-3 text-[13px] leading-relaxed">
+                <Markdown text={s.answer} />
+              </div>
               <p className="mt-1 text-[11px] text-muted">
                 {fast
                   ? "Answered by a fixed tool call and a template: no model."

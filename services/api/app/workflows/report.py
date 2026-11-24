@@ -100,6 +100,11 @@ def _e(v: Any) -> str:
     return html.escape("" if v is None else str(v))
 
 
+def _who(label: Any) -> str:
+    """A person's name from the principal label (``user:<issuer>|<subject>``). The JSON keeps the label whole."""
+    return _e(str(label).split("|")[-1]) if label else "—"
+
+
 def _j(v: Any) -> str:
     return html.escape(json.dumps(v, sort_keys=True, default=str, ensure_ascii=False))
 
@@ -132,8 +137,8 @@ def to_html(r: dict[str, Any]) -> str:
     )
     rows_follow = (
         "".join(
-            f"<tr><td class=num>{_e(p['id'])}</td><td>{_e(p['state'])}</td><td>{_e(p['proposed_by'])}</td>"
-            f"<td>{_e(p.get('decided_by') or '—')}</td><td>{_e(p['rationale'])}</td><td class=num>{_e(', '.join(p.get('evidence_ids') or []))}</td></tr>"
+            f"<tr><td class=num>{_e(p['id'])}</td><td>{_e(p['state'])}</td><td>{_who(p['proposed_by'])}</td>"
+            f"<td>{_who(p.get('decided_by'))}</td><td>{_e(p['rationale'])}</td><td class=num>{_e(', '.join(p.get('evidence_ids') or []))}</td></tr>"
             for p in r["follow_up_proposals"]
         )
         or "<tr><td colspan=6>None.</td></tr>"
@@ -149,7 +154,7 @@ def to_html(r: dict[str, Any]) -> str:
 <table><tr><th>Workflow</th><td>{_e(run["workflow_name"])} (<code>{_e(run["workflow"])}</code>)</td></tr>
 <tr><th>Run id</th><td class=num>{_e(run["id"])}</td></tr><tr><th>Workspace</th><td>{_e(r["organization"])}</td></tr>
 <tr><th>Environment</th><td>{_e(run["environment"])}</td></tr><tr><th>State</th><td>{_e(run["state"])}, {_e(run["attempts"])} attempt(s)</td></tr>
-<tr><th>Started by</th><td>{_e(run["submitted_by"])}</td></tr><tr><th>Created</th><td class=num>{_e(run["created_at"])}</td></tr>
+<tr><th>Started by</th><td>{_who(run["submitted_by"])}</td></tr><tr><th>Created</th><td class=num>{_e(run["created_at"])}</td></tr>
 <tr><th>Finished</th><td class=num>{_e(run["finished_at"])}</td></tr></table>
 <h2>Result</h2>
 <table><tr><th>Reported by the instrument</th><td>{_e(rep.get("device"))}: {_e(rep.get("value"))} <span class=num>{_j(rep.get("output"))}</span></td></tr>

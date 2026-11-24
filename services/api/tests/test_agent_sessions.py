@@ -201,3 +201,27 @@ def test_a_follow_up_is_drafted_only_when_the_engineer_asks_for_it_and_is_never_
     assert (
         lab.post(f"{ORG}/agent/sessions", json={"question": "DRAFT x", "propose": True}, headers=VIC).status_code == 403
     )
+
+
+def test_a_server_that_cannot_keep_sessions_says_so_instead_of_failing(
+    lab: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A non-root container on a read-only file system: the page must show 'unavailable', not break."""
+    blocker = tmp_path / "a-file"
+    blocker.write_text("not a directory", encoding="utf-8")
+    setting(monkeypatch, "PAP_AGENT_STATE_PATH", str(blocker / "agent"))  # a directory cannot be created under a file
+    s = ok(lab.get(f"{ORG}/agent/status", headers=EVE))
+    assert s["runner_available"] is False and s["can_ask"] is True
+    assert ok(lab.get(f"{ORG}/agent/sessions", headers=EVE)) == []
+    r = ask(lab, "list experiments")
+    assert r.status_code == 503 and r.json()["detail"]["code"] == "agent.unavailable"
+    assert lab.get(f"{ORG}/agent/sessions/{'a' * 32}", headers=EVE).status_code == 404
+
+
+def test_without_the_harness_installed_the_runner_is_unavailable(
+    lab: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    setting(monkeypatch, "PAP_AGENT_COMMAND", "")
+    monkeypatch.setattr("app.agent.sessions.shutil.which", lambda _name: None)  # no uv on this server
+    assert ok(lab.get(f"{ORG}/agent/status", headers=EVE))["runner_available"] is False
+    assert ask(lab, "list experiments").status_code == 503

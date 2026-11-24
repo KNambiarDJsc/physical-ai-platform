@@ -64,11 +64,18 @@ test("register releases, upload evidence, evaluate, compare, export, drill down"
   await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
   const question = page.getByLabel("Question", { exact: true });
   await expect(question).toHaveValue(/Investigate release evaluation .+ in project/);
-  await question.fill("list experiments");
-  const started = page.waitForRequest((r) => r.method() === "POST" && r.url().endsWith("/agent/sessions"));
-  await page.getByRole("button", { name: "Ask", exact: true }).click();
-  expect((await started).postDataJSON().focus).toBe("release");
-  await expect(page.getByText("Answered by a fixed tool call and a template: no model.")).toBeVisible({ timeout: 60000 });
+  // The Compose image has no agent runner (no uv, no harness, a read-only disk): there the panel must say so.
+  const status = await page.request.get(`/api/v1/orgs/${org}/agent/status`, { headers: { Authorization: `Bearer dev:${user}` } });
+  if (!(await status.json()).runner_available) {
+    await expect(page.getByText("The agent is not available on this server")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
+  } else {
+    await question.fill("list experiments");
+    const started = page.waitForRequest((r) => r.method() === "POST" && r.url().endsWith("/agent/sessions"));
+    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    expect((await started).postDataJSON().focus).toBe("release");
+    await expect(page.getByText("Answered by a fixed tool call and a template: no model.")).toBeVisible({ timeout: 60000 });
+  }
   await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
 
 

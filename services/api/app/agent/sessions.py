@@ -69,9 +69,19 @@ def _model() -> tuple[bool, str | None, bool]:
 
 
 def _dirs() -> tuple[Path, Path]:
+    """The status and trace directories. Pure: nothing is created, so reading never fails on a read-only disk."""
     base = get_settings().agent_state_path
-    (base / "status").mkdir(parents=True, exist_ok=True)
     return base / "status", base / "traces"
+
+
+def _state_writable() -> bool:
+    """Whether sessions can be kept here. A non-root container on a read-only disk cannot; the page says so."""
+    status_dir, _ = _dirs()
+    try:
+        status_dir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return False
+    return os.access(status_dir, os.W_OK)
 
 
 # --------------------------------------------------------------------------------------------------------- state
@@ -215,7 +225,7 @@ def agent_status(ctx: ViewerDep) -> AgentStatus:
     configured, model, priced = _model()
     count, usd = _today()
     return AgentStatus(
-        runner_available=_command() is not None,
+        runner_available=_command() is not None and _state_writable(),
         model_configured=configured,
         model=model,
         priced=priced,
@@ -265,6 +275,10 @@ def ask(
     cmd = _command()
     if cmd is None:
         raise error(503, "agent.unavailable", "The agent runner is not installed on this server.")
+    if not _state_writable():
+        raise error(
+            503, "agent.unavailable", "This server cannot keep agent sessions: its state directory is not writable."
+        )
     token = (authorization or "").removeprefix("Bearer ").strip()
     if not token:
         raise error(401, "auth.unauthenticated", "sign in to ask the agent")

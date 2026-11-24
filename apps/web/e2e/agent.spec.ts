@@ -10,6 +10,7 @@ const run = Date.now().toString(36);
 const org = `agent-${run}`;
 const eng = `eng-${run}`;
 const view = `view-${run}`;
+let runner = true; // whether this deployment can run the agent (the Compose image cannot: no uv, no harness)
 
 test.beforeAll(async ({ playwright, baseURL }) => {
   const api = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Authorization: `Bearer dev:${eng}` } });
@@ -19,6 +20,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
   };
   await ok(api.post("/api/v1/orgs", { data: { slug: org, name: "Agent" } }));
   await ok(api.put(`/api/v1/orgs/${org}/members`, { data: { issuer: "dev", subject: view, role: "viewer" } }));
+  runner = (await (await api.get(`/api/v1/orgs/${org}/agent/status`)).json()).runner_available;
 });
 
 async function signIn(page: Page, subject: string) {
@@ -38,6 +40,7 @@ test("a viewer can read the Agent page but cannot ask", async ({ page }) => {
 });
 
 test("an engineer asks a fixed question and gets an answer, its cost and its trace", async ({ page }) => {
+  test.skip(!runner, "this deployment has no agent runner; the next test covers that state");
   test.setTimeout(180_000); // the first start of the harness environment can be slow
   await signIn(page, eng);
   await page.goto(`/agent?org=${org}`);
@@ -51,4 +54,14 @@ test("an engineer asks a fixed question and gets an answer, its cost and its tra
   await page.getByText(/^Trace \(\d+ steps\)$/).click();
   await expect(page.getByText(/1\. list_experiments/)).toBeVisible();
   await expect(page.getByRole("button", { name: /list experiments/ }).first()).toBeVisible(); // in the session list
+});
+
+test("where the agent cannot run, the page says so and nothing can be asked", async ({ page }) => {
+  test.skip(runner, "this deployment has an agent runner; the tests above cover asking");
+  await signIn(page, eng);
+  await page.goto(`/agent?org=${org}`);
+  await expect(page.getByRole("heading", { name: "Agent", level: 1 })).toBeVisible();
+  await expect(page.getByText("The agent is not available on this server")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
+  await expect(page.getByText("No session yet.")).toBeVisible();
 });

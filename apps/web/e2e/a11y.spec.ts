@@ -100,7 +100,7 @@ const pages = () => [
   [`/workflows?org=${org}`, "Recent runs"],
   [`/twin?org=${org}&project=reach`, "Events in the recording"],
   [`/experiments?org=${org}`, "No experiments yet."],
-  [`/agent?org=${org}`, "Read-only: the agent cannot request, approve or run anything from this page."],
+  [`/agent?org=${org}`, "Ask about this workspace's runs, experiments and recordings."],
 ];
 
 for (const theme of ["dark", "light"] as const) {

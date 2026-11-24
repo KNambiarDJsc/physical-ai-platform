@@ -23,6 +23,7 @@ const OK_PROC = "dispense-50ul";
 const FAULT_PROC = "dispense-50ul-blocked-line";
 
 test.describe.configure({ mode: "serial" });
+let runner = true; // a deployment without an agent runner (the Compose image) cannot do the agent steps
 
 test.beforeAll(async ({ playwright, baseURL }) => {
   test.setTimeout(120_000);
@@ -37,6 +38,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
   await ok(api.put(`${O}/members`, { data: { issuer: "dev", subject: vic, role: "viewer" } }));
   await ok(api.post(`${O}/environments`, { data: { config_key: "virtual-lab" } }), 201);
   await ok(api.post(`${O}/environments/virtual-lab/discover`));
+  runner = (await (await api.get(`${O}/agent/status`)).json()).runner_available;
   const base = { environment: "virtual-lab" };
   await ok(api.post(`${O}/workflows`, { data: { ...base, slug: OK_PROC, name: "Dispense 50 µL (normal bench)", template: "dispense-and-verify", parameters: { volume_ul: 50, tolerance_pct: 2 } } }), 201);
   await ok(api.post(`${O}/workflows`, { data: { ...base, slug: FAULT_PROC, name: "Dispense 50 µL (simulated partial blockage)", template: "dispense-with-fault", parameters: { volume_ul: 50, tolerance_pct: 2, fault: "partial_blockage" } } }), 201);
@@ -106,23 +108,30 @@ test("discover, configure, request, approve, run, fail, investigate, draft, expo
   await expect(step4.getByRole("link", { name: "Dispense 50 µL (normal bench)" })).toBeVisible();
   await expect(step4.getByRole("link", { name: "Dispense 50 µL (simulated partial blockage)" })).toBeVisible();
 
-  // investigation by fixed rules (no model): cites stored ids, says so, and drafts a follow-up
-  await page.getByRole("link", { name: "Rule-based investigation (no model)" }).click();
-  await expect(page.getByLabel("Question")).toHaveValue(/^Investigate workflow run /);
-  await page.getByRole("button", { name: "Ask", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Answer" })).toBeVisible({ timeout: 180_000 });
-  const answer = page.getByRole("region", { name: "Answer" });
-  await expect(answer.getByText(/does not support it/)).toBeVisible();
-  await expect(answer.getByText(/not a model/)).toBeVisible();
-  await expect(page.getByText("no model used")).toBeVisible();
-  await expect(page.getByText("drafted, not filed")).toBeVisible();
+  if (runner) {
+    // investigation by fixed rules (no model): cites stored ids, says so, and drafts a follow-up
+    await page.getByRole("link", { name: "Rule-based investigation (no model)" }).click();
+    await expect(page.getByLabel("Question")).toHaveValue(/^Investigate workflow run /);
+    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Answer" })).toBeVisible({ timeout: 180_000 });
+    const answer = page.getByRole("region", { name: "Answer" });
+    await expect(answer.getByText(/does not support it/)).toBeVisible();
+    await expect(answer.getByText(/not a model/)).toBeVisible();
+    await expect(page.getByText("no model used")).toBeVisible();
+    await expect(page.getByText("drafted, not filed")).toBeVisible();
 
-  // a person files the draft; it is a proposal like any other and still needs someone else
-  await page.getByRole("button", { name: "File as a proposal" }).click();
-  await expect(page.getByText("It is waiting for someone other than whoever filed it.")).toBeVisible();
-  await page.goto(`/workflows?org=${org}`);
-  await expect(page.getByText("via assistant tools")).toBeVisible();
-  await expect(page.getByRole("button", { name: `Approve proposal for ${FAULT_PROC}`, exact: true })).toHaveCount(1); // pending, not run
+    // a person files the draft; it is a proposal like any other and still needs someone else
+    await page.getByRole("button", { name: "File as a proposal" }).click();
+    await expect(page.getByText("It is waiting for someone other than whoever filed it.")).toBeVisible();
+    await page.goto(`/workflows?org=${org}`);
+    await expect(page.getByText("via assistant tools")).toBeVisible();
+    await expect(page.getByRole("button", { name: `Approve proposal for ${FAULT_PROC}`, exact: true })).toHaveCount(1); // pending, not run
+  } else {
+    // no agent runner here (the Compose image): the page must say so, and nothing can be asked
+    await page.getByRole("link", { name: "Rule-based investigation (no model)" }).click();
+    await expect(page.getByText("The agent is not available on this server")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
+  }
 
   // 6: the exported evidence, from stored records only
   await page.goto(`/journey?org=${org}`);
@@ -137,7 +146,7 @@ test("discover, configure, request, approve, run, fail, investigate, draft, expo
   expect(report.reported_by_instrument.value).toBe("succeeded"); // the pump's claim, unedited
   expect(report.execution.map((s: { action: string }) => s.action)).toEqual(["set_fault", "tare", "dispense", "weigh", "set_fault"]);
   // the request that started this run (approved by bob) and the agent's drafted follow-up (filed by ada, still waiting)
-  expect(report.follow_up_proposals.map((p: { state: string }) => p.state).sort()).toEqual(["approved", "proposed"]);
+  expect(report.follow_up_proposals.map((p: { state: string }) => p.state).sort()).toEqual(runner ? ["approved", "proposed"] : ["approved"]);
   const started = report.follow_up_proposals.find((p: { state: string }) => p.state === "approved");
   expect(started.proposed_by).not.toBe(started.decided_by); // two people
   const [popup] = await Promise.all([page.waitForEvent("popup"), failing.getByRole("button", { name: "Evidence report" }).click()]);
@@ -148,7 +157,8 @@ test("discover, configure, request, approve, run, fail, investigate, draft, expo
 test("a viewer can follow the journey but cannot approve or ask the agent", async ({ page }) => {
   await signIn(page, vic);
   await page.goto(`/workflows?org=${org}`);
-  await expect(page.getByText("awaiting an engineer").first()).toBeVisible();
+  // a viewer sees the agent-filed follow-up as waiting for an engineer (only a deployment with an agent has one)
+  if (runner) await expect(page.getByText("awaiting an engineer").first()).toBeVisible();
   await expect(page.getByRole("button", { name: /^Approve proposal for/ })).toHaveCount(0);
   await page.goto(`/agent?org=${org}`);
   await expect(page.getByText("Asking costs model spend, so it needs the engineer role.")).toBeVisible();

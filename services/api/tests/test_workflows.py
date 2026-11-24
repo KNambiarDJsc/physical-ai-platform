@@ -312,3 +312,14 @@ def test_a_run_report_is_reproducible_labelled_escaped_and_private(client: TestC
         assert r.status_code == 404
         assert client.get(f"{ORG}/workflow-runs/{rid}/report.{kind}", headers=as_user("mallory")).status_code == 404
         assert client.get(f"{ORG}/workflow-runs/{rid}/report.{kind}").status_code == 401
+
+
+def test_the_report_page_names_people_not_internal_labels(client: TestClient, lab: str) -> None:
+    workflow(client, "healthy", volume_ul=50, tolerance_pct=2)
+    rid = run(client, "healthy")["id"]
+    assert work_once() == "succeeded"
+    page = client.get(f"{ORG}/workflow-runs/{rid}/report.html", headers=H).text
+    assert "user:dev|" not in page and "<th>Started by</th><td>ada</td>" in page
+    assert (
+        "user:dev|ada" in client.get(f"{ORG}/workflow-runs/{rid}/report.json", headers=H).text
+    )  # the JSON keeps it whole

@@ -18,12 +18,21 @@ stored evidence without being able to act. Everything runs on a **simulated benc
    uv run python scripts/journey_seed.py      # a clean workspace: lab-journey
    ```
 3. Open <http://127.0.0.1:3000/settings> in two browser profiles: **ada** (admin, the researcher) and **bob** (engineer,
-   the approver). Pick workspace `lab-journey`. Open **Lab experiment** in the sidebar as ada.
+   the approver). Pick workspace `lab-journey`. As ada, open **Lab experiment**: press **Ctrl K**, type `lab`, press Enter (or open
+   `http://127.0.0.1:3000/journey?org=lab-journey`).
 4. Spend: the agent is capped at $0.25 per session and $1.00 per day (50 sessions a day); one investigation costs about
    $0.03 (about 35 a day fit the daily cap). Ask one question in the rehearsal workspace first so a finished session exists as a fallback.
 5. No model or no network? The agent page still works with the rule-based investigation (labelled "no model").
 
 To reset between rehearsals, use a new workspace: `uv run python scripts/journey_seed.py --org lab-journey-2`.
+
+## Where things are in the redesigned interface
+
+The top bar has **Projects**, **Studio**, **Runs**, **Integrations** and **Settings**. **Lab experiment** and **Agent** are
+not in the top bar: reach **Lab experiment** with **Ctrl K** (the "Go to" box: type `lab`) or its address, and the **Agent**
+with the two buttons in step 5 of Lab experiment. **Workflows** has a link in step 3 ("Approve or reject in Workflows").
+The run pages open from "Open the run" or from step 4; **Workbench** is also under **Runs**. If you get lost, press
+**Ctrl K** and type the page's name.
 
 ## The ten minutes
 
