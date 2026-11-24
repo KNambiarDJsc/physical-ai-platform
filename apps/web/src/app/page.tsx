@@ -1,10 +1,10 @@
 import { PageHeader } from "@/components/AppShell";
 import { ProjectList } from "@/components/ProjectList";
 
-export default function Overview() {
+export default function ProjectsPage() {
   return (
     <>
-      <PageHeader title="Overview" subtitle="Projects you can access. Open one to compare releases." />
+      <PageHeader title="Projects" subtitle="Projects you can access. Open a workspace to continue engineering." />
       <ProjectList />
     </>
   );

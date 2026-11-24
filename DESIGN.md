@@ -6,7 +6,7 @@ surfaces keep a reading-first layout. Interaction references include Linear, Fox
 they inform interaction quality, not a visual template to copy.
 
 This file is the contract for every screen. When a screen and this file disagree, fix one of them in the same
-change.
+change. The rationale and render critique for the Taste-led product pass live in `docs/design/TASTE_REVIEW.md`.
 
 ## 1. Honesty rules come first
 
@@ -27,12 +27,12 @@ Defined once in `apps/web/src/app/globals.css` (`@theme`), used through Tailwind
 
 | Token | Role | Dark | Light |
 |---|---|---|---|
-| `bg` | Canvas | `#0B1016` | `#F2F1ED` |
+| `bg` | Canvas | `#0B1016` | `#F4F6F7` |
 | `panel` | Panels, tables | `#131B24` | `#FFFFFF` |
 | `sunken` | Hover rows, wells, code | `#1B2732` | `#EEF0F3` |
 | `line` | Borders and dividers | `#34414D` | `#DDE1E6` |
 | `ink` | Primary text | `#EDF3F4` | `#0B1016` |
-| `muted` | Secondary text | `#A2B1BB` | `#525D6A` |
+| `muted` | Secondary text | `#A2B1BB` | `#434E59` |
 | `faint` | Tertiary text, axis labels | `#99A9B4` | `#626C78` |
 | `accent` | Interactive: links, focus, selection, primary action | `#89D7DB` | `#16666B` |
 | `on-accent` | Text on an accent fill | `#0B1322` | `#FFFFFF` |

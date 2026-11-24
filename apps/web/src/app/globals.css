@@ -43,12 +43,12 @@
 @layer base {
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --color-bg: #f2f1ed;
+      --color-bg: #f4f6f7;
       --color-panel: #ffffff;
       --color-sunken: #eef0f3;
       --color-line: #dde1e6;
       --color-ink: #0b1016;
-      --color-muted: #525d6a;
+      --color-muted: #434e59;
       --color-faint: #626c78;
       --color-accent: #16666b;
       --color-accent-soft: #deeeec;
@@ -68,12 +68,12 @@
   }
 
   :root[data-theme="light"] {
-    --color-bg: #f2f1ed;
+    --color-bg: #f4f6f7;
     --color-panel: #ffffff;
     --color-sunken: #eef0f3;
     --color-line: #dde1e6;
     --color-ink: #0b1016;
-    --color-muted: #525d6a;
+    --color-muted: #434e59;
     --color-faint: #626c78;
     --color-accent: #16666b;
     --color-accent-soft: #deeeec;
@@ -103,7 +103,7 @@
 
   body {
     font-family: var(--font-sans);
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
   }
@@ -189,20 +189,15 @@
   }
 
   .kbd {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    border: 1px solid var(--color-line);
-    border-bottom-width: 2px;
-    border-radius: 3px;
-    padding: 0 4px;
+    font-family: inherit;
+    font-size: 13px;
     color: var(--color-muted);
-    background: var(--color-bg);
   }
 }
 
-/* The studio shell stays quiet while its active workspace reads as the primary instrument. */
+/* A flat shell lets the selected workspace carry the visual emphasis. */
 .studio-shell-nav {
-  background: color-mix(in srgb, var(--color-panel) 94%, var(--color-accent));
+  background: var(--color-panel);
 }
 .studio-shell-nav nav {
   scrollbar-width: none;

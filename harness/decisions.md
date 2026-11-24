@@ -349,3 +349,13 @@ keyboard page finder. In the twin and Workbench, source/evidence panes collapse 
 keyboard support and a compact timeline. Narrow layouts move navigation to its own scrollable row and stack workspace
 panes so evidence remains reachable. This changes navigation and layout only: it does not change who may command a
 device, how an approval works, or how the OpenMHS engine computes a verdict.
+
+
+## D-044 (2026-11-24) Product surfaces use real interface proof, not marketing imagery or motion quotas
+Taste’s `product-performs` direction fits the engineering workspace: project records, recording events and OpenMHS
+verdicts are the visual material. The Projects index and run investigation show the controls and data the operator can
+actually use. The public-site inspector’s photo floor, oversized display-image focal point and eight-element motion quota
+do not transfer to the authenticated app. Do not add stock imagery, generated robot evidence or animation solely to pass
+those checks. Keep responsive layouts, accessible focus, direct actions and reduced-motion feedback. The direction changes
+composition only; it does not change evidence semantics, physical read-only behavior, approval boundaries or engine-owned
+verdicts.

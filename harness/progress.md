@@ -2,6 +2,29 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-24 — Taste-led product surface pass
+
+**Changes:** Applied Taste’s `product-performs` direction to the actual app. Replaced the icon badge/nav treatment with a
+text-led wordmark and plain destinations, removed decorative header/page dividers, raised the global title/subtitle scale,
+made the Projects home a live organization/project index with progressive create forms, and promoted `New project` to the
+primary action. Switched the light surface to a cool neutral with darker muted text; constrained signed-in identity at
+tablet widths. No sample measurements, synthetic evidence, stock imagery or marketing motion were added.
+
+**Evidence:** Taste source audit: 0 failures / 0 warnings. Its browser inspector rendered 1440, 768 and 390 px; the tablet
+overflow was fixed and the final run reports no overflow, no small text, no eyebrow or first-action warning. Three
+remaining inspector failures (photo count, display-image focal point, motion count) and one no-footage warning are
+marketing-page rules; this is an authenticated engineering application, so the app keeps real interface evidence and
+purposeful interaction feedback instead. Web typecheck, lint and production build passed. Playwright accessibility + lab
+suites: 9 passed; real recorded-failure investigation: 1 passed. Dark/light axe checks and mobile run view passed.
+
+**State:** Follow-up changes are local and not pushed. Browser fixture data lived only in the isolated disposable database
+and is explicitly named synthetic; it is not committed as product evidence. `docs/design/screenshots/project-home-*`
+shows that labelled fixture. Existing demo recording material was not touched. Registry remains 56 verified; HAR-001 still
+needs an authorized real-model run.
+
+**Next:** Review the app surface with robotics and laboratory engineers. Keep real device evidence and engine verdicts
+central; use observed task friction to guide any further visual changes.
+
 ## 2026-11-24 — Studio investigation UX checkpoint
 
 **Changes:** Replaced the full-height left navigation rail and duplicate breadcrumb row with a compact five-destination

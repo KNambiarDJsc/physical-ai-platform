@@ -81,12 +81,14 @@ const GROUPS: { label: string; items: NavItem[] }[] = [
 ];
 const ALL = GROUPS.flatMap((g) => g.items);
 
-const PRIMARY: NavItem[] = [
-  { href: "/", label: "Projects", icon: LayoutDashboard, hint: "Projects and workspaces" },
-  { href: "/twin", label: "Studio", icon: Box, hint: "Explore, execute and investigate" },
-  { href: "/runs", label: "Runs", icon: Activity, hint: "Run history and release evidence" },
-  { href: "/hardware", label: "Integrations", icon: Cpu, hint: "Environments and connected services" },
-  { href: "/settings", label: "Settings", icon: Settings, hint: "Identity and workspace settings" },
+type PrimaryNavItem = Omit<NavItem, "icon">;
+
+const PRIMARY: PrimaryNavItem[] = [
+  { href: "/", label: "Projects", hint: "Projects and workspaces" },
+  { href: "/twin", label: "Studio", hint: "Explore, execute and investigate" },
+  { href: "/runs", label: "Runs", hint: "Run history and release evidence" },
+  { href: "/hardware", label: "Integrations", hint: "Environments and connected services" },
+  { href: "/settings", label: "Settings", hint: "Identity and workspace settings" },
 ];
 
 function primaryActive(path: string, href: string): boolean {
@@ -113,19 +115,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="studio-shell-nav sticky top-0 z-30 border-b border-line bg-panel">
+    <div className="flex min-h-dvh flex-col">
+      <header className="studio-shell-nav sticky top-0 z-30 bg-panel">
         <div className="flex min-h-14 flex-wrap items-center gap-3 px-3 sm:flex-nowrap sm:px-5">
-          <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm">
-            <span aria-hidden className="grid size-7 place-items-center rounded-[5px] border border-line bg-bg font-mono text-[11px] font-semibold text-accent">PA</span>
-            <span className="hidden text-[13px] font-semibold tracking-[-0.02em] sm:inline">Physical AI Studio</span>
+          <Link href="/" className="shrink-0 rounded-sm text-[15px] font-semibold tracking-[-0.035em] text-ink">
+            Physical AI Studio
           </Link>
-          <nav aria-label="Main" className="order-3 -mx-3 flex basis-full min-w-0 gap-1 overflow-x-auto border-t border-line px-2 py-1.5 sm:order-none sm:mx-0 sm:min-w-fit sm:basis-auto sm:flex-initial sm:border-0 sm:px-0 sm:py-0 sm:pl-5">
-            {PRIMARY.map(({ href, label, icon: Icon }) => {
+          <nav aria-label="Main" className="order-3 -mx-3 flex basis-full min-w-0 gap-x-5 overflow-x-auto bg-sunken px-4 py-1.5 sm:order-none sm:mx-0 sm:min-w-fit sm:basis-auto sm:flex-initial sm:bg-transparent sm:px-0 sm:py-0 sm:pl-5">
+            {PRIMARY.map(({ href, label }) => {
               const on = primaryActive(path, href);
-              return <Link key={href} href={href} aria-current={on ? "page" : undefined} title={label} className={clsx("flex h-9 shrink-0 items-center gap-2 rounded-[5px] px-2.5 text-[12px] font-medium transition-colors sm:px-3 sm:text-[13px]", on ? "bg-selected text-ink" : "text-muted hover:bg-hover hover:text-ink")}>
-                <Icon size={15} strokeWidth={1.8} aria-hidden className={on ? "text-accent" : undefined} />
-                <span className="hidden max-sm:inline md:inline">{label}</span>
+              return <Link key={href} href={href} aria-current={on ? "page" : undefined} className={clsx("flex h-9 shrink-0 items-center text-[13px] font-medium transition-colors sm:text-[14px]", on ? "font-semibold text-accent" : "text-muted hover:text-ink")}>
+                {label}
               </Link>;
             })}
           </nav>
@@ -141,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="min-w-0 flex-1 px-4 py-5 md:px-7">
+        <main className="min-w-0 flex-1 px-[clamp(1rem,3vw,2.5rem)] py-[clamp(1rem,2.5vw,2rem)]">
           <div key={path} className="reveal">
             {children}
           </div>
@@ -160,7 +160,7 @@ function ThemeSwitch() {
   return (
     <button
       type="button"
-      className="btn size-7 justify-center p-0 text-muted"
+      className="btn size-8 justify-center p-0 text-muted"
       aria-label={`Theme: ${theme}. Switch to ${next[theme]}`}
       title={`Theme: ${theme}`}
       onClick={() => {
@@ -186,9 +186,9 @@ function WhoAmI() {
   const who = a?.mode === "oidc" ? (a.user?.name ?? null) : a?.mode === "dev" ? (dev?.replace(/^dev:/, "") ?? null) : null;
   if (auth.isLoading) return null;
   return who ? (
-    <Link href="/settings" className="flex h-7 max-w-40 items-center gap-1.5 rounded-[5px] px-1.5 text-[12px] text-muted hover:bg-sunken hover:text-ink" title="Signed in. Change in Settings">
+    <Link href="/settings" className="flex h-8 max-w-16 items-center gap-1.5 rounded-sm px-1.5 text-[13px] text-muted hover:text-ink lg:max-w-40" title="Signed in. Change in Settings">
       <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-ok" />
-      <span className="truncate num">{who}</span>
+      <span className="truncate">{who}</span>
     </Link>
   ) : (
     <Link href="/settings" className="btn h-7 text-muted">
@@ -224,10 +224,10 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="dialog-enter w-full max-w-lg overflow-hidden rounded-md border border-line bg-panel shadow-2xl shadow-black/40"
+        className="dialog-enter w-full max-w-lg overflow-hidden rounded-md border border-line bg-panel"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 border-b border-line px-3">
+        <div className="flex items-center gap-2 bg-sunken px-3">
           <Search size={14} aria-hidden className="text-faint" />
           <input
             ref={input}
@@ -283,10 +283,10 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
+    <header className="mb-8 flex flex-wrap items-end justify-between gap-4 pb-1">
       <div className="min-w-0">
-        <h1 className="text-[clamp(1.3rem,2vw,1.8rem)] font-semibold leading-tight tracking-[-0.035em]">{title}</h1>
-        {subtitle && <div className="mt-0.5 text-[13px] text-muted">{subtitle}</div>}
+        <h1 className="text-[clamp(1.65rem,2.6vw,2.4rem)] font-semibold leading-[1.08] tracking-[-0.045em]">{title}</h1>
+        {subtitle && <div className="mt-1.5 max-w-[68ch] text-[16px] leading-relaxed text-muted">{subtitle}</div>}
       </div>
       {actions}
     </header>
@@ -296,8 +296,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 export function Panel({ title, children, className }: { title?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <section className={clsx("rounded-md border border-line bg-panel", className)}>
-      {title && <h2 className="border-b border-line px-4 py-2 text-[13px] font-medium">{title}</h2>}
-      <div className="p-4">{children}</div>
+      {title && <h2 className="px-4 pt-4 text-[14px] font-semibold">{title}</h2>}
+      <div className={title ? "px-4 pb-4 pt-2" : "p-4"}>{children}</div>
     </section>
   );
 }

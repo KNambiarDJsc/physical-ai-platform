@@ -4,7 +4,18 @@
 
 **Instrument desk.** A dark blue-black field, cyan selection, fixed tool edges, tabular readings and one dominant viewport. Spatial awareness from the Lattice brief suits simultaneous scene and time inspection. Runway’s editing-workspace principle keeps the investigation alongside the selected material. Choose this direction for operation and playback.
 
-**Engineering notebook.** A warm porcelain field, dark ink, aligned evidence rows and wide margins. This suits reading release reports and approval packets. At workstation density the margins compete with playback. Use its light surfaces for document review.
+**Engineering notebook.** A cool neutral field, dark ink, aligned evidence rows and wide margins. This suits reading release reports and approval packets. At workstation density the margins compete with playback. Use its light surfaces for document review.
+
+## Applied direction
+
+Taste dealt `product-performs`, `quiet-instrument` and `type-only-statement`. The product uses `product-performs`: the
+interface and its recorded evidence are the proof. On this page, a time-indexed robot event becomes an investigation
+bench beside the OpenMHS verdict. A generic telemetry viewer could show the event; this workflow keeps the run identity,
+recorded state, criterion and engine result in one place.
+
+Fluid functionalism means the project index, scene and evidence panes reflow with available width. Navigation is text-led;
+primary actions are explicit; the app uses stored project data and real recording fragments. The light field is now a cool
+neutral. Motion stays limited to route and control feedback, with reduced-motion support.
 
 ## Application navigation and workspace
 
