@@ -23,6 +23,7 @@ from strands.tools.tools import PythonAgentTool
 from . import grounding
 from .budget import Budget, BudgetExceeded
 from .fastpath import try_fast_path
+from .focus import INSTRUCTIONS, Focus
 from .ledger import Ledger
 from .models import CappedModel, StopSession
 from .toolbox import Approver, Progress, Toolbox
@@ -63,6 +64,7 @@ class Options:
     draft_requests: bool = False  # the agent may DRAFT a follow-up; a person files it elsewhere (never sent from here)
     progress: Progress | None = None
     cancel: threading.Event = field(default_factory=threading.Event)
+    focus: Focus = Focus.general
 
 
 @dataclass
@@ -166,7 +168,7 @@ def run_session(
         return _finish(trace, budget, o)
     toolbox = Toolbox(
         client, trace, o.allow_requests, approve=o.approve, progress=o.progress, cancel=o.cancel, role=role,
-        draft_writes=o.draft_requests,
+        draft_writes=o.draft_requests, focus=o.focus,
     )  # fmt: skip
     if role is None:
         trace.stop = f"stopped: not a member of workspace {o.org}"
@@ -222,7 +224,11 @@ def run_session(
     agent = Agent(
         model=capped,
         tools=platform_tools(toolbox),  # type: ignore[arg-type]
-        system_prompt=SYSTEM + drafting + f'\n\nThe workspace is "{o.org}". Pass org="{o.org}" to every tool.',
+        system_prompt=SYSTEM
+        + "\n"
+        + INSTRUCTIONS[o.focus]
+        + drafting
+        + f'\n\nThe workspace is "{o.org}". Pass org="{o.org}" to every tool.',
         callback_handler=None,
         session_manager=session_manager,
     )

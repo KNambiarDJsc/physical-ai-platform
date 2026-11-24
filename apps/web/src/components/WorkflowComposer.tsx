@@ -120,12 +120,12 @@ export function WorkflowComposer({ org }: { org: string }) {
                   ))}
                   <span className="ml-auto flex gap-2 pb-1.5">
                     {i > 0 && (
-                      <button type="button" className="text-accent hover:underline" onClick={() => { const st = [...form.steps]; [st[i - 1], st[i]] = [st[i]!, st[i - 1]!]; set({ steps: st }); }}>
+                      <button type="button" className="inline-flex min-h-8 items-center justify-center rounded-sm px-2 text-accent hover:bg-hover hover:underline" onClick={() => { const st = [...form.steps]; [st[i - 1], st[i]] = [st[i]!, st[i - 1]!]; set({ steps: st }); }}>
                         Move step {i + 1} up
                       </button>
                     )}
                     {form.steps.length > 1 && (
-                      <button type="button" className="text-accent hover:underline" onClick={() => set({ steps: form.steps.filter((_, j) => j !== i), evidence: [], conditions: [], claimStep: 0 })}>
+                      <button type="button" className="inline-flex min-h-8 items-center justify-center rounded-sm px-2 text-accent hover:bg-hover hover:underline" onClick={() => set({ steps: form.steps.filter((_, j) => j !== i), evidence: [], conditions: [], claimStep: 0 })}>
                         Remove step {i + 1}
                       </button>
                     )}
@@ -146,7 +146,7 @@ export function WorkflowComposer({ org }: { org: string }) {
 
         <fieldset className="space-y-3 border-t border-line pt-3">
           <legend className="sr-only">Verification</legend>
-          <label className="flex items-center gap-2">
+          <label className="flex min-h-8 items-center gap-2">
             <input type="checkbox" checked={form.verify} onChange={(e) => set({ verify: e.target.checked })} />
             The engine verifies the result
           </label>

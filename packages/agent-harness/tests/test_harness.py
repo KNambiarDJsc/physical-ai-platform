@@ -17,9 +17,12 @@ from pap_agent_harness import grounding
 from pap_agent_harness.agent import SYSTEM, Options, run_session
 from pap_agent_harness.budget import Budget, BudgetExceeded
 from pap_agent_harness.config import LLMSettings, NotConfigured
+from pap_agent_harness.focus import Focus
 from pap_agent_harness.ledger import Ledger
 from pap_agent_harness.models import ScriptedModel
 from pap_agent_harness.providers import build_model
+from pap_agent_harness.toolbox import Toolbox
+from pap_agent_harness.trace import Trace
 from pap_agent_tools.client import PlatformClient
 
 RUN = "5f1f2b9e-0000-4000-8000-000000000001"
@@ -424,3 +427,22 @@ def test_reasoning_effort_is_an_optional_speed_setting_for_the_openai_provider(m
     monkeypatch.setenv("PAP_LLM_REASONING_EFFORT", "turbo")
     with pytest.raises(NotConfigured, match="low, medium or high"):
         LLMSettings.from_env()
+
+
+@pytest.mark.parametrize(
+    ("focus", "available", "excluded"),
+    [
+        (Focus.robotics, "explain_recording_event", "read_observation"),
+        (Focus.laboratory, "investigate_run", "get_comparison"),
+        (Focus.release, "get_comparison", "propose_experiment"),
+    ],
+)
+def test_context_limits_tool_discovery_and_dispatch(focus: Focus, available: str, excluded: str) -> None:
+    platform = Platform()
+    trace = Trace(question="inspect", model="scripted", org="lab", allow_requests=False)
+    toolbox = Toolbox(platform.client(), trace, focus=focus, role="engineer", draft_writes=True)
+    assert available in toolbox.names()
+    assert excluded not in toolbox.names()
+    assert "error" in toolbox.call(excluded, {})
+    assert "error" in toolbox.call("list_experiments", {"org": "other"})
+    assert platform.calls == []

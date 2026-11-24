@@ -2,6 +2,29 @@
 
 Newest entry first. Each entry: what changed, evidence, current state, next step, anything uncommitted.
 
+## 2026-11-24 — Studio investigation UX checkpoint
+
+**Changes:** Replaced the full-height left navigation rail and duplicate breadcrumb row with a compact five-destination
+header (Projects, Studio, Runs, Integrations, Settings); kept detailed existing routes in the keyboard page finder.
+Expanded the Digital twin and Workbench scene/run area, made source and evidence panels collapsible, retained pointer and
+keyboard resizing, and adjusted the mobile header/workspace to stack without page-level horizontal overflow. Added the
+Explore / Execute / Investigate mode switch, selected-run investigation entry points and visible step context. Updated
+the design contract, system, audit and implementation checkpoints to match the UI. Screenshots are under
+`docs/design/screenshots/` (`twin-before.png`, `twin-after.png`, `event-investigation.png`, `lab-mobile.png`).
+
+**Evidence:** `npm --prefix apps/web run typecheck`, `lint` and production `build` passed. The isolated local stack API
+smoke passed. Full Playwright run: 54 passed, 13 skipped; after correcting the journey subject selector, its two tests
+passed in a focused rerun. Final responsive/accessibility/lab run: 9 passed, including desktop and 390 px mobile
+navigation, theme checks, keyboard pane resizing and lab flows. The skips are opt-in OIDC, live ROS and trial/Gazebo
+modes. No feature registry status was changed: 56 remain verified and there is no eligible next feature. HAR-001
+still needs an authorized real-model run.
+
+**State:** UI and documentation changes are local; nothing was pushed. The pre-existing `docs/demo/recording/` remains
+untouched and unstaged.
+
+**Next:** Review the instrument-desk UI with robotics/lab users, especially mobile access to evidence and long-recording
+navigation. Treat task observations as research evidence before changing panel defaults again.
+
 ## 2026-11-23 - Customer onboarding verified
 
 **Changes:** Kept ONB-001 for first-run onboarding and assigned ONB-002 to customer onboarding.

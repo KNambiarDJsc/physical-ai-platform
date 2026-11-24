@@ -1,5 +1,6 @@
 "use client";
 
+import { StudioModes } from "../StudioModes";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Notice } from "../AppShell";
@@ -47,6 +48,7 @@ function Studio() {
   const editVersion = editing?.versions.find((v) => v.number === Number(edit)) ?? editing?.versions.at(-1);
   return (
     <>
+      <StudioModes org={org} />
       {orgs.length > 1 && (
         <div className="mb-3 flex justify-end">
           <OrgSelect orgs={orgs} org={org} select={select} />

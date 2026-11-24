@@ -340,3 +340,12 @@ connection); nothing else is retried. When drafting is on and an answer speaks o
 platform appends a note marked as its own. Both join the simulated-evidence note (D-040): the platform states facts the
 model may omit or misstate, in words marked as the platform's.
 
+
+
+## D-043 (2026-11-24) The operating surface is a five-destination header with a contextual instrument desk
+The full-height left rail constrained the twin and run view, while the separate breadcrumb bar consumed another row. The
+header now exposes Projects, Studio, Runs, Integrations and Settings; the existing detail pages remain reachable via the
+keyboard page finder. In the twin and Workbench, source/evidence panes collapse and resize around the scene or run, with
+keyboard support and a compact timeline. Narrow layouts move navigation to its own scrollable row and stack workspace
+panes so evidence remains reachable. This changes navigation and layout only: it does not change who may command a
+device, how an approval works, or how the OpenMHS engine computes a verdict.

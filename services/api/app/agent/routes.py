@@ -75,10 +75,9 @@ def _out(session: Session, p: ExperimentProposal) -> ProposalOut:
     )
 
 
-def _get(session: Session, org_id: uuid.UUID, pid: uuid.UUID) -> ExperimentProposal:
-    p = session.scalar(
-        select(ExperimentProposal).where(ExperimentProposal.organization_id == org_id, ExperimentProposal.id == pid)
-    )
+def _get(session: Session, org_id: uuid.UUID, pid: uuid.UUID, *, decision: bool = False) -> ExperimentProposal:
+    query = select(ExperimentProposal).where(ExperimentProposal.organization_id == org_id, ExperimentProposal.id == pid)
+    p = session.scalar(query.with_for_update() if decision else query)
     if p is None:
         raise error(404, "not_found", "proposal not found")
     return p
@@ -124,7 +123,7 @@ def get_proposal(proposal_id: uuid.UUID, ctx: ViewerDep, session: SessionDep) ->
 @router.post("/experiment-proposals/{proposal_id}/approve")
 def approve(proposal_id: uuid.UUID, ctx: EngineerDep, session: SessionDep) -> ProposalOut:
     """An engineer approves: the workflow is queued as an ordinary run (the executor's simulated-only checks apply)."""
-    p = _get(session, ctx.org.id, proposal_id)
+    p = _get(session, ctx.org.id, proposal_id, decision=True)
     if p.state != "proposed":
         raise error(409, "conflict", f"this proposal is already {p.state}")
     if p.proposed_by == ctx.principal.label:  # two people: the one who asks is never the one who approves (as D-037)
@@ -149,7 +148,7 @@ def approve(proposal_id: uuid.UUID, ctx: EngineerDep, session: SessionDep) -> Pr
 
 @router.post("/experiment-proposals/{proposal_id}/reject")
 def reject(proposal_id: uuid.UUID, body: DecisionIn, ctx: EngineerDep, session: SessionDep) -> ProposalOut:
-    p = _get(session, ctx.org.id, proposal_id)
+    p = _get(session, ctx.org.id, proposal_id, decision=True)
     if p.state != "proposed":
         raise error(409, "conflict", f"this proposal is already {p.state}")
     p.state, p.decided_by, p.decided_at, p.decision_note = "rejected", ctx.principal.label, utcnow(), body.note

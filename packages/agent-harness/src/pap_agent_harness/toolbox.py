@@ -16,6 +16,7 @@ from pap_agent_tools.client import PlatformClient, ToolError
 from pap_agent_tools.tools import TOOLS, WRITES
 from pydantic import ValidationError
 
+from .focus import TOOLS_BY_FOCUS, Focus
 from .trace import Trace
 
 MAX_OUTPUT_CHARS = 20_000  # what the model is shown of one tool output; the trace keeps all of it
@@ -46,9 +47,11 @@ class Toolbox:
         role: str | None = None,
         backoff_s: float = 0.5,
         draft_writes: bool = False,
+        focus: Focus = Focus.general,
     ) -> None:
         # draft_writes: a write is recorded in the trace as a DRAFT and sent nowhere; a person files or discards it
         # (the website's Agent page). Nothing is requested, proposed or run by the agent itself.
+        self.focus = focus
         self.draft_writes = draft_writes
         self.client, self.trace, self.allow_requests = client, trace, allow_requests
         self.approve, self.progress, self.cancel, self.role = approve, progress, cancel, role
@@ -65,7 +68,8 @@ class Toolbox:
         if self.role is None and self.trace.org:  # discovery said the caller is not in this workspace
             return []
         writes_ok = (self.allow_requests and self.approve is not None) or self.draft_writes
-        return [n for n in TOOLS if writes_ok or n not in WRITES]
+        domain = TOOLS_BY_FOCUS.get(self.focus)
+        return [n for n in TOOLS if (domain is None or n in domain) and (writes_ok or n not in WRITES)]
 
     def specs(self) -> list[dict[str, Any]]:
         return [
@@ -98,6 +102,9 @@ class Toolbox:
             msg = "; ".join(f"{'.'.join(map(str, x['loc']))}: {x['msg']}" for x in e.errors())
             self.trace.tool(name, args, permitted=True, error=f"invalid input: {msg}")
             return {"error": f"invalid input: {msg}"}
+        if getattr(a, "org", self.trace.org) != self.trace.org:
+            self.trace.tool(name, args, permitted=False, error="outside the session workspace")
+            return {"error": "outside the session workspace"}
         if name in WRITES and self.draft_writes:
             note = (
                 "Recorded as a DRAFT. Nothing was sent or run: a person reads it on the page and files or discards it. "

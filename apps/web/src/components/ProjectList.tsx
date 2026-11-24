@@ -39,9 +39,14 @@ function Projects() {
             <ul className="divide-y divide-line">
               {q?.data?.map((p) => (
                 <li key={p.id} className="py-2">
-                  <Link className="font-medium text-accent hover:underline" href={`/o/${o.slug}/p/${p.slug}`}>
+                  <Link className="inline-flex min-h-7 items-center font-medium text-accent hover:underline" href={`/o/${o.slug}/p/${p.slug}`}>
                     {p.name}
                   </Link>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <Link className="inline-flex min-h-7 items-center text-accent underline" href={{ pathname: "/twin", query: { org: o.slug, project: p.slug } }}>Explore system</Link>
+                    <Link className="inline-flex min-h-7 items-center text-accent underline" href={{ pathname: "/experiments", query: { org: o.slug } }}>Configure experiment</Link>
+                    <Link className="inline-flex min-h-7 items-center text-accent underline" href={{ pathname: "/runs", query: { org: o.slug } }}>Investigate workspace runs</Link>
+                  </div>
                   {p.description && <div className="text-xs text-muted">{p.description}</div>}
                 </li>
               ))}

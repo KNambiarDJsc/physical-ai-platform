@@ -18,7 +18,7 @@ export function ComparisonView({ data, episodesHref }: { data: ComparisonOut; ep
         <span className="text-xs text-muted">task type</span>
         <span className="num text-xs">{data.reported.result.task_type}</span>
       </div>
-      <div className="grid gap-4 2xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <ComparisonPanel title="Reported by the robot" c={data.reported.result} />
         {data.verified ? (
           <ComparisonPanel title="Independently verified" c={data.verified.result} />

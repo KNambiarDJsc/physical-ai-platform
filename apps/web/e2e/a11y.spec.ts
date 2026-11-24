@@ -94,6 +94,7 @@ const pages = () => [
   [`/o/${org}/p/reach/e/${evaluation}`, "Independently verified"],
   [`/o/${org}/p/reach/e/${evaluation}/episodes`, "Episodes"],
   [`/onboarding?org=${org}`, "Every step is done"],
+  [`/runs?org=${org}`, "Find a run"],
   [`/workbench?org=${org}`, "Independently verified (OpenMHS engine)"],
   [`/hardware?org=${org}`, "Discover devices"],
   [`/workflows?org=${org}`, "Recent runs"],

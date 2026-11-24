@@ -9,21 +9,21 @@
   --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", Consolas, monospace;
 
   /* dark (default) */
-  --color-bg: #111418;
-  --color-panel: #191d23;
-  --color-sunken: #1f242b;
-  --color-line: #2b313a;
-  --color-ink: #e8edf2;
-  --color-muted: #9ba8b7;
-  --color-faint: #838e9c;
-  --color-accent: #6699e8;
-  --color-accent-soft: #1b2a42;
+  --color-bg: #0b1016;
+  --color-panel: #131b24;
+  --color-sunken: #1b2732;
+  --color-line: #34414d;
+  --color-ink: #edf3f4;
+  --color-muted: #a2b1bb;
+  --color-faint: #99a9b4;
+  --color-accent: #89d7db;
+  --color-accent-soft: #183238;
   --color-on-accent: #0b1322;
-  --color-ok: #47b88a;
+  --color-ok: #c6de77;
   --color-ok-soft: #15302a;
   --color-warn: #e1b45c;
   --color-warn-soft: #352a14;
-  --color-bad: #e06c75;
+  --color-bad: #ef928b;
   --color-bad-soft: #3a1c21;
   --color-unknown: #a9aedb;
   --color-unknown-soft: #262a42;
@@ -43,15 +43,15 @@
 @layer base {
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --color-bg: #f5f6f8;
+      --color-bg: #f2f1ed;
       --color-panel: #ffffff;
       --color-sunken: #eef0f3;
       --color-line: #dde1e6;
-      --color-ink: #111418;
+      --color-ink: #0b1016;
       --color-muted: #525d6a;
       --color-faint: #626c78;
-      --color-accent: #2f64c7;
-      --color-accent-soft: #e7eefb;
+      --color-accent: #16666b;
+      --color-accent-soft: #deeeec;
       --color-on-accent: #ffffff;
       --color-ok: #1d7a54;
       --color-ok-soft: #e5f3ec;
@@ -68,15 +68,15 @@
   }
 
   :root[data-theme="light"] {
-    --color-bg: #f5f6f8;
+    --color-bg: #f2f1ed;
     --color-panel: #ffffff;
     --color-sunken: #eef0f3;
     --color-line: #dde1e6;
-    --color-ink: #111418;
+    --color-ink: #0b1016;
     --color-muted: #525d6a;
     --color-faint: #626c78;
-    --color-accent: #2f64c7;
-    --color-accent-soft: #e7eefb;
+    --color-accent: #16666b;
+    --color-accent-soft: #deeeec;
     --color-on-accent: #ffffff;
     --color-ok: #1d7a54;
     --color-ok-soft: #e5f3ec;
@@ -200,6 +200,65 @@
   }
 }
 
+/* The studio shell stays quiet while its active workspace reads as the primary instrument. */
+.studio-shell-nav {
+  background: color-mix(in srgb, var(--color-panel) 94%, var(--color-accent));
+}
+.studio-shell-nav nav {
+  scrollbar-width: none;
+}
+.studio-shell-nav nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* A visible center grip makes resizable work areas discoverable without thickening their dividers. */
+.split-grip {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-panel);
+  transform: translate(-50%, -50%);
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.split-grip-vertical {
+  width: 7px;
+  height: 34px;
+}
+.split-grip-horizontal {
+  width: 38px;
+  height: 7px;
+}
+[role="separator"]:hover .split-grip,
+[role="separator"]:focus-visible .split-grip {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+button,
+select,
+input {
+  accent-color: var(--color-accent);
+}
+button,
+a,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-accent) 34%, transparent);
+}
+* {
+  scrollbar-color: var(--color-line) transparent;
+  scrollbar-width: thin;
+}
+
 /* Entrances animate opacity and transform only, never layout properties. */
 @keyframes fade-in {
   from {
@@ -254,4 +313,16 @@
   .btn:active:not(:disabled) {
     box-shadow: none;
   }
+}
+
+/* A phone presents the run, its evidence, then its sources and timeline in reading order. */
+@media (max-width: 767px) {
+  .investigation-workspace { height: auto; }
+  .investigation-workspace { min-height: calc(100dvh - 100px); }
+  .investigation-workspace .workspace-split { display: flex; flex-direction: column; height: auto; }
+  .investigation-workspace .workspace-split > [role="separator"] { display: none; }
+  .investigation-workspace .split-pane,
+  .investigation-workspace .split-content { width: 100% !important; height: auto !important; flex: none; }
+  .investigation-workspace .split-content { order: -1; }
+  .investigation-workspace canvas { min-height: 18rem; }
 }

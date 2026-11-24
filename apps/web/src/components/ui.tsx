@@ -54,7 +54,7 @@ export function EvidenceClassBadge({ classes }: { classes: readonly string[] | u
 
 export function Table({ head, children, caption }: { head: ReactNode[]; children: ReactNode; caption?: string }) {
   return (
-    <div className="scroll-x overflow-x-auto">
+    <div className="scroll-x overflow-x-auto" role="region" aria-label={caption ?? "Scrollable table"} tabIndex={0}>
       <table className="w-full border-collapse text-[13px]">
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead>

@@ -129,6 +129,7 @@ def _scrub(text: str, secrets: list[str]) -> str:
 
 
 class AskIn(BaseModel):
+    focus: Literal["general", "robotics", "laboratory", "release"] = "general"
     question: str = Field(min_length=3, max_length=1000)
     # The agent may DRAFT a follow-up experiment. It is recorded in the trace and sent nowhere: a person files it
     # from the page, as themselves, and a different person must still approve it.
@@ -294,6 +295,7 @@ def ask(
             "--max-usd", str(s.agent_session_usd), "--max-steps", str(s.agent_max_steps),
             "--timeout-s", str(s.agent_timeout_s), "--state", str(s.agent_state_path), "--session", sid,
             "--allow-no-model",
+            *(["--focus", body.focus] if body.focus != "general" else []),
             *(["--draft-requests"] if body.propose else []),
             "--", body.question,
         ]  # fmt: skip

@@ -1418,6 +1418,12 @@ export interface components {
         /** AskIn */
         AskIn: {
             /**
+             * Focus
+             * @default general
+             * @enum {string}
+             */
+            focus: "general" | "robotics" | "laboratory" | "release";
+            /**
              * Propose
              * @default false
              */

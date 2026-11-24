@@ -261,6 +261,7 @@ def decide(client: TestClient, rid: str, what: str, sha: str, headers: Any = BOB
 
 
 def test_only_an_approval_of_the_exact_checksum_by_someone_else_queues_trials(client: TestClient, lab: str) -> None:
+    new_version(client, drive_spec(client, approval={"role": "engineer", "distinct_approver": False}), status=422)
     v = new_version(client, drive_spec(client))
     v2 = new_version(client, drive_spec(client, repetitions=1, seeds=[5]))
     req = request(client, headers=ADA)  # anyone in the workspace may ask; ada asks, so ada may not approve

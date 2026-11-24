@@ -78,12 +78,13 @@ export function Split({
     >
       {/* a wider invisible hit area than the 1 px line */}
       <span aria-hidden className={clsx("absolute", vertical ? "inset-x-0 -inset-y-1.5" : "inset-y-0 -inset-x-1.5")} />
+      <span aria-hidden className={clsx("split-grip", vertical ? "split-grip-horizontal" : "split-grip-vertical")} />
     </div>
   );
-  const sized = <div style={vertical ? { height: size } : { width: size }} className="min-h-0 min-w-0 shrink-0 overflow-auto">{pane}</div>;
-  const rest = <div className="min-h-0 min-w-0 flex-1 overflow-auto">{children}</div>;
+  const sized = <div style={vertical ? { height: size } : { width: size }} className="split-pane min-h-0 min-w-0 shrink-0 overflow-auto">{pane}</div>;
+  const rest = <div className="split-content min-h-0 min-w-0 flex-1 overflow-auto">{children}</div>;
   return (
-    <div className={clsx("flex min-h-0 min-w-0", vertical ? "flex-col" : "flex-row", className)}>
+    <div className={clsx("workspace-split flex min-h-0 min-w-0", vertical ? "flex-col" : "flex-row", className)}>
       {side === "start" ? (
         <>
           {sized}

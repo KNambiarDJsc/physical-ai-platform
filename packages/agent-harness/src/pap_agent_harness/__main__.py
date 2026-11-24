@@ -20,6 +20,7 @@ from pap_agent_tools.client import PlatformClient
 from .agent import Options, run_session
 from .budget import Budget
 from .config import LLMSettings, NotConfigured
+from .focus import Focus
 from .ledger import Ledger
 from .providers import build_model
 
@@ -59,6 +60,7 @@ def main() -> None:
     a = sub.add_parser("ask", help="ask one question; the agent investigates with the platform's tools")
     a.add_argument("question")
     a.add_argument("--org", required=True)
+    a.add_argument("--focus", choices=[f.value for f in Focus], default="general")
     a.add_argument("--api", default=os.environ.get("PAP_API_URL", "http://127.0.0.1:8000"))
     a.add_argument("--as", dest="subject", help="development sign-in subject (dev auth mode only)")
     a.add_argument("--allow-requests", action="store_true", help="let the agent ask (with your confirmation) for runs")
@@ -109,7 +111,7 @@ def main() -> None:
         org=ns.org, allow_requests=ns.allow_requests, approve=_confirm if ns.allow_requests else None,
         max_calls=ns.max_steps, timeout_s=ns.timeout_s, experiment=ns.experiment,
         experiment_max_tokens=ns.experiment_max_tokens, experiment_max_usd=ns.experiment_max_usd,
-        draft_requests=ns.draft_requests,
+        draft_requests=ns.draft_requests, focus=Focus(ns.focus),
         ledger=Ledger(state / "ledger.json"), session_id=ns.session, sessions_dir=state / "sessions",
         trace_dir=state / "traces", fast_paths=not ns.no_fast_paths, progress=_progress,
     )  # fmt: skip

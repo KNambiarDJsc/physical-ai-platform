@@ -281,10 +281,9 @@ def _version(session: Session, e: Experiment, number: int) -> ExperimentVersion:
     return v
 
 
-def _request(session: Session, org_id: uuid.UUID, rid: uuid.UUID) -> ExperimentRequest:
-    r = session.scalar(
-        select(ExperimentRequest).where(ExperimentRequest.organization_id == org_id, ExperimentRequest.id == rid)
-    )
+def _request(session: Session, org_id: uuid.UUID, rid: uuid.UUID, *, decision: bool = False) -> ExperimentRequest:
+    query = select(ExperimentRequest).where(ExperimentRequest.organization_id == org_id, ExperimentRequest.id == rid)
+    r = session.scalar(query.with_for_update() if decision else query)
     if r is None:
         raise error(404, "not_found", "request not found")
     return r
@@ -437,7 +436,7 @@ def approve_experiment_request(
     request_id: uuid.UUID, body: ExperimentDecisionIn, ctx: EngineerDep, session: SessionDep
 ) -> ExperimentRequestDetail:
     """Approve the exact checksum reviewed: re-check against the host, compile to workflows, queue every trial."""
-    r = _request(session, ctx.org.id, request_id)
+    r = _request(session, ctx.org.id, request_id, decision=True)
     try:
         trials = approve(session, get_settings(), ctx, r, body.spec_sha256, body.note)
     except SpecError as ex:
@@ -454,7 +453,7 @@ def approve_experiment_request(
 def reject_experiment_request(
     request_id: uuid.UUID, body: ExperimentDecisionIn, ctx: EngineerDep, session: SessionDep
 ) -> ExperimentRequestDetail:
-    r = _request(session, ctx.org.id, request_id)
+    r = _request(session, ctx.org.id, request_id, decision=True)
     try:
         reject(session, ctx, r, body.spec_sha256, body.note)
     except SpecError as ex:

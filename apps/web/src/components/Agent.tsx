@@ -73,13 +73,16 @@ export function AgentView() {
   );
 }
 
-function Agent() {
-  const { me, orgs, org, select } = useOrg();
+export type AgentFocus = "general" | "robotics" | "laboratory" | "release";
+
+export function Agent({ initialQuestion, workspace, focus = "general" }: { initialQuestion?: string; workspace?: string; focus?: AgentFocus } = {}) {
+  const { me, orgs, org: selectedOrg, select } = useOrg();
+  const org = workspace ?? selectedOrg;
   const qc = useQueryClient();
   const [picked, setPicked] = useState<string | null>(null);
   const params = useSearchParams();
-  const [question, setQuestion] = useState(params.get("q") ?? ""); // the guided journey hands over its question
-  const [propose, setPropose] = useState(!!params.get("q"));
+  const [question, setQuestion] = useState(initialQuestion ?? params.get("q") ?? ""); // the guided journey hands over its question
+  const [propose, setPropose] = useState(!initialQuestion && !!params.get("q"));
 
   const proposals = useQuery({
     queryKey: ["agent-proposals", org],
@@ -97,7 +100,7 @@ function Agent() {
     enabled: !!org,
     refetchInterval: (q) => (q.state.data?.some((s) => s.state === "running") ? 1500 : false),
   });
-  const shownId = picked ?? sessions.data?.[0]?.id ?? null;
+  const shownId = picked ?? (initialQuestion ? null : sessions.data?.[0]?.id) ?? null;
   const detail = useQuery({
     queryKey: ["agent-session", org, shownId],
     queryFn: () => api<Session>(`${orgPath(org!)}/agent/sessions/${shownId}`),
@@ -113,7 +116,7 @@ function Agent() {
   }, [finished, qc, org]);
 
   const ask = useMutation({
-    mutationFn: (q: string) => api<Session>(`${orgPath(org!)}/agent/sessions`, { method: "POST", body: JSON.stringify({ question: q, propose }) }),
+    mutationFn: (q: string) => api<Session>(`${orgPath(org!)}/agent/sessions`, { method: "POST", body: JSON.stringify({ question: q, propose, focus }) }),
     onSuccess: (s) => {
       setPicked(s.id);
       setQuestion("");
@@ -129,12 +132,12 @@ function Agent() {
 
   return (
     <>
-      <PageHeader
+      {!initialQuestion && <PageHeader
         title="Agent"
         subtitle="Ask about this workspace's runs, experiments and recordings. The agent reads with your permissions, cites what it used and cannot approve, start or change anything."
         actions={<OrgSelect orgs={orgs} org={org} select={select} />}
-      />
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      />}
+      <div className={initialQuestion ? "space-y-4" : "grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]"}>
         <div className="min-w-0 space-y-4">
           <Panel title="Ask">
             {status.isLoading && <p className="text-[13px] text-muted">Loading…</p>}
@@ -173,7 +176,7 @@ function Agent() {
                 }}
                 disabled={!st?.can_ask}
               />
-              {st?.can_ask && (
+              {st?.can_ask && focus !== "release" && (
                 <label className="flex items-start gap-2 text-[12px] text-muted">
                   <input type="checkbox" className="mt-0.5" checked={propose} onChange={(e) => setPropose(e.target.checked)} />
                   <span>Let the agent draft a follow-up experiment. A draft is not sent: you decide whether to file it, and someone other than you must approve it before anything runs.</span>
@@ -216,7 +219,7 @@ function Agent() {
 
         <div className="min-w-0 space-y-4">
           {st && <Limits st={st} />}
-          <Panel title="Sessions">
+          {!initialQuestion && <Panel title="Sessions">
             {sessions.isLoading && <p className="text-[13px] text-muted">Loading…</p>}
             {sessions.error && <Notice tone="bad">Could not list sessions: {sessions.error.message}</Notice>}
             {sessions.data && sessions.data.length === 0 && <p className="text-[13px] text-muted">No session yet. Ask a question to start one.</p>}
@@ -245,7 +248,7 @@ function Agent() {
                 </li>
               ))}
             </ul>
-          </Panel>
+          </Panel>}
         </div>
       </div>
     </>

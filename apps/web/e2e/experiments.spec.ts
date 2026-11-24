@@ -47,7 +47,7 @@ async function signAs(page: Page, subject: string, theme: "dark" | "light" = "da
   const url = test.info().project.use.baseURL ?? "http://127.0.0.1:3000";
   await page.context().addCookies([{ name: "pap_theme", value: theme, url }]);
   await page.goto("/settings");
-  await page.getByLabel("Subject").fill(subject);
+  await page.getByLabel("Subject", { exact: true }).fill(subject);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText(`Signed in as`)).toBeVisible();
 }

@@ -1,8 +1,10 @@
 "use client";
 
+import { StudioModes } from "../StudioModes";
+import { InvestigationAgent } from "../InvestigationAgent";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Eye, RotateCcw } from "lucide-react";
+import { Eye, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, RotateCcw } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -140,6 +142,8 @@ function Twin() {
   const [rate, setRate] = useState(1);
   const [eventId, setEventId] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
+  const [sourcesOpen, setSourcesOpen] = useState(true);
+  const [evidenceOpen, setEvidenceOpen] = useState(true);
   const tr = track.data ?? null;
   // Baseline versus candidate: a second recording of the project, drawn as a ghost on the same time axis.
   const compareId = params.get("compare");
@@ -526,7 +530,8 @@ function Twin() {
   );
 
   return (
-    <div className="-mx-4 -my-5 flex h-[calc(100vh-44px)] min-h-[640px] flex-col md:-mx-7">
+    <div className="investigation-workspace -mx-4 -my-5 flex h-[calc(100dvh-56px)] min-h-[560px] flex-col md:-mx-7">
+      <StudioModes org={org} />
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2.5 md:px-7">
         <h1 className="text-[15px] font-semibold">Digital twin</h1>
         {(projects.data?.length ?? 0) > 1 && (
@@ -553,6 +558,12 @@ function Twin() {
           </span>
         )}
         <div className="ml-auto flex items-center gap-3">
+          <button type="button" className="btn h-8" aria-expanded={sourcesOpen} onClick={() => setSourcesOpen((v) => !v)}>
+            {sourcesOpen ? <PanelLeftClose size={14} aria-hidden /> : <PanelLeftOpen size={14} aria-hidden />} Sources
+          </button>
+          <button type="button" className="btn h-8" aria-expanded={evidenceOpen} onClick={() => setEvidenceOpen((v) => !v)}>
+            {evidenceOpen ? <PanelRightClose size={14} aria-hidden /> : <PanelRightOpen size={14} aria-hidden />} Evidence
+          </button>
           <Link className="text-[12px] text-accent hover:underline" href={`/workbench?org=${org}`}>
             Workbench runs
           </Link>
@@ -564,7 +575,7 @@ function Twin() {
       <Split
         side="bottom"
         label="Resize the timeline"
-        initial={200}
+        initial={164}
         min={110}
         max={420}
         className="flex-1"
@@ -578,28 +589,29 @@ function Twin() {
           )
         }
       >
-        <Split side="start" label="Resize the sources panel" initial={260} min={200} max={420} className="h-full" pane={left}>
-          <Split
-            side="end"
-            label="Resize the inspector"
-            initial={360}
-            min={280}
-            max={560}
-            className="h-full"
-            pane={
+        <div className="flex h-full min-w-0">
+          {sourcesOpen ? (
+            <Split side="start" label="Resize the sources panel" initial={230} min={200} max={380} className="h-full" pane={left}>
+              {evidenceOpen ? (
+                <Split side="end" label="Resize the evidence panel" initial={320} min={270} max={500} className="h-full" pane={
+                  <div className="flex h-full flex-col overflow-auto">
+                    {source.kind === "recording" && recId && <InvestigationAgent focus="robotics" workspace={org} question={`Investigate recording ${recId} in project ${project}${event ? `, event ${event.id} at ${event.t.toFixed(2)} s (${event.title})` : ""}. Cite the recorded evidence and distinguish the trial verdict from a release comparison.`} />}
+                    {structure ? <Inspector structure={structure} sample={sample} track={tr} selected={link} onSelect={setLink} modelName={`${version.data?.model_name ?? ""} v${version.data?.number ?? ""}`} /> : <p className="p-3 text-[12px] text-muted">The model has not loaded.</p>}
+                    {source.kind === "recording" && recId && <Assistant org={org} project={project} recordingId={recId} event={event} />}
+                  </div>
+                }>{center}</Split>
+              ) : center}
+            </Split>
+          ) : evidenceOpen ? (
+            <Split side="end" label="Resize the evidence panel" initial={320} min={270} max={500} className="h-full" pane={
               <div className="flex h-full flex-col overflow-auto">
-                {structure ? (
-                  <Inspector structure={structure} sample={sample} track={tr} selected={link} onSelect={setLink} modelName={`${version.data?.model_name ?? ""} v${version.data?.number ?? ""}`} />
-                ) : (
-                  <p className="p-3 text-[12px] text-muted">The model has not loaded.</p>
-                )}
+                {source.kind === "recording" && recId && <InvestigationAgent focus="robotics" workspace={org} question={`Investigate recording ${recId} in project ${project}${event ? `, event ${event.id} at ${event.t.toFixed(2)} s (${event.title})` : ""}. Cite the recorded evidence and distinguish the trial verdict from a release comparison.`} />}
+                {structure ? <Inspector structure={structure} sample={sample} track={tr} selected={link} onSelect={setLink} modelName={`${version.data?.model_name ?? ""} v${version.data?.number ?? ""}`} /> : <p className="p-3 text-[12px] text-muted">The model has not loaded.</p>}
                 {source.kind === "recording" && recId && <Assistant org={org} project={project} recordingId={recId} event={event} />}
               </div>
-            }
-          >
-            {center}
-          </Split>
-        </Split>
+            }>{center}</Split>
+          ) : <div className="h-full min-w-0 flex-1">{center}</div>}
+        </div>
       </Split>
     </div>
   );

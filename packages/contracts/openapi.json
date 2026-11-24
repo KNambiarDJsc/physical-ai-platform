@@ -422,6 +422,17 @@
       },
       "AskIn": {
         "properties": {
+          "focus": {
+            "default": "general",
+            "enum": [
+              "general",
+              "robotics",
+              "laboratory",
+              "release"
+            ],
+            "title": "Focus",
+            "type": "string"
+          },
           "propose": {
             "default": false,
             "title": "Propose",

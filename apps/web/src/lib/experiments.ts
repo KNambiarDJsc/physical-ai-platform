@@ -117,7 +117,6 @@ export type Form = {
   model: string; // project/model@version, or ""
   software: { name: string; revision: string }[];
   approverRole: "engineer" | "admin";
-  distinctApprover: boolean;
   notes: string;
 };
 
@@ -162,7 +161,6 @@ export function blankForm(env: SimEnv | undefined, sc: SimScenario | undefined):
     model: "",
     software: [{ name: "", revision: "" }],
     approverRole: "engineer",
-    distinctApprover: true,
     notes: "",
   };
 }
@@ -263,7 +261,7 @@ export function buildSpec(form: Form, env: SimEnv | undefined, sc: SimScenario |
         ...(r.op === "between" ? { min: Number(r.value), max: Number(r.max) } : { value: Number(r.value) }),
       })),
     },
-    approval: { role: form.approverRole, distinct_approver: form.distinctApprover },
+    approval: { role: form.approverRole, distinct_approver: true },
   };
   return { spec, problems };
 }
@@ -306,7 +304,6 @@ export function formFromSpec(spec: Record<string, unknown>, exp: { name: string;
     model: s.model ? `${s.model.project}/${s.model.model}@${s.model.version}` : "",
     software: s.software,
     approverRole: s.approval.role,
-    distinctApprover: s.approval.distinct_approver,
     notes: "",
   };
 }

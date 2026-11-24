@@ -16,7 +16,7 @@ test("register releases, upload evidence, evaluate, compare, export, drill down"
   await page.goto("/settings");
   await page.getByLabel("Subject").fill(user);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await page.getByRole("link", { name: "Overview" }).click();
+  await page.getByRole("link", { name: "Projects" }).click();
   await expect(page.getByText("You are not a member of any organization yet.")).toBeVisible();
   await page.getByLabel("Organization name").fill("E2E");
   await page.getByLabel("Organization slug").fill(org);
@@ -59,6 +59,16 @@ test("register releases, upload evidence, evaluate, compare, export, drill down"
   await expect(page.getByRole("heading", { name: /Paired by scenario/ })).toBeVisible();
   await expect(page.getByText(/commit e9ef873b42/)).toBeVisible();
   await page.screenshot({ path: "test-results/comparison.png", fullPage: true });
+  await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
+  const question = page.getByLabel("Question", { exact: true });
+  await expect(question).toHaveValue(/Investigate release evaluation .+ in project/);
+  await question.fill("list experiments");
+  const started = page.waitForRequest((r) => r.method() === "POST" && r.url().endsWith("/agent/sessions"));
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  expect((await started).postDataJSON().focus).toBe("release");
+  await expect(page.getByText("Answered by a fixed tool call and a template: no model.")).toBeVisible({ timeout: 60000 });
+  await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
+
 
   // Export: the HTML report is rendered from the JSON report, and says what kind of evidence it rests on.
   const [html] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download HTML report" }).click()]);

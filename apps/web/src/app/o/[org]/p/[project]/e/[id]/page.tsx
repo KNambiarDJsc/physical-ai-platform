@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { use, useState } from "react";
 import { Notice, PageHeader, Panel } from "@/components/AppShell";
+import { InvestigationAgent } from "@/components/InvestigationAgent";
 import { ComparisonView } from "@/components/ComparisonView";
 import { RequireIdentity } from "@/components/Identity";
 import { StateBadge } from "@/components/ui";
@@ -62,6 +63,7 @@ function Evaluation({ org, project, id }: Params) {
       )}
       {j?.state === "cancelled" && <Notice tone="info">This evaluation was cancelled.</Notice>}
       {cmp.error && <Notice tone="bad">{cmp.error.message}</Notice>}
+      {cmp.data && <InvestigationAgent focus="release" workspace={org} question={`Investigate release evaluation ${id} in project ${project}. Cite the stored comparison, explain the engine verdict and identify missing evidence.`} />}
       {cmp.data && <ComparisonView data={cmp.data} episodesHref={`/o/${org}/p/${project}/e/${id}/episodes`} />}
     </>
   );

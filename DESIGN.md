@@ -1,9 +1,9 @@
-# Design: Precision Industrial
+# Design: Physical AI Studio
 
-The platform is engineering software for robotics and laboratory teams. It should read like a carefully built
-instrument: dense, quiet, exact. Interaction references are Linear (application shell, density, keyboard),
-Foxglove and Rerun (synchronized multimodal workspaces), Sentry (failure triage), n8n (workflow canvases) and
-Vercel (onboarding and environments). They are references for interaction quality, not templates to copy.
+The platform is engineering software for robotics and laboratory teams. Its operating surface is an instrument desk:
+dense, quiet and exact, with one dominant viewport and evidence kept beside the selected run. The release and report
+surfaces keep a reading-first layout. Interaction references include Linear, Foxglove, Rerun, Sentry, n8n and Vercel;
+they inform interaction quality, not a visual template to copy.
 
 This file is the contract for every screen. When a screen and this file disagree, fix one of them in the same
 change.
@@ -27,28 +27,23 @@ Defined once in `apps/web/src/app/globals.css` (`@theme`), used through Tailwind
 
 | Token | Role | Dark | Light |
 |---|---|---|---|
-| `bg` | Canvas | `#111418` | `#F5F6F8` |
-| `panel` | Panels, sidebar, tables | `#191D23` | `#FFFFFF` |
-| `sunken` | Hover rows, wells, code | `#1F242B` | `#EEF0F3` |
-| `line` | Borders and dividers | `#2B313A` | `#DDE1E6` |
-| `ink` | Primary text | `#E8EDF2` | `#111418` |
-| `muted` | Secondary text | `#9BA8B7` | `#525D6A` |
-| `faint` | Tertiary text, axis labels | `#838E9C` | `#626C78` |
-| `accent` | Interactive: links, focus, selection, primary action | `#6699E8` | `#2F64C7` |
+| `bg` | Canvas | `#0B1016` | `#F2F1ED` |
+| `panel` | Panels, tables | `#131B24` | `#FFFFFF` |
+| `sunken` | Hover rows, wells, code | `#1B2732` | `#EEF0F3` |
+| `line` | Borders and dividers | `#34414D` | `#DDE1E6` |
+| `ink` | Primary text | `#EDF3F4` | `#0B1016` |
+| `muted` | Secondary text | `#A2B1BB` | `#525D6A` |
+| `faint` | Tertiary text, axis labels | `#99A9B4` | `#626C78` |
+| `accent` | Interactive: links, focus, selection, primary action | `#89D7DB` | `#16666B` |
 | `on-accent` | Text on an accent fill | `#0B1322` | `#FFFFFF` |
-| `ok` | Verified success, supported success | `#47B88A` | `#1D7A54` |
+| `ok` | Verified success, supported success | `#C6DE77` | `#1D7A54` |
 | `warn` | Contradiction, warnings, simulated-evidence label | `#E1B45C` | `#946000` |
-| `bad` | Verified failure, regression, errors | `#E06C75` | `#BF3540` |
+| `bad` | Verified failure, regression, errors | `#EF928B` | `#BF3540` |
 | `unknown` | Unknown, insufficient evidence, reported only | `#A9AEDB` | `#545A9E` |
 
 Two overlay tokens tint the surface beneath them for interaction: `hover` (dark: white 6 %, light: ink 5 %) and
-`selected` (dark: white 10 %, light: ink 8 %). They never carry text on their own.
-
-Each semantic colour has a `-soft` background (badges, notices). Dark is the default; light follows the
-operating system or the theme switch in the top bar. All text tokens meet WCAG AA (4.5:1) on `bg`, `panel` and `sunken`, and on their own `-soft` backgrounds (checked by computing the ratios, not by eye).
-
-Semantic colours are reserved for states. They are not used for decoration, section headers or icons that do
-not carry a state.
+`selected` (dark: white 10 %, light: ink 8 %). They never carry text on their own. Semantic colours are reserved for
+states, not decoration. Theme selection can follow the operating system or be changed in the header.
 
 ## 3. Typography
 
@@ -61,25 +56,28 @@ not carry a state.
 
 ## 4. Spacing, shape, elevation
 
-- 4 px grid. Panel padding 16 px; table cells 6 × 8 px; sidebar items 28 px tall.
+- 4 px grid. Page padding is 16–28 px; dense workspace panels use compact internal spacing.
 - Radius: 6 px on panels and inputs, 4 px on badges and buttons. No pill-shaped containers.
 - Elevation is a 1 px border. Shadows only on overlays (command palette, menus).
-- Density over whitespace: an engineer should see a full comparison without scrolling on a 1280 × 720 screen.
+- Keep the scene and evidence visible together at workstation widths; below that, preserve access by stacking panels
+  without page-level horizontal scrolling.
 
 ## 5. Application shell
 
-- **Left sidebar**: grouped navigation (Release intelligence, Operations, Workspace). Items are real pages
-  only. Active item: `sunken` background and `ink` text with an accent bar, not a coloured block.
-- **Top bar**: breadcrumb (workspace / page / entity), command palette trigger (`Ctrl K` / `⌘K`), theme switch,
-  signed-in identity. Height 44 px.
-- **Content**: page header (title, one-line description, actions on the right), then panels. Width is fluid;
-  tables scroll inside their panel, never the page sideways.
-- **Command palette**: navigation to every page; later, entities (projects, evaluations). Keyboard first:
-  arrow keys, Enter, Escape.
+- **Primary navigation**: one compact, 56 px header with Projects, Studio, Runs, Integrations and Settings. On narrow
+  screens, the destinations move to a horizontally scrollable row beneath the brand and account controls.
+- **Header controls**: the page finder (`Ctrl K` / `⌘K`), theme switch and signed-in identity. The page finder reaches
+  every existing route, including detailed pages that do not fit in the five primary destinations. There is no second
+  breadcrumb bar.
+- **Content**: page header (title, one-line description, actions on the right), then panels. Width is fluid; tables
+  scroll inside their labelled region, never the page sideways.
+- **Page finder**: keyboard first; arrow keys, Enter and Escape. It searches the real destinations and pages only.
 
-The Workbench (instruments left, the run centre, inspector right, timeline bottom, every pane resizable by pointer
-and keyboard) uses the same shell. The Digital twin page (`/twin`) is its robot view: sources and events left, the 3D
-viewport centre, inspector and assistant right, the recording's timeline and telemetry bottom.
+The Workbench and Digital twin are full-height instrument desks beneath the header. Studio mode controls switch among
+Explore, Execute and Investigate. Sources and evidence flank a flexible scene or run view; both side panels can be
+collapsed, and split handles support pointer and keyboard resizing. The twin defaults to 230 px for sources, 320 px
+for evidence and a 164 px playback timeline. The Workbench timeline defaults to 145 px. On small screens the panes
+stack so measurements remain reachable without widening the page.
 
 ## 6. Interaction model per module
 

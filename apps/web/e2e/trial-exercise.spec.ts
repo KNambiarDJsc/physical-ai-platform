@@ -93,7 +93,7 @@ test("the trial exercise, as written, from a clean install", async ({ page }) =>
   await page.goto("/settings");
   await page.getByLabel("Subject").fill(`trial-${run}`);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await page.getByRole("link", { name: "Overview" }).click();
+  await page.getByRole("link", { name: "Projects" }).click();
   await page.getByLabel("Organization name").fill("Trial");
   await page.getByLabel("Organization slug").fill(`trial-${run}`);
   await page.getByRole("button", { name: "Create organization" }).click();
@@ -137,7 +137,7 @@ test("the trial exercise, as written, from a clean install", async ({ page }) =>
   lap("T4");
 
   // T5: real flights (physical evidence)
-  await page.getByRole("link", { name: "Overview" }).click();
+  await page.getByRole("link", { name: "Projects" }).click();
   await page.getByLabel(`Project name`).first().fill("Drone flights");
   await page.getByLabel(`Project slug`).first().fill("drones");
   await page.getByRole("button", { name: "Create project" }).first().click();

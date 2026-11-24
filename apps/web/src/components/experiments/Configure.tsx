@@ -427,10 +427,7 @@ export function Configure({ org, role, existing, onSaved, onCancel }: { org: str
                     <option value="admin">An admin</option>
                   </select>
                 </label>
-                <label className="flex items-center gap-2 pb-1.5">
-                  <input type="checkbox" checked={form.distinctApprover} onChange={(e) => set({ distinctApprover: e.target.checked })} />
-                  Someone other than the person who asks for the run must approve it
-                </label>
+                <p className="self-end pb-1.5 text-sm text-muted">A second person must approve this version before it can run.</p>
               </div>
             </Section>
           </>

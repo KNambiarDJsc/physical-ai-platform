@@ -50,6 +50,8 @@ def create_version(
 ) -> tuple[ExperimentVersion, bool]:
     """Validate against the host's current listing and store, or return the existing version of the same spec."""
     spec = parse_spec(raw)
+    if not spec.approval.distinct_approver:
+        raise SpecError(422, "experiment.invalid", "An independent approver is required.")
     env = environment(session, ctx.org.id, spec.environment)
     listing = read_listing(session, env, settings)
     scenario = validate(spec, listing)
@@ -110,7 +112,7 @@ def _decidable(session: Session, ctx: OrgContext, r: ExperimentRequest, reviewed
     spec = ExperimentSpec.model_validate(v.spec)
     if RANK[ctx.role] < RANK[spec.approval.role]:
         raise SpecError(403, "forbidden", f"this experiment needs an approver with the {spec.approval.role} role")
-    if spec.approval.distinct_approver and principal_key(ctx) == r.requested_by_id:
+    if principal_key(ctx) == r.requested_by_id:
         raise SpecError(403, "experiment.self_approval", "this experiment needs someone other than the requester")
     return v
 

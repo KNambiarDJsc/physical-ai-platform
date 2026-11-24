@@ -44,7 +44,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
 
 async function signIn(page: Page, subject: string) {
   await page.goto("/settings");
-  await page.getByLabel("Subject").fill(subject);
+  await page.getByLabel("Subject", { exact: true }).fill(subject);
   await page.getByRole("button", { name: "Sign in" }).click();
 }
 

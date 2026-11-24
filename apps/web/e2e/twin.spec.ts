@@ -160,6 +160,16 @@ test.describe("the milestone: a real recorded failure, in 3D, explained", () => 
     await expect(ex).toContainText("moved backwards");
     await expect(ex).toContainText("Not known");
     await expect(ex).toContainText("why it happened");
+    if (process.env.PAP_DESIGN_CAPTURE === "after") {
+      await page.screenshot({ path: "../../docs/design/screenshots/twin-after.png" });
+    }
+    await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
+    await expect(page.getByLabel("Question", { exact: true })).toHaveValue(/Investigate recording .*event .+\. Cite/);
+    if (process.env.PAP_DESIGN_CAPTURE === "after") {
+      await page.getByLabel("Question", { exact: true }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: "../../docs/design/screenshots/event-investigation.png" });
+    }
+
     // the evidence it cites, as ids
     await expect(ex.getByText(/^verification:/).first()).toBeVisible();
     await expect(ex.getByText(/^contract:[0-9a-f]{12}$/).first()).toBeVisible();

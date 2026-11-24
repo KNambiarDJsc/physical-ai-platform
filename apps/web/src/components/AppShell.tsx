@@ -7,7 +7,6 @@ import {
   Bot,
   Box,
   Boxes,
-  ChevronRight,
   Cpu,
   FlaskConical,
   GitCompareArrows,
@@ -36,46 +35,66 @@ type NavItem = { href: string; label: string; icon: LucideIcon; hint: string };
 
 /** Only pages that exist. A module that is not built is not listed (DESIGN.md §1). */
 const GROUPS: { label: string; items: NavItem[] }[] = [
+
   {
-    label: "Lab automation",
+    label: "Projects",
     items: [
+      { href: "/", label: "Overview", icon: LayoutDashboard, hint: "Projects you can access" },
       { href: "/onboarding", label: "Get started", icon: Rocket, hint: "Workspace, environment, first verified run" },
-      { href: "/journey", label: "Lab experiment", icon: Route, hint: "Guided path: configure, approve, run, investigate, export" },
-      { href: "/workbench", label: "Workbench", icon: PanelsTopLeft, hint: "Run workflows, watch instruments, read verdicts" },
-      { href: "/experiments", label: "Experiments", icon: FlaskConical, hint: "Configure, approve and run simulation experiments" },
+      { href: "/fleet", label: "Fleet", icon: Boxes, hint: "Robots and outcome counts per release" },
+    ],
+  },
+  {
+    label: "Studio",
+    items: [
       { href: "/twin", label: "Digital twin", icon: Box, hint: "Robot model, recordings and the event timeline" },
-      { href: "/hardware", label: "Hardware Hub", icon: Cpu, hint: "Environments, devices and capabilities" },
       { href: "/workflows", label: "Workflows", icon: Workflow, hint: "Device actions with a verification contract" },
+      { href: "/journey", label: "Lab experiment", icon: Route, hint: "Guided path: configure, approve, run, investigate, export" },
+      { href: "/experiments", label: "Experiments", icon: FlaskConical, hint: "Configure, approve and run simulation experiments" },
       { href: "/agent", label: "Agent", icon: Bot, hint: "Ask about runs and experiments; read-only, cites what it used" },
     ],
   },
   {
-    label: "Release intelligence",
+    label: "Runs",
     items: [
-      { href: "/", label: "Overview", icon: LayoutDashboard, hint: "Projects you can access" },
+      { href: "/runs", label: "Run history", icon: Activity, hint: "Search workflow runs by environment, outcome and date" },
+      { href: "/workbench", label: "Workbench", icon: PanelsTopLeft, hint: "Run workflows, watch instruments, read verdicts" },
       { href: "/releases", label: "Releases", icon: GitCompareArrows, hint: "Baseline vs candidate comparisons" },
+      { href: "/evidence", label: "Evidence", icon: Activity, hint: "Stored files and their digests" },
       { href: "/verification", label: "Verification", icon: ShieldCheck, hint: "Reported vs independently verified" },
       { href: "/incidents", label: "Incidents", icon: AlertTriangle, hint: "Failures the engine grouped" },
-      { href: "/evidence", label: "Evidence", icon: Activity, hint: "Stored files and their digests" },
     ],
   },
   {
-    label: "Operations",
-    items: [{ href: "/fleet", label: "Fleet", icon: Boxes, hint: "Robots and outcome counts per release" }],
+    label: "Integrations",
+    items: [
+      { href: "/hardware", label: "Hardware Hub", icon: Cpu, hint: "Environments, devices and capabilities" },
+      { href: "/integrations", label: "Integrations", icon: Plug, hint: "API, credentials, engine build" },
+    ],
   },
   {
-    label: "Workspace",
+    label: "Settings",
     items: [
-      { href: "/integrations", label: "Integrations", icon: Plug, hint: "API, credentials, engine build" },
       { href: "/settings", label: "Settings", icon: Settings, hint: "Identity and sign-in" },
     ],
   },
 ];
 const ALL = GROUPS.flatMap((g) => g.items);
 
-function isActive(path: string, href: string): boolean {
-  if (href === "/") return path === "/";
-  return path.startsWith(href) || (href === "/releases" && path.startsWith("/o/"));
+const PRIMARY: NavItem[] = [
+  { href: "/", label: "Projects", icon: LayoutDashboard, hint: "Projects and workspaces" },
+  { href: "/twin", label: "Studio", icon: Box, hint: "Explore, execute and investigate" },
+  { href: "/runs", label: "Runs", icon: Activity, hint: "Run history and release evidence" },
+  { href: "/hardware", label: "Integrations", icon: Cpu, hint: "Environments and connected services" },
+  { href: "/settings", label: "Settings", icon: Settings, hint: "Identity and workspace settings" },
+];
+
+function primaryActive(path: string, href: string): boolean {
+  if (href === "/") return path === "/" || path === "/onboarding" || path === "/fleet" || /^\/o\/[^/]+\/p\/[^/]+$/.test(path);
+  if (href === "/twin") return ["/twin", "/workflows", "/journey", "/experiments", "/agent"].some((p) => path.startsWith(p));
+  if (href === "/runs") return ["/runs", "/workbench", "/releases", "/evidence", "/verification", "/incidents"].some((p) => path.startsWith(p)) || /\/e\//.test(path);
+  if (href === "/hardware") return path.startsWith("/hardware") || path.startsWith("/integrations");
+  return path.startsWith(href);
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -94,56 +113,34 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <nav
-        aria-label="Main"
-        className="shrink-0 border-b border-line bg-panel md:sticky md:top-0 md:flex md:h-screen md:w-56 md:flex-col md:border-r md:border-b-0"
-      >
-        <div className="hidden items-center gap-2.5 px-4 pb-4 pt-3.5 md:flex">
-          <span aria-hidden className="grid size-6 place-items-center rounded-[5px] border border-line bg-bg font-mono text-[11px] font-semibold text-accent">
-            RP
-          </span>
-          <div className="min-w-0 leading-tight">
-            <div className="truncate text-[13px] font-semibold">Reliability Platform</div>
-            <div className="truncate text-[11px] text-faint" title="Commands go only to simulated devices; physical devices are read, never commanded">
-              Self-hosted · no hardware control
-            </div>
+    <div className="flex min-h-screen flex-col">
+      <header className="studio-shell-nav sticky top-0 z-30 border-b border-line bg-panel">
+        <div className="flex min-h-14 flex-wrap items-center gap-3 px-3 sm:flex-nowrap sm:px-5">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm">
+            <span aria-hidden className="grid size-7 place-items-center rounded-[5px] border border-line bg-bg font-mono text-[11px] font-semibold text-accent">PA</span>
+            <span className="hidden text-[13px] font-semibold tracking-[-0.02em] sm:inline">Physical AI Studio</span>
+          </Link>
+          <nav aria-label="Main" className="order-3 -mx-3 flex basis-full min-w-0 gap-1 overflow-x-auto border-t border-line px-2 py-1.5 sm:order-none sm:mx-0 sm:min-w-fit sm:basis-auto sm:flex-initial sm:border-0 sm:px-0 sm:py-0 sm:pl-5">
+            {PRIMARY.map(({ href, label, icon: Icon }) => {
+              const on = primaryActive(path, href);
+              return <Link key={href} href={href} aria-current={on ? "page" : undefined} title={label} className={clsx("flex h-9 shrink-0 items-center gap-2 rounded-[5px] px-2.5 text-[12px] font-medium transition-colors sm:px-3 sm:text-[13px]", on ? "bg-selected text-ink" : "text-muted hover:bg-hover hover:text-ink")}>
+                <Icon size={15} strokeWidth={1.8} aria-hidden className={on ? "text-accent" : undefined} />
+                <span className="hidden max-sm:inline md:inline">{label}</span>
+              </Link>;
+            })}
+          </nav>
+          <div className="order-2 ml-auto flex shrink-0 items-center gap-1.5 sm:order-none">
+            <button type="button" onClick={() => setPalette(true)} className="btn h-8 text-muted" aria-haspopup="dialog" aria-label="Go to… Ctrl K" title="Open the page finder">
+              <Search size={14} aria-hidden />
+              <span className="hidden font-normal sm:inline">Go to…</span>
+              <span className="kbd hidden sm:inline-flex">Ctrl K</span>
+            </button>
+            <ThemeSwitch />
+            <WhoAmI />
           </div>
         </div>
-        <div className="flex gap-0.5 overflow-x-auto px-2 py-1.5 md:block md:space-y-4 md:overflow-visible md:py-0">
-          {GROUPS.map((g) => (
-            <div key={g.label} className="flex gap-0.5 md:block">
-              <div className="hidden px-2 pb-1 text-[11px] font-medium text-faint md:block">{g.label}</div>
-              <ul className="flex gap-0.5 md:block md:space-y-px">
-                {g.items.map(({ href, label, icon: Icon }) => {
-                  const on = isActive(path, href);
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        aria-current={on ? "page" : undefined}
-                        className={clsx(
-                          "relative flex h-7 items-center gap-2 whitespace-nowrap rounded-[5px] px-2 text-[13px] transition-colors duration-[80ms]",
-                          on ? "bg-selected font-medium text-ink" : "text-muted hover:bg-hover hover:text-ink",
-                        )}
-                      >
-                        {on && <span aria-hidden className="fade-in absolute inset-y-1.5 left-0 hidden w-0.5 rounded-full bg-accent md:block" />}
-                        <Icon size={14} strokeWidth={1.75} aria-hidden className={on ? "text-accent" : undefined} />
-                        <span>{label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="mt-auto hidden border-t border-line px-4 py-2.5 text-[11px] text-faint md:block">
-          Engine: OpenMHS (pinned)
-        </div>
-      </nav>
+      </header>
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar path={path} onPalette={() => setPalette(true)} />
         <main className="min-w-0 flex-1 px-4 py-5 md:px-7">
           <div key={path} className="reveal">
             {children}
@@ -152,60 +149,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       {palette && <CommandPalette onClose={() => setPalette(false)} />}
     </div>
-  );
-}
-
-/** Breadcrumb from the URL only: slugs and short ids, nothing fetched and nothing inferred. */
-function crumbs(path: string): { label: string; href?: string; mono?: boolean }[] {
-  const m = path.match(/^\/o\/([^/]+)\/p\/([^/]+)(?:\/e\/([^/]+)(\/episodes)?)?/);
-  if (m) {
-    const [, org = "", project = "", evaluation, episodes] = m;
-    const out: { label: string; href?: string; mono?: boolean }[] = [
-      { label: "Releases", href: "/releases" },
-      { label: org },
-      { label: project, href: `/o/${org}/p/${project}` },
-    ];
-    if (evaluation) out.push({ label: `evaluation ${evaluation.slice(0, 8)}`, href: `/o/${org}/p/${project}/e/${evaluation}`, mono: true });
-    if (episodes) out.push({ label: "Episodes" });
-    return out;
-  }
-  const item = ALL.find((i) => isActive(path, i.href));
-  return [{ label: item?.label ?? "Page" }];
-}
-
-function TopBar({ path, onPalette }: { path: string; onPalette: () => void }) {
-  const items = crumbs(path);
-  return (
-    <header className="sticky top-0 z-20 flex h-11 items-center gap-3 border-b border-line bg-bg/95 px-4 backdrop-blur-[2px] md:px-7">
-      <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-        <ol className="flex min-w-0 items-center gap-1 text-[13px]">
-          {items.map((c, i) => {
-            const last = i === items.length - 1;
-            return (
-              <li key={i} className={clsx("flex min-w-0 items-center gap-1", c.mono && "num", last ? "text-ink" : "text-muted")}>
-                {i > 0 && <ChevronRight size={13} aria-hidden className="shrink-0 text-faint" />}
-                {c.href && !last ? (
-                  <Link href={c.href} className="truncate hover:text-ink">
-                    {c.label}
-                  </Link>
-                ) : (
-                  <span className="truncate" aria-current={last ? "page" : undefined}>
-                    {c.label}
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-      <button type="button" onClick={onPalette} className="btn hidden h-7 text-muted sm:inline-flex" aria-haspopup="dialog" title="Open the command palette">
-        <Search size={13} aria-hidden />
-        <span className="font-normal">Go to…</span>
-        <span className="kbd">Ctrl K</span>
-      </button>
-      <ThemeSwitch />
-      <WhoAmI />
-    </header>
   );
 }
 
@@ -340,9 +283,9 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <header className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
       <div className="min-w-0">
-        <h1 className="text-[15px] font-semibold tracking-[-0.01em]">{title}</h1>
+        <h1 className="text-[clamp(1.3rem,2vw,1.8rem)] font-semibold leading-tight tracking-[-0.035em]">{title}</h1>
         {subtitle && <div className="mt-0.5 text-[13px] text-muted">{subtitle}</div>}
       </div>
       {actions}

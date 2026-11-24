@@ -57,7 +57,10 @@ test("a new user goes from sign-in to an engine-verified result through the inte
   await page.getByLabel("Subject").fill(newcomer);
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Get started" }).click();
+  await page.getByRole("button", { name: /Go to/ }).click();
+  const pageFinder = page.getByRole("dialog", { name: "Command palette" });
+  await pageFinder.getByRole("combobox", { name: "Go to page" }).fill("get started");
+  await pageFinder.getByRole("option", { name: /Get started/ }).click();
   await expect(page.getByRole("heading", { name: "Get started", level: 1 })).toBeVisible();
 
   // 1. Workspace
@@ -103,7 +106,7 @@ test("a new user goes from sign-in to an engine-verified result through the inte
   await expect(page.getByText(/"reported_dispensed_ul": 50/)).toBeVisible();
 
   // Discovered capabilities are inspectable in the Hardware Hub, with live reads.
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Hardware Hub" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Integrations" }).click();
   await page.getByRole("navigation", { name: "Devices" }).getByRole("button", { name: "balance" }).click();
   await page.getByRole("button", { name: "Read readability_g" }).click();
   await expect(page.getByRole("row").filter({ hasText: "readability_g" })).toContainText("0.0001");
@@ -133,8 +136,22 @@ test("an injected blockage is a contradiction: reported success, verdict violate
     await expect(page.getByText("Contradiction").first()).toBeVisible({ timeout: 60_000 });
     const reported = page.getByRole("region", { name: "Reported by the instrument" });
     await expect(reported.getByText("succeeded")).toBeVisible();
+    await page.getByText("Investigate with Engineering Agent", { exact: true }).click();
+    await expect(page.getByLabel("Question", { exact: true })).toHaveValue(/Investigate workflow run .*verification result/);
     await expect(reported.getByText("reported_dispensed_ul = 100")).toBeVisible();
     await expect(page.getByRole("region", { name: "Independently verified (OpenMHS engine)" }).getByText("violated")).toBeVisible();
+    const runId = new URL(page.url()).searchParams.get("run");
+    expect(runId).toBeTruthy();
+    await page.goto(`/runs?org=${org}`);
+    await page.getByLabel("Find a run").fill(runId!);
+    await page.getByRole("link").filter({ hasText: runId! }).click();
+    await expect(page).toHaveURL(new RegExp(runId!));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("heading", { name: "Independently verified (OpenMHS engine)" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    if (process.env.PAP_DESIGN_CAPTURE === "after") {
+      await page.screenshot({ path: "../../docs/design/screenshots/lab-mobile.png" });
+    }
   } finally {
     await labAction(request, "simulation", "reset");
   }
@@ -143,11 +160,11 @@ test("an injected blockage is a contradiction: reported success, verdict violate
 test("panels resize by keyboard", async ({ page }) => {
   await signIn(page);
   await page.goto(`/workbench?org=${org}`);
-  const sep = page.getByRole("separator", { name: "Resize the inspector" });
-  await expect(sep).toHaveAttribute("aria-valuenow", "340");
+  const sep = page.getByRole("separator", { name: "Resize the evidence panel" });
+  await expect(sep).toHaveAttribute("aria-valuenow", "320");
   await sep.focus();
   await page.keyboard.press("ArrowLeft");
-  await expect(sep).toHaveAttribute("aria-valuenow", "356");
+  await expect(sep).toHaveAttribute("aria-valuenow", "336");
   await page.keyboard.press("Home");
   await expect(sep).toHaveAttribute("aria-valuenow", "260");
 });

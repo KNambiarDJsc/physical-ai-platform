@@ -395,6 +395,10 @@ function Integrations({ items, orgs }: { items: Workspace[]; orgs: { slug: strin
           <p className="mt-2 text-xs text-muted">Read from the latest finished evaluation. The platform calls this pinned build; it never reimplements its statistics.</p>
         </Panel>
       </div>
+      <Panel title="Execution environments">
+        <p className="text-sm text-muted">Inspect the operator catalog, discover instrument capabilities and read device health in Hardware Hub.</p>
+        <ul className="mt-2 space-y-1">{orgs.map((o) => <li key={o.slug}><Link className="text-accent underline" href={{ pathname: "/hardware", query: { org: o.slug } }}>Open {o.slug} environments</Link></li>)}</ul>
+      </Panel>
       <Panel title="Machine credentials (CI and robots posting evidence)">
         {admin.length === 0 && <p className="text-[13px] text-muted">Only organization admins can see credentials.</p>}
         {admin.map((o, i) => {

@@ -113,8 +113,7 @@ export function SpecSummary({ spec: raw, scenario: rawScenario, envName }: { spe
         </dd>
         <dt className="text-muted">Approval</dt>
         <dd>
-          {spec.approval.role === "admin" ? "An admin" : "An engineer"}
-          {spec.approval.distinct_approver ? ", other than the person who asked" : ""}
+          {spec.approval.role === "admin" ? "An admin" : "An engineer"}, other than the person who asked
         </dd>
       </dl>
       <Table
@@ -396,7 +395,7 @@ export function RequestView({ org, role, slug, id, onAskAgain }: { org: string; 
   const sc = asScenario(d.scenario);
   const approvalRole = spec.approval.role;
   const mayDecide = (role === "engineer" && approvalRole === "engineer") || role === "admin";
-  const own = d.requested_by_me && spec.approval.distinct_approver;
+  const own = d.requested_by_me;
   const finished = d.state === "approved" && d.trials_done >= d.trials;
   return (
     <>

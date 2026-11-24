@@ -1,8 +1,9 @@
 "use client";
 
+import { StudioModes } from "./StudioModes";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Play } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -22,6 +23,7 @@ import { Notice } from "./AppShell";
 import { KindBadge } from "./Hardware";
 import { ObsState } from "./Observation";
 import { RequireIdentity } from "./Identity";
+import { InvestigationAgent } from "./InvestigationAgent";
 import { Split } from "./Split";
 import { Badge, ClassBadge, Time } from "./ui";
 import { OrgSelect, RUN_STATE, useDevices, useOrg, useRuns, useWorkflows } from "./Workspace";
@@ -69,6 +71,8 @@ function Workbench() {
   const runs = useRuns(org);
   const devices = useDevices(org);
   const [wfSlug, setWfSlug] = useState<string | null>(params.get("workflow"));
+  const [instrumentsOpen, setInstrumentsOpen] = useState(true);
+  const [evidenceOpen, setEvidenceOpen] = useState(true);
   const runId = params.get("run") ?? runs.data?.[0]?.id ?? null;
   const [sel, setSel] = useState<Selection>({ kind: "verification" });
 
@@ -111,7 +115,8 @@ function Workbench() {
     );
 
   return (
-    <div className="-mx-4 -my-5 flex h-[calc(100vh-44px)] min-h-[600px] flex-col md:-mx-7">
+    <div className="investigation-workspace -mx-4 -my-5 flex h-[calc(100dvh-56px)] min-h-[540px] flex-col md:-mx-7">
+      <StudioModes org={org} />
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2.5 md:px-7">
         <h1 className="text-[15px] font-semibold">Workbench</h1>
         <label className="flex items-center gap-2 text-[12px] text-muted">
@@ -131,6 +136,12 @@ function Workbench() {
         )}
         {start.error && <span className="text-[13px] text-bad">{start.error.message}</span>}
         <div className="ml-auto flex items-center gap-3">
+          <button type="button" className="btn h-8" aria-expanded={instrumentsOpen} onClick={() => setInstrumentsOpen((v) => !v)}>
+            {instrumentsOpen ? <PanelLeftClose size={14} aria-hidden /> : <PanelLeftOpen size={14} aria-hidden />} Instruments
+          </button>
+          <button type="button" className="btn h-8" aria-expanded={evidenceOpen} onClick={() => setEvidenceOpen((v) => !v)}>
+            {evidenceOpen ? <PanelRightClose size={14} aria-hidden /> : <PanelRightOpen size={14} aria-hidden />} Evidence
+          </button>
           <Link className="text-[12px] text-accent hover:underline" href={`/twin?org=${org}`}>
             Digital twin
           </Link>
@@ -140,33 +151,23 @@ function Workbench() {
       <Split
         side="bottom"
         label="Resize the timeline"
-        initial={170}
+        initial={145}
         min={90}
         max={360}
         className="flex-1"
         pane={<Timeline run={run.data} sel={sel} onSelect={setSel} />}
       >
-        <Split
-          side="start"
-          label="Resize the instruments panel"
-          initial={260}
-          min={200}
-          max={420}
-          className="h-full"
-          pane={<Instruments org={org} devices={devices.data ?? []} workflow={wf} runs={runs.data ?? []} runId={runId} onRun={setRun} />}
-        >
-          <Split
-            side="end"
-            label="Resize the inspector"
-            initial={340}
-            min={260}
-            max={560}
-            className="h-full"
-            pane={<Inspector run={run.data} sel={sel} />}
-          >
-            <RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} />
-          </Split>
-        </Split>
+        <div className="flex h-full min-w-0">
+          {instrumentsOpen ? <Split side="start" label="Resize the instruments panel" initial={230} min={200} max={380} className="h-full" pane={<Instruments org={org} devices={devices.data ?? []} workflow={wf} runs={runs.data ?? []} runId={runId} onRun={setRun} />}>
+            {evidenceOpen ? <Split side="end" label="Resize the evidence panel" initial={320} min={260} max={500} className="h-full" pane={<>
+              {run.data && <InvestigationAgent focus="laboratory" workspace={org} question={`Investigate workflow run ${run.data.id}, ${sel.kind === "step" ? `step ${sel.position + 1}` : "its verification result"}. Cite recorded observations and identify missing evidence.`} />}
+              <Inspector run={run.data} sel={sel} />
+            </>}><RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} /></Split> : <RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} />}
+          </Split> : evidenceOpen ? <Split side="end" label="Resize the evidence panel" initial={320} min={260} max={500} className="h-full" pane={<>
+            {run.data && <InvestigationAgent focus="laboratory" workspace={org} question={`Investigate workflow run ${run.data.id}, ${sel.kind === "step" ? `step ${sel.position + 1}` : "its verification result"}. Cite recorded observations and identify missing evidence.`} />}
+            <Inspector run={run.data} sel={sel} />
+          </>}><RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} /></Split> : <div className="min-w-0 flex-1"><RunView org={org} run={run.data} loading={run.isLoading} error={run.error?.message} sel={sel} onSelect={setSel} /></div>}
+        </div>
       </Split>
     </div>
   );
